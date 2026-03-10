@@ -18,7 +18,7 @@ psi0, occ = siam_bitstring_initial_state(K=K)
 
 initial_state = ''.join(str(b) for b in occ)
 
-BK = BARK(H, initial_state, max_iterations=5, time_step=1, tolerance=0.01)
+BK = BARK(H, initial_state, max_iterations=7, time_step=1, tolerance=0.1)
 
 bases = BK.basis
 

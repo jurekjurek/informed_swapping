@@ -163,20 +163,61 @@ class BARK:
         return element
 
     def project_to_subspace(self, basis: List[str]) -> np.ndarray:
-        """Project the Hamiltonian onto the subspace spanned by the given basis."""
+        """Project the Hamiltonian onto the subspace spanned by ``basis``.
 
-        Hamiltonian = self.H.to_list()
-        data = []
-        row_indices = []
-        col_indices = []
+        This implementation avoids the explicit double loop over all basis
+        pairs (i, j). Instead, for each basis vector |j> and each Pauli term
+        in the Hamiltonian, it applies the Pauli string to |j>, obtains the
+        resulting bitstring |i>, and, if |i> is also in the basis, updates the
+        corresponding matrix entry H_ij. This reduces the complexity from
+        O(|basis|^2 * n_terms) to roughly O(|basis| * n_terms).
+        """
 
-        for i, bitstring_i in enumerate(basis):
-            for j, bitstring_j in enumerate(basis):
-                data.append(self.compute_matrix_element(bitstring_i, bitstring_j, Hamiltonian))
-                row_indices.append(i)
-                col_indices.append(j)
-        
-        return csr_matrix((data, (row_indices, col_indices)), shape=(len(basis), len(basis)))
+        # Map basis bitstrings to their indices for O(1) lookups
+        basis_index: dict[str, int] = {bitstring: idx for idx, bitstring in enumerate(basis)}
+
+        # (pauli_string, coefficient) pairs from the original Hamiltonian
+        h_terms = self.H.to_list()
+
+        data: list[complex] = []
+        row_indices: list[int] = []
+        col_indices: list[int] = []
+
+        for j, ket in enumerate(basis):
+            for pauli, coeff in h_terms:
+                # Apply the Pauli string to |ket>
+                bits = list(ket)
+                amplitude = complex(coeff)
+
+                for q, op in enumerate(pauli):
+                    b = bits[q]
+                    if op == "I":
+                        continue
+                    elif op == "X":
+                        # X flips the bit
+                        bits[q] = "1" if b == "0" else "0"
+                    elif op == "Y":
+                        # Y flips the bit and introduces a phase
+                        if b == "0":
+                            bits[q] = "1"
+                            amplitude *= 1j
+                        else:  # b == "1"
+                            bits[q] = "0"
+                            amplitude *= -1j
+                    elif op == "Z":
+                        # Z leaves the bit but may add a sign
+                        if b == "1":
+                            amplitude *= -1
+
+                bra_state = "".join(bits)
+                i = basis_index.get(bra_state)
+                if i is not None and amplitude != 0:
+                    row_indices.append(i)
+                    col_indices.append(j)
+                    data.append(amplitude)
+
+        size = len(basis)
+        return csr_matrix((data, (row_indices, col_indices)), shape=(size, size))
 
     def print_angry_dog(self) -> None:
             print(DOG)
