@@ -17,7 +17,7 @@ H = generateSchwingerHamiltonian(N, x, lam, l0, m_lat, g)
 
 initial_state = '10' * (N//2)
 
-BK = BARK(H, initial_state, max_iterations=100, time_step=1, tolerance=0.001)
+BK = BARK(H, initial_state, max_iterations=100, time_step=1, tolerance=0.001, even_numbers=True)
 
 bases = BK.basis
 

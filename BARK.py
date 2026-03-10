@@ -20,6 +20,7 @@ class BARK:
         max_iterations: int = 10,
         time_step: Optional[float] = None,
         tolerance: Optional[float] = None,
+        even_numbers: Optional[bool] = None,
     ) -> None:
         self.print_angry_dog()
 
@@ -29,6 +30,7 @@ class BARK:
         self.time_step: Optional[float] = time_step
         self.tolerance: Optional[float] = tolerance
         self.basis: List[List[str]] = [[initial_state]]
+        self.even_numbers: Optional[bool] = even_numbers
 
         # Derived / precomputed data
         self.num_qubits: int = len(initial_state)
@@ -84,7 +86,12 @@ class BARK:
 
             new_coeff = coeff * op_coeff
             if self.tolerance is None or abs(new_coeff) > self.tolerance:
-                new_states.append((new_state, new_coeff))
+                if self.even_numbers is not None:
+                    num_ones = new_state.count("1")
+                    if num_ones == len(new_state)//2:
+                        new_states.append((new_state, new_coeff))
+                else:
+                    new_states.append((new_state, new_coeff))
 
         return new_states
 
