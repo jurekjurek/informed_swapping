@@ -1,0 +1,40 @@
+Hamiltonian shape: (256, 256)
+Ground state energy (exact): -44.788293524955016
+Running SKQD for t=0.001...
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
+  return splu(A).solve
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  return spsolve(Q, P)
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9658.90it/s]
+Running SKQD for t=0.01...
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9926.34it/s]
+Running SKQD for t=0.1...
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9962.53it/s]
+Running SKQD for t=0.2...
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9797.72it/s]
+Running SKQD for t=0.3...
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9982.35it/s]
+Running SKQD for t=0.4...
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9915.61it/s]
+Running SKQD for t=0.5...
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9914.88it/s]
+Running SKQD for t=0.6...
+  0%|          | 0/256 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 256/256 [00:00<00:00, 9859.25it/s]
+Computing energy path for t=0.001...
+Computing energy path for t=0.01...
+Computing energy path for t=0.1...
+Computing energy path for t=0.2...
+Computing energy path for t=0.3...
+Computing energy path for t=0.4...
+Computing energy path for t=0.5...
+Computing energy path for t=0.6...
+Sampling random paths...
+Computing paths:   0%|          | 0/10000 [00:00<?, ?it/s]Computing paths:   0%|          | 1/10000 [00:01<3:27:00,  1.24s/it]Computing paths:   0%|          | 2/10000 [00:02<3:33:35,  1.28s/it]Computing paths:   0%|          | 3/10000 [00:03<3:31:38,  1.27s/it]Computing paths:   0%|          | 4/10000 [00:05<3:28:28,  1.25s/it]Computing paths:   0%|          | 5/10000 [00:06<3:27:42,  1.25s/it]Computing paths:   0%|          | 6/10000 [00:07<3:29:07,  1.26s/it]Computing paths:   0%|          | 7/10000 [00:08<3:26:01,  1.24s/it]Computing paths:   0%|          | 8/10000 [00:09<3:25:43,  1.24s/it]Computing paths:   0%|          | 9/10000 [00:11<3:28:08,  1.25s/it]Computing paths:   0%|          | 10/10000 [00:12<3:27:24,  1.25s/it]Computing paths:   0%|          | 11/10000 [00:13<3:24:32,  1.23s/it]Computing paths:   0%|          | 12/10000 [00:14<3:27:02,  1.24s/it]Computing paths:   0%|          | 13/10000 [00:16<3:23:39,  1.22s/it]Computing paths:   0%|          | 14/10000 [00:17<3:22:49,  1.22s/it]Computing paths:   0%|          | 15/10000 [00:18<3:22:13,  1.22s/it]Computing paths:   0%|          | 16/10000 [00:19<3:24:08,  1.23s/it]Computing paths:   0%|          | 17/10000 [00:21<3:25:27,  1.23s/it]Computing paths:   0%|          | 18/10000 [00:22<3:25:28,  1.24s/it]Computing paths:   0%|          | 19/10000 [00:23<3:25:55,  1.24s/it]Computing paths:   0%|          | 20/10000 [00:24<3:25:55,  1.24s/it]Computing paths:   0%|          | 21/10000 [00:26<3:26:45,  1.24s/it]Computing paths:   0%|          | 22/10000 [00:27<3:28:01,  1.25s/it]Computing paths:   0%|          | 23/10000 [00:28<3:28:17,  1.25s/it]Computing paths:   0%|          | 24/10000 [00:29<3:25:45,  1.24s/it]Computing paths:   0%|          | 25/10000 [00:31<3:26:35,  1.24s/it]Computing paths:   0%|          | 26/10000 [00:32<3:27:01,  1.25s/it]
