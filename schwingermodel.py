@@ -395,3 +395,283 @@ def siam_bitstring_initial_state(
     psi0 = Statevector.from_int(index, dims=2**n_qubits)
 
     return psi0, occ
+
+
+
+
+
+
+
+'''classical diag'''
+
+import numpy as np
+import scipy.linalg
+from qiskit.quantum_info import SparsePauliOp
+
+
+def apply_pauli_to_bitstring(pauli_label: str, bitstring: str):
+    """
+    Apply a Pauli string to a computational basis bitstring.
+
+    Returns
+    -------
+    phase : complex
+        The phase acquired.
+    out_bitstring : str
+        The resulting computational basis bitstring.
+
+    Conventions
+    -----------
+    - `pauli_label` is a Qiskit Pauli label string, e.g. "IXYZ".
+    - `bitstring` is a standard computational basis bitstring, e.g. "0101".
+    - We assume the displayed bitstring ordering matches the Pauli label ordering.
+    """
+    bits = list(bitstring)
+    phase = 1.0 + 0.0j
+
+    for i, p in enumerate(pauli_label):
+        b = bits[i]
+
+        if p == 'I':
+            continue
+        elif p == 'X':
+            bits[i] = '1' if b == '0' else '0'
+        elif p == 'Y':
+            # Y|0> = i|1>,  Y|1> = -i|0>
+            bits[i] = '1' if b == '0' else '0'
+            phase *= 1j if b == '0' else -1j
+        elif p == 'Z':
+            # Z|0> = |0>, Z|1> = -|1>
+            if b == '1':
+                phase *= -1
+        else:
+            raise ValueError(f"Invalid Pauli character: {p}")
+
+    return phase, ''.join(bits)
+
+
+def project_hamiltonian_to_bitstring_subspace(H: SparsePauliOp, bitstrings):
+    """
+    Project a SparsePauliOp Hamiltonian into the subspace spanned by the
+    given computational-basis bitstrings.
+
+    Parameters
+    ----------
+    H : SparsePauliOp
+        Full Hamiltonian on N qubits.
+    bitstrings : sequence[str]
+        Bitstrings defining the subspace basis.
+
+    Returns
+    -------
+    H_sub : np.ndarray
+        Dense projected Hamiltonian matrix in the bitstring basis.
+    basis : list[str]
+        The ordered basis actually used.
+    """
+    # Remove duplicates but preserve order
+    basis = list(dict.fromkeys(bitstrings))
+    m = len(basis)
+    if m == 0:
+        raise ValueError("bitstrings must not be empty")
+
+    n = len(basis[0])
+    if any(len(b) != n for b in basis):
+        raise ValueError("All bitstrings must have the same length")
+
+    basis_index = {b: i for i, b in enumerate(basis)}
+
+    H_sub = np.zeros((m, m), dtype=complex)
+
+    labels = H.paulis.to_labels()
+    coeffs = H.coeffs
+
+    # Matrix element construction:
+    # For each column basis state |b_j>, act with each Pauli term.
+    # If it lands on another basis state |b_i> inside the chosen subspace,
+    # add coeff * phase to H_sub[i, j].
+    for j, b_in in enumerate(basis):
+        for label, coeff in zip(labels, coeffs):
+            phase, b_out = apply_pauli_to_bitstring(label, b_in)
+            i = basis_index.get(b_out)
+            if i is not None:
+                H_sub[i, j] += coeff * phase
+
+    return H_sub, basis
+
+
+def diagonalize_projected_hamiltonian(H_sub):
+    """
+    Diagonalize a projected Hamiltonian matrix.
+
+    Uses scipy.linalg.eigh, assuming H_sub is Hermitian.
+    """
+    evals, evecs = scipy.linalg.eigh(H_sub)
+    return evals, evecs
+
+
+
+
+
+
+'''bark, bark'''
+from qiskit.quantum_info import SparsePauliOp
+
+def bitflip_projection(op: SparsePauliOp) -> SparsePauliOp:
+    terms = []
+    for label, coeff in zip(op.paulis.to_labels(), op.coeffs):
+        new_label = label.replace("Y", "I").replace("Z", "I")
+        terms.append((new_label, coeff))
+    return SparsePauliOp.from_list(terms).simplify()
+
+
+def apply_ix_string_to_bitstring(ix_label: str, bitstring: str) -> str:
+    out = list(bitstring)
+    for j, p in enumerate(ix_label):
+        if p == "X":
+            out[j] = "1" if out[j] == "0" else "0"
+    return "".join(out)
+
+
+def reachable_bitstrings_n_steps(op: SparsePauliOp, initial_bitstrings, n_steps: int):
+    """
+    Ignore amplitudes entirely.
+    Track only which bitstrings are reachable after n_steps applications
+    of the projected operator's flip masks.
+    """
+    if isinstance(initial_bitstrings, str):
+        current = {initial_bitstrings}
+    else:
+        current = set(initial_bitstrings)
+
+    labels = op.paulis.to_labels()
+
+    for _ in range(n_steps):
+        nxt = set()
+        for b in current:
+            for label in labels:
+                nxt.add(apply_ix_string_to_bitstring(label, b))
+        current = nxt
+
+    return current
+
+def reachable_bitstrings_accumulating(op, initial_bitstrings, n_steps):
+    if isinstance(initial_bitstrings, str):
+        current = {initial_bitstrings}
+    else:
+        current = set(initial_bitstrings)
+
+    labels = op.paulis.to_labels()
+
+    for _ in range(n_steps):
+        new = set()
+        for b in current:
+            for label in labels:
+                new.add(apply_ix_string_to_bitstring(label, b))
+        current |= new   # union with previous states
+
+    return current
+
+
+
+from qiskit.quantum_info import SparsePauliOp
+import math
+
+def WS_sparse_pauli_op(N, x, lam, l0, m_lat, g):
+    """
+    Construct the SparsePauliOp for
+
+        W_S =  (x/2) * sum_{n=0}^{N-2} (X_n X_{n+1} + Y_n Y_{n+1})
+             + (1/2) * sum_{n=0}^{N-2} sum_{k=n+1}^{N-1} (N - k - 1 + lam) * Z_n Z_k
+             + sum_{n=0}^{N-2} ( N/4 - (1/2) * floor(n/2) + l0*(N - n - 1) ) * Z_n
+             + (m_lat/g) * sqrt(x) * sum_{n=0}^{N-1} (-1)^n * Z_n
+             + l0**2 * (N - 1) + (1/2) * l0 * N + (1/8) * N**2 + (lam/4) * N
+
+    Args:
+        N (int): number of qubits (sites).
+        x (float)
+        lam (float): lambda
+        l0 (float): ell_0
+        m_lat (float)
+        g (float)
+
+    Returns:
+        SparsePauliOp on N qubits.
+    """
+    terms = []
+
+    def add_1q(op, i, coeff):
+        # Qiskit labels are little-endian: qubit 0 is rightmost
+        s = ['I'] * N
+        s[N - 1 - i] = op
+        terms.append((''.join(s), complex(coeff)))
+
+    def add_2q(op, i, j, coeff):
+        s = ['I'] * N
+        s[N - 1 - i] = op
+        s[N - 1 - j] = op
+        terms.append((''.join(s), complex(coeff)))
+
+    # (x/2) * sum (X_i X_{i+1} + Y_i Y_{i+1})
+    for n in range(N - 1):
+        add_2q('X', n, n + 1, x / 2.0)
+        add_2q('Y', n, n + 1, x / 2.0)
+
+    # (1/2) * sum_{n<k} (N - k - 1 + lam) * Z_n Z_k
+    for n in range(N - 1):
+        for k in range(n + 1, N):
+            coeff = 0.5 * (N - k - 1 + lam)
+            add_2q('Z', n, k, coeff)
+
+    # sum_{n=0}^{N-2} (N/4 - 1/2 floor(n/2) + l0*(N - n - 1)) * Z_n
+    for n in range(N - 1):
+        coeff = (N / 4.0) - 0.5 * math.ceil(n / 2) + l0 * (N - n - 1)
+        add_1q('Z', n, coeff)
+
+    # (m_lat/g) * sqrt(x) * sum_{n=0}^{N-1} (-1)^n * Z_n
+    pref = (m_lat / g) * math.sqrt(x)
+    for n in range(N):
+        add_1q('Z', n, pref * ((-1) ** n))
+
+    # Constant (identity) term
+    const = (l0 ** 2) * (N - 1) + 0.5 * l0 * N + 0.125 * (N ** 2) + (lam / 4.0) * N
+    terms.append(('I' * N, complex(const)))
+
+    return SparsePauliOp.from_list(terms).simplify()
+
+
+def schwinger_kinetic_term(N, x, lam, l0, m_lat, g):
+    """
+    Construct the SparsePauliOp for
+
+        W_S =  (x/2) * sum_{n=0}^{N-2} (X_n X_{n+1} + Y_n Y_{n+1})
+             + (1/2) * sum_{n=0}^{N-2} sum_{k=n+1}^{N-1} (N - k - 1 + lam) * Z_n Z_k
+             + sum_{n=0}^{N-2} ( N/4 - (1/2) * floor(n/2) + l0*(N - n - 1) ) * Z_n
+             + (m_lat/g) * sqrt(x) * sum_{n=0}^{N-1} (-1)^n * Z_n
+             + l0**2 * (N - 1) + (1/2) * l0 * N + (1/8) * N**2 + (lam/4) * N
+
+    Args:
+        N (int): number of qubits (sites).
+        x (float)
+        lam (float): lambda
+        l0 (float): ell_0
+        m_lat (float)
+        g (float)
+
+    Returns:
+        SparsePauliOp on N qubits.
+    """
+    terms = []
+
+    def add_2q(op, i, j, coeff):
+        s = ['I'] * N
+        s[N - 1 - i] = op
+        s[N - 1 - j] = op
+        terms.append((''.join(s), complex(coeff)))
+
+    # (x/2) * sum (X_i X_{i+1} + Y_i Y_{i+1})
+    for n in range(N - 1):
+        add_2q('X', n, n + 1, x / 2.0)
+        add_2q('Y', n, n + 1, x / 2.0)
+
+    return SparsePauliOp.from_list(terms).simplify()

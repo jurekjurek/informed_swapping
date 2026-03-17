@@ -22,7 +22,7 @@ class BARK:
         tolerance: Optional[float] = None,
         even_numbers: Optional[bool] = None,
     ) -> None:
-        self.print_angry_dog()
+        # self.print_angry_dog()
 
         self.H: SparsePauliOp = H
         self.initial_state: str = initial_state
