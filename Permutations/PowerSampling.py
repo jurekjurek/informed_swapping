@@ -2,13 +2,7 @@ import scipy.sparse as sp
 import numpy as np
 import tqdm
 
-def get_exponential(H: sp.csr_matrix, t: float) -> sp.csr_matrix:
-    """
-    Get the exponential of the Hamiltonian H, i.e. exp(-iHt).
-    """
-    return sp.linalg.expm(-1j * H * t)
-
-def do_skqd(H: sp.csr_matrix, num_steps: int, t: float, initial: int = None) -> sp.csr_matrix:
+def do_power(H: sp.csr_matrix, num_steps: int, initial: int = None) -> sp.csr_matrix:
     samples_per_step = H.shape[0] // num_steps
     skqd_list = np.ones(H.shape[0])*-1
     skqd_list[0] = initial
@@ -22,7 +16,14 @@ def do_skqd(H: sp.csr_matrix, num_steps: int, t: float, initial: int = None) -> 
         initial_state = np.ones_like(initial_state) / np.sqrt(len(initial_state))
     else:
         initial_state[initial] = 1.0
-    U = get_exponential(H, t)
+    # Shift H to make it positive definite by the smallest eigenvalue
+    min_eig = sp.linalg.eigsh(H, k=1, which='SA', return_eigenvectors=False)[0]
+    if min_eig < 0:
+        H_shifted = H - min_eig * sp.eye(H.shape[0])
+    else:
+        H_shifted = H
+    U = sp.linalg.inv(H_shifted)  # Use the inverse of the shifted Hamiltonian for power iteration
+    
     # Get the current state
     current_state = initial_state.copy()
     leftover_indices = range(H.shape[0])
@@ -33,6 +34,9 @@ def do_skqd(H: sp.csr_matrix, num_steps: int, t: float, initial: int = None) -> 
     for step in tqdm.tqdm(range(num_steps)):
 
         current_state = U @ current_state
+
+        #Normalize
+        current_state /= np.linalg.norm(current_state)
 
         # Sample from the distribution defined by the current state
         probabilities = np.abs(current_state) ** 2
