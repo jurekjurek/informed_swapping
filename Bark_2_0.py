@@ -34,7 +34,7 @@ class CandidatePool:
     parent_round: int
 
 
-class BacktrackingPrunedHamiltonianExplorer:
+class BarkBarkBark:
     """
     Hamiltonian application with:
       - per-step candidate generation from the current pool
