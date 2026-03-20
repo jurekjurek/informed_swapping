@@ -38,6 +38,7 @@ class BARK:
         self.keep_states: Optional[int] = keep_states
 
         self._compile_teo_terms()
+        self.run()
 
     def apply_pauli_string(self, state: str, pauli_string: str) -> str:
         """Apply a Pauli string to a bitstring state.
