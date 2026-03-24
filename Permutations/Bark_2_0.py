@@ -59,6 +59,7 @@ class BarkBarkBark:
         sample_size: Optional[int] = None,
         sampling_score: str = "amplitude",
         restrict_equal_ones_zeros: bool = False,
+        return_only_applied_bitstrings: bool = False,
         random_seed: Optional[int] = None,
     ) -> None:
         if keep_states <= 0:
@@ -79,6 +80,8 @@ class BarkBarkBark:
         self.sample_size = sample_size
         self.sampling_score = sampling_score
         self.rng = np.random.default_rng(random_seed)
+
+        self.return_only_applied_bitstrings = return_only_applied_bitstrings
 
         self.restrict_equal_ones_zeros = restrict_equal_ones_zeros
         if self.restrict_equal_ones_zeros and (self.n % 2 != 0):
@@ -309,4 +312,7 @@ class BarkBarkBark:
             current_pool_idx = len(pools) - 1
             applications_done += 1
 
+        # I only want to consider some of the bitstrings in this case...
+        if self.return_only_applied_bitstrings:
+            return sorted(applied_set)
         return sorted(encountered)
