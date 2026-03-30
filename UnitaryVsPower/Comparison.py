@@ -417,27 +417,27 @@ def plot_results(
 
     lanczos_err = np.abs(lanczos_energies - exact_energy)
     lanczos_err = np.maximum(lanczos_err, 1e-16)
-    plt.plot(lanczos_iters, lanczos_err, marker="o", label="Lanczos on H")
+    plt.plot(lanczos_iters, lanczos_err, marker="v", label="Lanczos on H", alpha=len(lanczos_iters)/max_iter)
 
     stupid_energies, stupid_iters = stupid_results
     stupid_err = np.abs(stupid_energies - exact_energy)
     stupid_err = np.maximum(stupid_err, 1e-16)
-    plt.plot(stupid_iters, stupid_err, marker="x", label="Stupid method")
+    plt.plot(stupid_iters, stupid_err, marker="x", label="Completely random vectors", alpha=len(stupid_iters)/max_iter)
 
     for dt, energies, iters in arnoldi_results:
         err = np.abs(energies - exact_energy)
         err = np.maximum(err, 1e-16)
-        plt.plot(iters, err, marker="o", label=f"Arnoldi on exp(-iHt), dt={dt}")
+        plt.plot(iters, err, marker="o", label=f"Arnoldi on exp(-iHt), dt={dt}", alpha=len(iters)/max_iter)
 
     for dt, energies_cooked, iters_cooked in cooked_results:
         err_cooked = np.abs(energies_cooked - exact_energy)
         err_cooked = np.maximum(err_cooked, 1e-16)
-        plt.plot(iters_cooked, err_cooked, marker="s", label=f"Cooked Arnoldi, dt={dt}")
+        plt.plot(iters_cooked, err_cooked, marker="s", label=f"Arnoldi on exp(-it*(-H + 1/2* H^2)), dt={dt}", alpha=len(iters_cooked)/max_iter)
 
     for dt, wrong_energies, wrong_iters in wrong_results:
         wrong_err = np.abs(wrong_energies - exact_energy)
         wrong_err = np.maximum(wrong_err, 1e-16)
-        plt.plot(wrong_iters, wrong_err, marker="^", label=f"Wrong Arnoldi, dt={dt}")
+        plt.plot(wrong_iters, wrong_err, marker="^", label=f"Arnoldi on exp(-iRandom_H*t), dt={dt}", alpha=len(wrong_iters)/max_iter)
 
     plt.yscale("log")
     # plt.xscale("log")
@@ -453,9 +453,9 @@ def plot_results(
 if __name__ == "__main__":
     np.random.seed(42)
 
-    size = 10000
+    size = 5000
     density = 0.001
-    max_iter = 200
+    max_iter = 100
     tol = 1e-12
     time_steps = [0.1, 0.2, 0.3, 0.4]
 
