@@ -259,6 +259,9 @@ class BarkBarkBark:
         encountered: Set[str] = {self.initial_state}
         applied_set: Set[str] = set()
 
+        # making sure that the returned list is in correct order
+        applied_sequence: List[str] = []
+
         # Step 0: apply H to the initial state to create the first pool.
         first_pool_amps = self.apply_hamiltonian({self.initial_state: 1.0 + 0.0j})
         encountered.update(first_pool_amps.keys())
@@ -293,6 +296,7 @@ class BarkBarkBark:
 
             # Mark chosen states as expanded globally and within this pool.
             for b in chosen:
+                applied_sequence.append(b)
                 applied_set.add(b)
                 current_pool.unexpanded.discard(b)
 
@@ -314,5 +318,6 @@ class BarkBarkBark:
 
         # I only want to consider some of the bitstrings in this case...
         if self.return_only_applied_bitstrings:
-            return sorted(applied_set)
+            return applied_sequence
+        return list(encountered)   # or whatever behavior you want for the other case
         return sorted(encountered)
