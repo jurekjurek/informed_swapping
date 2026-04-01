@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from MakeHam import make_sparse_ground_state_hamiltonian_from_qubits
+from JBARK import BARK
 
 class GridScan:
     def __init__(self, n_qubits: list[int], sparsity_values: list[float | int], overlaps: list[float], seeds: list[int]):
@@ -70,12 +71,10 @@ class GridScan:
                         idx = np.argmin(np.abs(amps - wanted_overlap))
                         self.real_overlaps[i,j,k,l] = amps[idx]
 
-                        # Here we will run BARK with the starting index idx on H.
-                        # The result will be a list like [[3],[3,6],[3,6,2],...], the goal is to find the first element in that list where the sublist contains all indices in sup
-                        # For now, produce a toy list of the form [[idx],[idx, random index], [idx, random index, random index], ...]
-                        toy_list = [list(np.random.choice(H.shape[0], size=m, replace=False)) for m in range(1, 2**n_qubits + 1)]
+                        bark = BARK(H, idx)
+                        bark.run()
 
-                        for t, sublist in enumerate(toy_list):
+                        for t, sublist in enumerate(bark.samples):
                             if all(s in sublist for s in sup):
                                 self.stopping_times[i,j,k,l] = t + 1
                                 break
