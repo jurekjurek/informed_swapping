@@ -9,7 +9,8 @@ import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from scipy.sparse import csr_matrix
 
-from dog_ascii import DOG
+# from dog_ascii import DOG
+DOG = 'dog'
 
 
 class BARK:
