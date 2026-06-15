@@ -254,13 +254,13 @@ class BarkBarkBark:
         Returns
         -------
         List[str]
-            All encountered bitstrings, as strings.
+            Bitstrings in the order in which H was applied to them.
         """
         encountered: Set[str] = {self.initial_state}
-        applied_set: Set[str] = set()
 
-        # making sure that the returned list is in correct order
-        applied_sequence: List[str] = []
+        # Initial state already has H applied to it in Step 0.
+        applied_set: Set[str] = {self.initial_state}
+        applied_sequence: List[str] = [self.initial_state]
 
         # Step 0: apply H to the initial state to create the first pool.
         first_pool_amps = self.apply_hamiltonian({self.initial_state: 1.0 + 0.0j})
