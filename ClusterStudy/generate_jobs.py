@@ -24,13 +24,13 @@ import os
 
 # Full grid — intended for the large cluster run.
 FULL_GRID = dict(
-    n_qubits       = [6, 7, 8, 9, 10],
-    gs_sparsity    = [0.05, 0.1, 0.25, 0.5, 0.75, 1.0],
-    ham_sparsity   = [0.0, 0.25, 0.5, 0.75, 1.0],
-    overlap        = [0.01, 0.1, 0.3, 0.5, 0.8],
+    n_qubits       = [6, 8, 10],
+    gs_sparsity    = [0.05, 0.1, 0.25, 0.5],
+    ham_sparsity   = [0.0, 0.25, 0.5],
+    overlap        = [0.1, 0.3, 0.5, 0.8],
     # keep_states expressed as a fraction of dim = 2^n_qubits;
     # the actual integer is computed per n_qubits below.
-    keep_states_frac = [0.01, 0.05, 0.1, 0.5],
+    keep_states_frac = [0.01, 0.05, 0.1],
 )
 
 # Small grid — quick sanity check, runs in minutes on a laptop.
