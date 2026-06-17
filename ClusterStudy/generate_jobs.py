@@ -26,7 +26,7 @@ import os
 FULL_GRID = dict(
     n_qubits       = [6, 8, 10],
     gs_sparsity    = [0.05, 0.1, 0.25, 0.5],
-    ham_sparsity   = [0.0, 0.25, 0.5],
+    ham_sparsity   = [0.1, 0.25, 0.5],
     overlap        = [0.1, 0.3, 0.5, 0.8],
     # keep_states expressed as a fraction of dim = 2^n_qubits;
     # the actual integer is computed per n_qubits below.

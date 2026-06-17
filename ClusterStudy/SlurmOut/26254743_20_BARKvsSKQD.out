@@ -1,0 +1,35 @@
+==================================================
+Array job  : 26254743
+Task (chunk): 20 / 29
+Node       : node022
+Started    : Wed Jun 17 02:54:41 PM CEST 2026
+==================================================
+Chunk 20/29  —  jobs 292–305 of 431  (14 experiments)
+============================================================
+
+[1/14  global=292]
+[10q | gs=0.05 | ham=0.1 | ov=0.3 | ks=51]
+  Building Hamiltonian ...
+    dim=1024, gs_support=52, ham_nnz=107870, gap≈1.0000
+  Initial state: idx=776, |<ψ|init>|²=0.100720 (requested 0.3)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
+  return splu(A).solve
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  return spsolve(Q, P)
+  0%|          | 0/64 [00:00<?, ?it/s] 92%|█████████▏| 59/64 [00:00<00:00, 581.43it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 583.96it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 92%|█████████▏| 59/64 [00:00<00:00, 581.63it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 584.75it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 92%|█████████▏| 59/64 [00:00<00:00, 585.05it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 586.49it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 92%|█████████▏| 59/64 [00:00<00:00, 587.88it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 589.96it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 91%|█████████ | 58/64 [00:00<00:00, 577.89it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 581.73it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 89%|████████▉ | 57/64 [00:00<00:00, 568.44it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 571.61it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 89%|████████▉ | 57/64 [00:00<00:00, 569.62it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 572.40it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 92%|█████████▏| 59/64 [00:00<00:00, 587.83it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 591.18it/s]
