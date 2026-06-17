@@ -1,0 +1,85 @@
+==================================================
+Array job  : 26251002
+Task (chunk): 20 / 29
+Node       : node121
+Started    : Wed Jun 17 10:01:42 AM CEST 2026
+==================================================
+Chunk 20/29  —  jobs 292–305 of 431  (14 experiments)
+============================================================
+
+[1/14  global=292]
+[10q | gs=0.05 | ham=0.0 | ov=0.3 | ks=51]
+  Building Hamiltonian ...
+    dim=1024, gs_support=52, ham_nnz=1126, gap≈1.0000
+  Initial state: idx=776, |<ψ|init>|²=0.100720 (requested 0.3)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
+  return splu(A).solve
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  return spsolve(Q, P)
+  0%|          | 0/64 [00:00<?, ?it/s]/home/erosanow_hpc/informed_swapping/Permutations/SKQD.py:45: RuntimeWarning: invalid value encountered in divide
+  probabilities_here /= np.sum(probabilities_here)
+No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 2023.41it/s]
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 2068.68it/s]
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 2070.97it/s]
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 2068.28it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1161 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1161 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[2/14  global=293]
+[10q | gs=0.05 | ham=0.0 | ov=0.3 | ks=102]
+  Building Hamiltonian ...
+    dim=1024, gs_support=52, ham_nnz=1126, gap≈1.0000
+  Initial state: idx=776, |<ψ|init>|²=0.100720 (requested 0.3)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 2060.64it/s]
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 2064.09it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1351 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1351 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[3/14  global=294]
+[10q | gs=0.05 | ham=0.0 | ov=0.5 | ks=10]
+  Building Hamiltonian ...
+    dim=1024, gs_support=52, ham_nnz=1126, gap≈1.0000
+  Initial state: idx=776, |<ψ|init>|²=0.100720 (requested 0.5)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 2068.18it/s]
