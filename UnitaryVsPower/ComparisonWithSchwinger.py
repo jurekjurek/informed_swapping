@@ -446,7 +446,7 @@ if __name__ == "__main__":
 
     max_iter = 100
     tol = 1e-12
-    time_steps = [0.1, 0.2, 0.3, 0.4]
+    time_steps = [0.5, 0.6, 0.7, 0.8]
 
     _, H, _, _ = build_full_hamiltonian(
         N=12,
