@@ -2,18 +2,26 @@
 # =============================================================================
 # Slurm array job: BARK vs SKQD systematic study
 #
-# Usage
-# -----
-# 1. Generate the parameter file:
+# 30 array jobs, each running ~1/30 of the parameter grid sequentially.
+# Each job may run for up to 24 hours.
+#
+# Workflow
+# --------
+# 1. Generate the parameter file (once):
 #       cd ClusterStudy
 #       python generate_jobs.py --preset full
 #
-# 2. Check the total number of jobs printed by generate_jobs.py, then submit:
-#       sbatch --array=0-<N-1> run_array.slurm
+# 2. Submit all 30 chunks:
+#       sbatch run_array.slurm
 #
-#    Or submit a limited number of simultaneous jobs (e.g. 50 at a time):
-#       sbatch --array=0-<N-1>%50 run_array.slurm
+# 3. If some jobs fail or time out, re-submit the same script — experiments
+#    whose output PNG already exists are skipped automatically.
 #
+# Changing the grid size
+# ----------------------
+# If you add more parameter combinations, update N_CHUNKS below and in the
+# --array range.  The chunk_slice logic in run_chunk.py distributes evenly
+# regardless of how many lines are in param_grid.txt.
 # =============================================================================
 
 #SBATCH --job-name=BARKvsSKQD
@@ -24,66 +32,49 @@
 
 #SBATCH --partition=intelsr_medium
 
-# Wall time: set generously; n_qubits=10 with 100 random paths can take >1h.
-#SBATCH --time=04:00:00
+# 30 array jobs, 0-indexed
+#SBATCH --array=0-29
 
-# Memory: dominated by storing the full Hilbert space (dim x dim matrices for
-# n_qubits=10 are 1024x1024 = ~8 MB each, but eigsh and path computation
-# can spike to several GB). Adjust if jobs OOM.
+# Up to 24 hours per chunk
+#SBATCH --time=24:00:00
+
+# Memory: eigsh on a 1024×1024 matrix is light, but 100 random paths can
+# accumulate intermediate matrices.  32 GB is a safe ceiling.
 #SBATCH --mem=32G
 
-# Single-threaded per job — parallelism comes from the array.
+# Single-threaded per job; parallelism comes from the array.
 #SBATCH --cpus-per-task=4
 
-# Log files: one per array task, stored in SlurmOut/
+# Log files: one per array task
 #SBATCH -o ./SlurmOut/%A_%a_%x.out
 
 # =============================================================================
-# Environment setup
+# Environment
 # =============================================================================
 
-# Adapt the path below to wherever the virtual environment lives on your cluster.
+# Adapt these two lines to your cluster setup.
 source /home/erosanow_hpc/informed_swapping/.SKQD/bin/activate
-
-# Move to the ClusterStudy directory so relative paths resolve correctly.
 cd /home/erosanow_hpc/informed_swapping/ClusterStudy
 
 # =============================================================================
-# Read hyperparameters for this array task
+# Run this chunk
 # =============================================================================
 
-PARAM_FILE="params/param_grid.txt"
+echo "=================================================="
+echo "Array job  : $SLURM_ARRAY_JOB_ID"
+echo "Task (chunk): $SLURM_ARRAY_TASK_ID / 29"
+echo "Node       : $(hostname)"
+echo "Started    : $(date)"
+echo "=================================================="
 
-# $SLURM_ARRAY_TASK_ID is 0-based; sed line numbers are 1-based.
-LINE=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" "$PARAM_FILE")
-
-if [ -z "$LINE" ]; then
-    echo "ERROR: no parameter line for task ID $SLURM_ARRAY_TASK_ID" >&2
-    exit 1
-fi
-
-# Parse the five whitespace-separated fields.
-read -r N_QUBITS GS_SPARSITY HAM_SPARSITY OVERLAP KEEP_STATES <<< "$LINE"
-
-echo "==================================================="
-echo "Task ID      : $SLURM_ARRAY_TASK_ID"
-echo "n_qubits     : $N_QUBITS"
-echo "gs_sparsity  : $GS_SPARSITY"
-echo "ham_sparsity : $HAM_SPARSITY"
-echo "overlap      : $OVERLAP"
-echo "keep_states  : $KEEP_STATES"
-echo "==================================================="
-
-# =============================================================================
-# Run the experiment
-# =============================================================================
-
-python -u run_experiment.py \
-    --n_qubits       "$N_QUBITS"     \
-    --gs_sparsity    "$GS_SPARSITY"  \
-    --ham_sparsity   "$HAM_SPARSITY" \
-    --overlap        "$OVERLAP"      \
-    --keep_states    "$KEEP_STATES"  \
-    --n_random_paths 100             \
-    --seed           42              \
+python -u run_chunk.py \
+    --chunk          "$SLURM_ARRAY_TASK_ID" \
+    --n_chunks       30                     \
+    --param_file     params/param_grid.txt  \
+    --n_random_paths 100                    \
+    --seed           42                     \
     --output_dir     results
+
+echo "=================================================="
+echo "Finished   : $(date)"
+echo "=================================================="
