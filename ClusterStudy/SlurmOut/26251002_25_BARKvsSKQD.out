@@ -1,0 +1,430 @@
+==================================================
+Array job  : 26251002
+Task (chunk): 25 / 29
+Node       : node131
+Started    : Wed Jun 17 10:01:42 AM CEST 2026
+==================================================
+Chunk 25/29  —  jobs 362–375 of 431  (14 experiments)
+============================================================
+
+[1/14  global=362]
+[10q | gs=0.25 | ham=0.0 | ov=0.1 | ks=102]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.1)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
+  return splu(A).solve
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  return spsolve(Q, P)
+  0%|          | 0/64 [00:00<?, ?it/s]/home/erosanow_hpc/informed_swapping/Permutations/SKQD.py:45: RuntimeWarning: invalid value encountered in divide
+  probabilities_here /= np.sum(probabilities_here)
+No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1736.29it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (2061 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (2061 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[2/14  global=363]
+[10q | gs=0.25 | ham=0.0 | ov=0.3 | ks=10]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.3)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1701.16it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (2181 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (2181 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[3/14  global=364]
+[10q | gs=0.25 | ham=0.0 | ov=0.3 | ks=51]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.3)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1702.31it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1961 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1961 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[4/14  global=365]
+[10q | gs=0.25 | ham=0.0 | ov=0.3 | ks=102]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.3)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1735.13it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1781 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1781 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[5/14  global=366]
+[10q | gs=0.25 | ham=0.0 | ov=0.5 | ks=10]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.5)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1653.44it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (2091 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (2091 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[6/14  global=367]
+[10q | gs=0.25 | ham=0.0 | ov=0.5 | ks=51]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.5)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1690.91it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (2011 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (2011 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[7/14  global=368]
+[10q | gs=0.25 | ham=0.0 | ov=0.5 | ks=102]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.5)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1592.91it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (2291 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (2291 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[8/14  global=369]
+[10q | gs=0.25 | ham=0.0 | ov=0.8 | ks=10]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.8)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1674.25it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1751 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1751 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[9/14  global=370]
+[10q | gs=0.25 | ham=0.0 | ov=0.8 | ks=51]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.8)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1711.87it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (2241 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (2241 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[10/14  global=371]
+[10q | gs=0.25 | ham=0.0 | ov=0.8 | ks=102]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=1536, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.8)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 1568.78it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1931 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1931 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[11/14  global=372]
+[10q | gs=0.25 | ham=0.25 | ov=0.1 | ks=10]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=265122, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.1)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 352.59it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 334.56it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 88%|████████▊ | 56/64 [00:00<00:00, 550.70it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 554.73it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 64%|██████▍   | 41/64 [00:00<00:00, 405.24it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 383.15it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 50%|█████     | 32/64 [00:00<00:00, 315.46it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 328.22it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 77%|███████▋  | 49/64 [00:00<00:00, 478.09it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 441.98it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 58%|█████▊    | 37/64 [00:00<00:00, 365.37it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 364.05it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 84%|████████▍ | 54/64 [00:00<00:00, 538.45it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 544.17it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 48%|████▊     | 31/64 [00:00<00:00, 307.55it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 324.47it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 338.99it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 347.58it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 335.23it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 320.38it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 88%|████████▊ | 56/64 [00:00<00:00, 553.16it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 555.33it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 326.74it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 340.79it/s]
+    Done. (970.0s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:31<52:01, 31.53s/it]Computing paths:   2%|▏         | 2/100 [01:11<59:46, 36.60s/it]Computing paths:   3%|▎         | 3/100 [01:40<53:11, 32.90s/it]Computing paths:   4%|▍         | 4/100 [02:32<1:04:56, 40.59s/it]Computing paths:   5%|▌         | 5/100 [02:59<56:29, 35.68s/it]  Computing paths:   6%|▌         | 6/100 [04:04<1:11:18, 45.51s/it]Computing paths:   7%|▋         | 7/100 [04:34<1:02:37, 40.40s/it]Computing paths:   8%|▊         | 8/100 [05:04<57:15, 37.34s/it]  Computing paths:   9%|▉         | 9/100 [05:31<51:48, 34.16s/it]Computing paths:  10%|█         | 10/100 [06:20<57:53, 38.59s/it]Computing paths:  11%|█         | 11/100 [06:49<52:47, 35.59s/it]Computing paths:  12%|█▏        | 12/100 [07:19<49:44, 33.92s/it]Computing paths:  13%|█▎        | 13/100 [08:08<56:03, 38.67s/it]Computing paths:  14%|█▍        | 14/100 [09:07<1:04:12, 44.79s/it]Computing paths:  15%|█▌        | 15/100 [09:52<1:03:26, 44.78s/it]Computing paths:  16%|█▌        | 16/100 [10:18<54:42, 39.07s/it]  Computing paths:  17%|█▋        | 17/100 [10:55<53:20, 38.56s/it]Computing paths:  18%|█▊        | 18/100 [11:22<47:50, 35.01s/it]Computing paths:  19%|█▉        | 19/100 [11:48<43:41, 32.36s/it]Computing paths:  20%|██        | 20/100 [12:15<40:50, 30.63s/it]Computing paths:  21%|██        | 21/100 [13:18<53:00, 40.26s/it]Computing paths:  22%|██▏       | 22/100 [14:15<58:54, 45.31s/it]Computing paths:  23%|██▎       | 23/100 [14:42<51:25, 40.07s/it]Computing paths:  24%|██▍       | 24/100 [15:10<45:58, 36.30s/it]Computing paths:  25%|██▌       | 25/100 [15:48<45:50, 36.67s/it]Computing paths:  26%|██▌       | 26/100 [16:40<50:59, 41.34s/it]Computing paths:  27%|██▋       | 27/100 [17:23<51:08, 42.03s/it]Computing paths:  28%|██▊       | 28/100 [17:54<46:28, 38.73s/it]Computing paths:  29%|██▉       | 29/100 [18:46<50:19, 42.53s/it]Computing paths:  30%|███       | 30/100 [19:33<51:06, 43.81s/it]Computing paths:  31%|███       | 31/100 [20:01<45:09, 39.27s/it]Computing paths:  32%|███▏      | 32/100 [20:30<40:56, 36.13s/it]Computing paths:  33%|███▎      | 33/100 [20:58<37:40, 33.75s/it]Computing paths:  34%|███▍      | 34/100 [21:25<34:56, 31.77s/it]Computing paths:  35%|███▌      | 35/100 [21:53<33:02, 30.51s/it]Computing paths:  36%|███▌      | 36/100 [22:50<41:01, 38.47s/it]Computing paths:  37%|███▋      | 37/100 [23:15<36:14, 34.51s/it]Computing paths:  38%|███▊      | 38/100 [24:12<42:28, 41.11s/it]Computing paths:  39%|███▉      | 39/100 [24:45<39:18, 38.67s/it]Computing paths:  40%|████      | 40/100 [25:10<34:34, 34.57s/it]Computing paths:  41%|████      | 41/100 [25:43<33:43, 34.29s/it]Computing paths:  42%|████▏     | 42/100 [26:11<31:07, 32.19s/it]Computing paths:  43%|████▎     | 43/100 [27:17<40:21, 42.48s/it]Computing paths:  44%|████▍     | 44/100 [27:43<35:03, 37.57s/it]Computing paths:  45%|████▌     | 45/100 [28:11<31:48, 34.71s/it]Computing paths:  46%|████▌     | 46/100 [28:40<29:32, 32.83s/it]Computing paths:  47%|████▋     | 47/100 [29:07<27:24, 31.03s/it]Computing paths:  48%|████▊     | 48/100 [29:36<26:20, 30.39s/it]Computing paths:  49%|████▉     | 49/100 [30:04<25:23, 29.86s/it]Computing paths:  50%|█████     | 50/100 [30:29<23:32, 28.25s/it]Computing paths:  51%|█████     | 51/100 [30:55<22:33, 27.63s/it]Computing paths:  52%|█████▏    | 52/100 [31:23<22:13, 27.78s/it]Computing paths:  53%|█████▎    | 53/100 [32:05<25:05, 32.04s/it]Computing paths:  54%|█████▍    | 54/100 [32:32<23:19, 30.42s/it]Computing paths:  55%|█████▌    | 55/100 [33:10<24:36, 32.81s/it]Computing paths:  56%|█████▌    | 56/100 [33:37<22:48, 31.10s/it]Computing paths:  57%|█████▋    | 57/100 [34:21<24:59, 34.88s/it]Computing paths:  58%|█████▊    | 58/100 [35:11<27:42, 39.58s/it]Computing paths:  59%|█████▉    | 59/100 [35:39<24:32, 35.92s/it]Computing paths:  60%|██████    | 60/100 [36:18<24:37, 36.93s/it]Computing paths:  61%|██████    | 61/100 [37:01<25:09, 38.71s/it]Computing paths:  62%|██████▏   | 62/100 [37:34<23:25, 36.97s/it]Computing paths:  63%|██████▎   | 63/100 [38:18<24:02, 38.99s/it]Computing paths:  64%|██████▍   | 64/100 [38:44<21:07, 35.22s/it]Computing paths:  65%|██████▌   | 65/100 [39:22<20:58, 35.95s/it]Computing paths:  66%|██████▌   | 66/100 [39:48<18:44, 33.07s/it]Computing paths:  67%|██████▋   | 67/100 [40:20<17:57, 32.66s/it]Computing paths:  68%|██████▊   | 68/100 [40:48<16:48, 31.51s/it]Computing paths:  69%|██████▉   | 69/100 [41:39<19:11, 37.16s/it]Computing paths:  70%|███████   | 70/100 [42:26<20:05, 40.17s/it]Computing paths:  71%|███████   | 71/100 [43:11<20:08, 41.66s/it]Computing paths:  72%|███████▏  | 72/100 [43:43<18:00, 38.60s/it]Computing paths:  73%|███████▎  | 73/100 [44:44<20:26, 45.42s/it]Computing paths:  74%|███████▍  | 74/100 [45:14<17:39, 40.74s/it]Computing paths:  75%|███████▌  | 75/100 [46:01<17:50, 42.83s/it]Computing paths:  76%|███████▌  | 76/100 [46:29<15:20, 38.37s/it]Computing paths:  77%|███████▋  | 77/100 [46:57<13:26, 35.07s/it]Computing paths:  78%|███████▊  | 78/100 [47:56<15:28, 42.20s/it]Computing paths:  79%|███████▉  | 79/100 [48:40<15:00, 42.87s/it]Computing paths:  80%|████████  | 80/100 [49:18<13:47, 41.40s/it]Computing paths:  81%|████████  | 81/100 [49:55<12:38, 39.94s/it]Computing paths:  82%|████████▏ | 82/100 [50:28<11:26, 38.12s/it]Computing paths:  83%|████████▎ | 83/100 [51:04<10:35, 37.37s/it]Computing paths:  84%|████████▍ | 84/100 [51:46<10:19, 38.71s/it]Computing paths:  85%|████████▌ | 85/100 [52:14<08:52, 35.51s/it]Computing paths:  86%|████████▌ | 86/100 [52:41<07:40, 32.93s/it]Computing paths:  87%|████████▋ | 87/100 [53:23<07:45, 35.83s/it]Computing paths:  88%|████████▊ | 88/100 [53:55<06:55, 34.59s/it]Computing paths:  89%|████████▉ | 89/100 [54:28<06:13, 33.93s/it]Computing paths:  90%|█████████ | 90/100 [54:54<05:16, 31.69s/it]Computing paths:  91%|█████████ | 91/100 [55:22<04:36, 30.72s/it]Computing paths:  92%|█████████▏| 92/100 [55:48<03:53, 29.22s/it]Computing paths:  93%|█████████▎| 93/100 [56:18<03:26, 29.51s/it]Computing paths:  94%|█████████▍| 94/100 [56:43<02:47, 27.97s/it]Computing paths:  95%|█████████▌| 95/100 [57:11<02:19, 27.92s/it]Computing paths:  96%|█████████▌| 96/100 [57:36<01:48, 27.21s/it]Computing paths:  97%|█████████▋| 97/100 [58:13<01:29, 29.99s/it]Computing paths:  98%|█████████▊| 98/100 [58:41<00:58, 29.47s/it]Computing paths:  99%|█████████▉| 99/100 [59:30<00:35, 35.34s/it]Computing paths: 100%|██████████| 100/100 [1:00:02<00:00, 34.49s/it]Computing paths: 100%|██████████| 100/100 [1:00:02<00:00, 36.03s/it]
+    Done. (3602.9s, 4572.9s total)
+  Running BARK (keep_states=10) ...
+ibwarn: [1039653] _do_madrpc: recv failed: Connection timed out
+ibwarn: [1039653] mad_rpc: _do_madrpc failed; dport (Lid 165)
+[2026-06-17T11:24:13.438] error: ofed: No error
+    Done. (990.0s, 5562.9s total)
+  Saved: results/nq10_gs0.25_ham0.25_ov0.10_ks0010_seed42.png
+  Total wall time: 5563.3s
+
+[12/14  global=373]
+[10q | gs=0.25 | ham=0.25 | ov=0.1 | ks=51]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=265122, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.1)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s] 55%|█████▍    | 35/64 [00:00<00:00, 342.51it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 335.18it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 69%|██████▉   | 44/64 [00:00<00:00, 431.20it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 386.51it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 332.81it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 347.93it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 339.61it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 347.41it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 88%|████████▊ | 56/64 [00:00<00:00, 558.78it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 564.52it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 334.15it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 338.92it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 62%|██████▎   | 40/64 [00:00<00:00, 393.93it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 370.00it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 50%|█████     | 32/64 [00:00<00:00, 311.34it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 327.48it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 359.03it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 358.18it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 88%|████████▊ | 56/64 [00:00<00:00, 557.88it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 560.64it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 359.88it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 360.73it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 55%|█████▍    | 35/64 [00:00<00:00, 343.50it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 365.82it/s]
+    Done. (980.0s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:30<51:03, 30.95s/it]Computing paths:   2%|▏         | 2/100 [01:00<49:23, 30.24s/it]Computing paths:   3%|▎         | 3/100 [01:36<52:45, 32.64s/it]Computing paths:   4%|▍         | 4/100 [02:05<50:03, 31.28s/it]Computing paths:   5%|▌         | 5/100 [02:30<45:43, 28.88s/it]Computing paths:   6%|▌         | 6/100 [03:41<1:07:54, 43.34s/it]Computing paths:   7%|▋         | 7/100 [04:23<1:06:19, 42.79s/it]Computing paths:   8%|▊         | 8/100 [05:02<1:04:05, 41.79s/it]Computing paths:   9%|▉         | 9/100 [05:40<1:01:38, 40.64s/it]Computing paths:  10%|█         | 10/100 [06:25<1:02:50, 41.89s/it]Computing paths:  11%|█         | 11/100 [07:11<1:03:56, 43.10s/it]Computing paths:  12%|█▏        | 12/100 [07:38<55:56, 38.14s/it]  Computing paths:  13%|█▎        | 13/100 [08:05<50:32, 34.85s/it]Computing paths:  14%|█▍        | 14/100 [08:29<45:13, 31.55s/it]Computing paths:  15%|█▌        | 15/100 [08:52<41:14, 29.11s/it]Computing paths:  16%|█▌        | 16/100 [09:29<43:50, 31.31s/it]Computing paths:  17%|█▋        | 17/100 [09:53<40:23, 29.20s/it]Computing paths:  18%|█▊        | 18/100 [10:21<39:11, 28.68s/it]Computing paths:  19%|█▉        | 19/100 [10:48<38:06, 28.22s/it]Computing paths:  20%|██        | 20/100 [11:17<38:09, 28.61s/it]Computing paths:  21%|██        | 21/100 [12:21<51:29, 39.11s/it]Computing paths:  22%|██▏       | 22/100 [12:49<46:44, 35.95s/it]Computing paths:  23%|██▎       | 23/100 [13:56<58:02, 45.23s/it]Computing paths:  24%|██▍       | 24/100 [14:39<56:23, 44.51s/it]Computing paths:  25%|██▌       | 25/100 [15:26<56:31, 45.22s/it]Computing paths:  26%|██▌       | 26/100 [16:08<54:41, 44.34s/it]Computing paths:  27%|██▋       | 27/100 [17:10<1:00:26, 49.67s/it]Computing paths:  28%|██▊       | 28/100 [17:38<51:34, 42.97s/it]  Computing paths:  29%|██▉       | 29/100 [18:45<59:37, 50.38s/it]Computing paths:  30%|███       | 30/100 [19:11<50:05, 42.94s/it]Computing paths:  31%|███       | 31/100 [19:57<50:24, 43.84s/it]Computing paths:  32%|███▏      | 32/100 [20:43<50:20, 44.41s/it]Computing paths:  33%|███▎      | 33/100 [21:10<43:51, 39.27s/it]Computing paths:  34%|███▍      | 34/100 [21:50<43:36, 39.65s/it]Computing paths:  35%|███▌      | 35/100 [22:49<48:58, 45.21s/it]Computing paths:  36%|███▌      | 36/100 [23:14<41:52, 39.26s/it]Computing paths:  37%|███▋      | 37/100 [23:44<38:10, 36.36s/it]Computing paths:  38%|███▊      | 38/100 [24:12<35:12, 34.08s/it]Computing paths:  39%|███▉      | 39/100 [24:39<32:27, 31.92s/it]Computing paths:  40%|████      | 40/100 [25:26<36:18, 36.31s/it]Computing paths:  41%|████      | 41/100 [25:57<34:05, 34.66s/it]Computing paths:  42%|████▏     | 42/100 [26:31<33:27, 34.62s/it]Computing paths:  43%|████▎     | 43/100 [26:58<30:43, 32.35s/it]Computing paths:  44%|████▍     | 44/100 [27:27<29:12, 31.30s/it]Computing paths:  45%|████▌     | 45/100 [28:12<32:25, 35.38s/it]Computing paths:  46%|████▌     | 46/100 [28:38<29:20, 32.61s/it]Computing paths:  47%|████▋     | 47/100 [29:03<26:44, 30.27s/it]Computing paths:  48%|████▊     | 48/100 [29:31<25:38, 29.59s/it]Computing paths:  49%|████▉     | 49/100 [30:09<27:13, 32.04s/it]Computing paths:  50%|█████     | 50/100 [31:07<33:17, 39.96s/it]Computing paths:  51%|█████     | 51/100 [31:35<29:42, 36.38s/it]Computing paths:  52%|█████▏    | 52/100 [32:16<30:06, 37.63s/it]Computing paths:  53%|█████▎    | 53/100 [33:02<31:35, 40.32s/it]Computing paths:  54%|█████▍    | 54/100 [33:31<28:11, 36.78s/it]Computing paths:  55%|█████▌    | 55/100 [33:58<25:30, 34.01s/it]Computing paths:  56%|█████▌    | 56/100 [34:25<23:16, 31.75s/it]Computing paths:  57%|█████▋    | 57/100 [35:21<28:05, 39.19s/it]Computing paths:  58%|█████▊    | 58/100 [35:49<25:00, 35.72s/it]Computing paths:  59%|█████▉    | 59/100 [36:54<30:25, 44.53s/it]Computing paths:  60%|██████    | 60/100 [37:57<33:23, 50.08s/it]Computing paths:  61%|██████    | 61/100 [39:09<36:47, 56.60s/it]Computing paths:  62%|██████▏   | 62/100 [39:37<30:26, 48.08s/it]Computing paths:  63%|██████▎   | 63/100 [40:05<25:53, 41.98s/it]Computing paths:  64%|██████▍   | 64/100 [40:32<22:31, 37.55s/it]Computing paths:  65%|██████▌   | 65/100 [41:05<21:03, 36.09s/it]Computing paths:  66%|██████▌   | 66/100 [41:50<21:58, 38.77s/it]Computing paths:  67%|██████▋   | 67/100 [42:37<22:40, 41.23s/it]Computing paths:  68%|██████▊   | 68/100 [43:11<20:51, 39.11s/it]Computing paths:  69%|██████▉   | 69/100 [44:18<24:33, 47.53s/it]Computing paths:  70%|███████   | 70/100 [44:47<20:54, 41.82s/it]Computing paths:  71%|███████   | 71/100 [45:13<17:57, 37.17s/it]Computing paths:  72%|███████▏  | 72/100 [45:42<16:10, 34.66s/it]Computing paths:  73%|███████▎  | 73/100 [46:12<15:01, 33.39s/it]Computing paths:  74%|███████▍  | 74/100 [46:53<15:25, 35.60s/it]Computing paths:  75%|███████▌  | 75/100 [47:19<13:41, 32.86s/it]Computing paths:  76%|███████▌  | 76/100 [47:46<12:26, 31.12s/it]Computing paths:  77%|███████▋  | 77/100 [48:15<11:41, 30.51s/it]Computing paths:  78%|███████▊  | 78/100 [48:42<10:47, 29.43s/it]Computing paths:  79%|███████▉  | 79/100 [49:31<12:18, 35.19s/it]Computing paths:  80%|████████  | 80/100 [50:21<13:10, 39.53s/it]Computing paths:  81%|████████  | 81/100 [50:51<11:40, 36.86s/it]Computing paths:  82%|████████▏ | 82/100 [51:29<11:10, 37.26s/it]Computing paths:  83%|████████▎ | 83/100 [51:57<09:41, 34.23s/it]Computing paths:  84%|████████▍ | 84/100 [52:26<08:43, 32.75s/it]Computing paths:  85%|████████▌ | 85/100 [52:54<07:48, 31.23s/it]Computing paths:  86%|████████▌ | 86/100 [53:21<06:59, 29.95s/it]Computing paths:  87%|████████▋ | 87/100 [54:03<07:16, 33.57s/it]Computing paths:  88%|████████▊ | 88/100 [54:31<06:23, 31.99s/it]Computing paths:  89%|████████▉ | 89/100 [54:57<05:31, 30.15s/it]Computing paths:  90%|█████████ | 90/100 [55:22<04:46, 28.62s/it]Computing paths:  91%|█████████ | 91/100 [55:47<04:08, 27.66s/it]Computing paths:  92%|█████████▏| 92/100 [56:26<04:06, 30.87s/it]Computing paths:  93%|█████████▎| 93/100 [57:18<04:22, 37.43s/it]Computing paths:  94%|█████████▍| 94/100 [57:46<03:26, 34.48s/it]Computing paths:  95%|█████████▌| 95/100 [58:14<02:42, 32.45s/it]Computing paths:  96%|█████████▌| 96/100 [58:51<02:15, 33.90s/it]Computing paths:  97%|█████████▋| 97/100 [1:00:00<02:13, 44.37s/it]Computing paths:  98%|█████████▊| 98/100 [1:00:28<01:18, 39.43s/it]Computing paths:  99%|█████████▉| 99/100 [1:00:55<00:35, 35.83s/it]Computing paths: 100%|██████████| 100/100 [1:01:19<00:00, 32.31s/it]Computing paths: 100%|██████████| 100/100 [1:01:19<00:00, 36.80s/it]
+    Done. (3679.7s, 4659.7s total)
+  Running BARK (keep_states=51) ...
+    Done. (1011.0s, 5670.7s total)
+  Saved: results/nq10_gs0.25_ham0.25_ov0.10_ks0051_seed42.png
+  Total wall time: 5671.1s
+
+[13/14  global=374]
+[10q | gs=0.25 | ham=0.25 | ov=0.1 | ks=102]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=265122, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.1)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s] 50%|█████     | 32/64 [00:00<00:00, 316.20it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 354.43it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 55%|█████▍    | 35/64 [00:00<00:00, 346.14it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 371.76it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 355.15it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 353.11it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 88%|████████▊ | 56/64 [00:00<00:00, 557.49it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 564.26it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 349.14it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 361.40it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 354.15it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 343.03it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 353.47it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 360.12it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 94%|█████████▍| 60/64 [00:00<00:00, 596.53it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 598.07it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 50%|█████     | 32/64 [00:00<00:00, 312.55it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 366.98it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 55%|█████▍    | 35/64 [00:00<00:00, 345.84it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 378.99it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 355.05it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 357.50it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 332.25it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 343.61it/s]
+    Done. (969.4s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:25<42:29, 25.75s/it]Computing paths:   2%|▏         | 2/100 [00:52<42:39, 26.11s/it]Computing paths:   3%|▎         | 3/100 [01:23<45:56, 28.42s/it]Computing paths:   4%|▍         | 4/100 [01:51<45:31, 28.45s/it]Computing paths:   5%|▌         | 5/100 [02:43<58:33, 36.99s/it]Computing paths:   6%|▌         | 6/100 [03:14<54:30, 34.79s/it]Computing paths:   7%|▋         | 7/100 [03:43<50:59, 32.90s/it]Computing paths:   8%|▊         | 8/100 [04:10<47:47, 31.17s/it]Computing paths:   9%|▉         | 9/100 [04:36<44:46, 29.52s/it]Computing paths:  10%|█         | 10/100 [05:17<49:29, 33.00s/it]Computing paths:  11%|█         | 11/100 [06:07<56:36, 38.16s/it]Computing paths:  12%|█▏        | 12/100 [06:35<51:16, 34.96s/it]Computing paths:  13%|█▎        | 13/100 [07:25<57:29, 39.65s/it]Computing paths:  14%|█▍        | 14/100 [07:54<52:22, 36.54s/it]Computing paths:  15%|█▌        | 15/100 [08:25<49:11, 34.72s/it]Computing paths:  16%|█▌        | 16/100 [08:52<45:24, 32.43s/it]Computing paths:  17%|█▋        | 17/100 [09:21<43:28, 31.43s/it]Computing paths:  18%|█▊        | 18/100 [09:51<42:10, 30.86s/it]Computing paths:  19%|█▉        | 19/100 [10:21<41:20, 30.63s/it]Computing paths:  20%|██        | 20/100 [10:48<39:36, 29.71s/it]Computing paths:  21%|██        | 21/100 [11:38<47:00, 35.71s/it]Computing paths:  22%|██▏       | 22/100 [12:03<42:21, 32.58s/it]Computing paths:  23%|██▎       | 23/100 [12:30<39:41, 30.93s/it]Computing paths:  24%|██▍       | 24/100 [12:59<38:12, 30.16s/it]Computing paths:  25%|██▌       | 25/100 [13:27<37:06, 29.69s/it]Computing paths:  26%|██▌       | 26/100 [13:53<35:15, 28.58s/it]Computing paths:  27%|██▋       | 27/100 [14:18<33:20, 27.41s/it]Computing paths:  28%|██▊       | 28/100 [15:03<39:09, 32.64s/it]Computing paths:  29%|██▉       | 29/100 [15:33<37:46, 31.93s/it]Computing paths:  30%|███       | 30/100 [16:02<36:04, 30.92s/it]Computing paths:  31%|███       | 31/100 [16:30<34:38, 30.12s/it]Computing paths:  32%|███▏      | 32/100 [16:56<32:48, 28.95s/it]Computing paths:  33%|███▎      | 33/100 [17:23<31:29, 28.20s/it]Computing paths:  34%|███▍      | 34/100 [17:48<30:12, 27.46s/it]Computing paths:  35%|███▌      | 35/100 [18:31<34:37, 31.97s/it]Computing paths:  36%|███▌      | 36/100 [18:58<32:36, 30.57s/it]Computing paths:  37%|███▋      | 37/100 [19:34<33:38, 32.03s/it]Computing paths:  38%|███▊      | 38/100 [20:19<37:13, 36.03s/it]Computing paths:  39%|███▉      | 39/100 [21:03<39:11, 38.56s/it]Computing paths:  40%|████      | 40/100 [21:32<35:34, 35.58s/it]Computing paths:  41%|████      | 41/100 [21:59<32:24, 32.96s/it]Computing paths:  42%|████▏     | 42/100 [22:25<29:49, 30.85s/it]Computing paths:  43%|████▎     | 43/100 [22:59<30:08, 31.73s/it]Computing paths:  44%|████▍     | 44/100 [23:25<28:14, 30.27s/it]Computing paths:  45%|████▌     | 45/100 [24:14<32:47, 35.76s/it]Computing paths:  46%|████▌     | 46/100 [24:41<29:45, 33.06s/it]Computing paths:  47%|████▋     | 47/100 [25:08<27:41, 31.35s/it]Computing paths:  48%|████▊     | 48/100 [26:15<36:25, 42.03s/it]Computing paths:  49%|████▉     | 49/100 [26:52<34:23, 40.46s/it]Computing paths:  50%|█████     | 50/100 [27:43<36:21, 43.63s/it]Computing paths:  51%|█████     | 51/100 [28:31<36:50, 45.11s/it]Computing paths:  52%|█████▏    | 52/100 [29:00<32:02, 40.05s/it]Computing paths:  53%|█████▎    | 53/100 [29:28<28:37, 36.54s/it]Computing paths:  54%|█████▍    | 54/100 [29:55<25:47, 33.64s/it]Computing paths:  55%|█████▌    | 55/100 [30:24<24:06, 32.14s/it]Computing paths:  56%|█████▌    | 56/100 [31:48<35:06, 47.88s/it]Computing paths:  57%|█████▋    | 57/100 [32:16<29:57, 41.81s/it]Computing paths:  58%|█████▊    | 58/100 [32:53<28:23, 40.57s/it]Computing paths:  59%|█████▉    | 59/100 [33:19<24:39, 36.09s/it]Computing paths:  60%|██████    | 60/100 [33:53<23:32, 35.30s/it]Computing paths:  61%|██████    | 61/100 [34:29<23:10, 35.66s/it]Computing paths:  62%|██████▏   | 62/100 [34:55<20:43, 32.71s/it]Computing paths:  63%|██████▎   | 63/100 [35:42<22:47, 36.95s/it]Computing paths:  64%|██████▍   | 64/100 [36:07<20:03, 33.42s/it]Computing paths:  65%|██████▌   | 65/100 [36:36<18:40, 32.03s/it]Computing paths:  66%|██████▌   | 66/100 [37:02<17:06, 30.18s/it]Computing paths:  67%|██████▋   | 67/100 [37:29<16:04, 29.24s/it]Computing paths:  68%|██████▊   | 68/100 [38:06<16:54, 31.69s/it]Computing paths:  69%|██████▉   | 69/100 [38:52<18:34, 35.96s/it]Computing paths:  70%|███████   | 70/100 [39:45<20:36, 41.20s/it]Computing paths:  71%|███████   | 71/100 [40:14<18:04, 37.41s/it]Computing paths:  72%|███████▏  | 72/100 [40:48<16:57, 36.33s/it]Computing paths:  73%|███████▎  | 73/100 [41:38<18:15, 40.56s/it]Computing paths:  74%|███████▍  | 74/100 [42:04<15:42, 36.25s/it]Computing paths:  75%|███████▌  | 75/100 [42:34<14:15, 34.22s/it]Computing paths:  76%|███████▌  | 76/100 [43:02<12:56, 32.34s/it]Computing paths:  77%|███████▋  | 77/100 [43:30<11:56, 31.14s/it]Computing paths:  78%|███████▊  | 78/100 [43:56<10:48, 29.50s/it]Computing paths:  79%|███████▉  | 79/100 [44:22<09:58, 28.51s/it]Computing paths:  80%|████████  | 80/100 [44:53<09:47, 29.40s/it]Computing paths:  81%|████████  | 81/100 [45:29<09:51, 31.16s/it]Computing paths:  82%|████████▏ | 82/100 [45:56<09:01, 30.08s/it]Computing paths:  83%|████████▎ | 83/100 [46:36<09:20, 32.95s/it]Computing paths:  84%|████████▍ | 84/100 [47:24<10:00, 37.53s/it]Computing paths:  85%|████████▌ | 85/100 [48:31<11:35, 46.34s/it]Computing paths:  86%|████████▌ | 86/100 [49:17<10:48, 46.30s/it]Computing paths:  87%|████████▋ | 87/100 [50:31<11:46, 54.38s/it]Computing paths:  88%|████████▊ | 88/100 [50:58<09:16, 46.35s/it]Computing paths:  89%|████████▉ | 89/100 [51:24<07:20, 40.07s/it]Computing paths:  90%|█████████ | 90/100 [51:51<06:03, 36.33s/it]Computing paths:  91%|█████████ | 91/100 [52:18<05:02, 33.56s/it]Computing paths:  92%|█████████▏| 92/100 [52:44<04:09, 31.19s/it]Computing paths:  93%|█████████▎| 93/100 [53:17<03:41, 31.64s/it]Computing paths:  94%|█████████▍| 94/100 [54:00<03:31, 35.25s/it]Computing paths:  95%|█████████▌| 95/100 [54:42<03:06, 37.29s/it]Computing paths:  96%|█████████▌| 96/100 [55:32<02:44, 41.06s/it]Computing paths:  97%|█████████▋| 97/100 [55:58<01:49, 36.41s/it]Computing paths:  98%|█████████▊| 98/100 [56:27<01:08, 34.15s/it]Computing paths:  99%|█████████▉| 99/100 [57:20<00:40, 40.07s/it]Computing paths: 100%|██████████| 100/100 [57:58<00:00, 39.22s/it]Computing paths: 100%|██████████| 100/100 [57:58<00:00, 34.78s/it]
+    Done. (3478.2s, 4447.6s total)
+  Running BARK (keep_states=102) ...
+    Done. (996.7s, 5444.4s total)
+  Saved: results/nq10_gs0.25_ham0.25_ov0.10_ks0102_seed42.png
+  Total wall time: 5444.8s
+
+[14/14  global=375]
+[10q | gs=0.25 | ham=0.25 | ov=0.3 | ks=10]
+  Building Hamiltonian ...
+    dim=1024, gs_support=257, ham_nnz=265122, gap≈1.0000
+  Initial state: idx=1019, |<ψ|init>|²=0.017327 (requested 0.3)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+  0%|          | 0/64 [00:00<?, ?it/s] 55%|█████▍    | 35/64 [00:00<00:00, 342.74it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 357.03it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 61%|██████    | 39/64 [00:00<00:00, 386.82it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 393.15it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 53%|█████▎    | 34/64 [00:00<00:00, 339.54it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 348.38it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 50%|█████     | 32/64 [00:00<00:00, 319.07it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 321.43it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 92%|█████████▏| 59/64 [00:00<00:00, 588.58it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 589.80it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 88%|████████▊ | 56/64 [00:00<00:00, 557.00it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 558.52it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 56%|█████▋    | 36/64 [00:00<00:00, 356.87it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 369.46it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 55%|█████▍    | 35/64 [00:00<00:00, 347.66it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 368.04it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 55%|█████▍    | 35/64 [00:00<00:00, 349.67it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 340.94it/s]
+[2026-06-17T14:54:14.612] error: *** JOB 26251065 ON node131 CANCELLED AT 2026-06-17T14:54:14 DUE to SIGNAL Terminated ***

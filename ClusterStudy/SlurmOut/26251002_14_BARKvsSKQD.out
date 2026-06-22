@@ -1,0 +1,493 @@
+==================================================
+Array job  : 26251002
+Task (chunk): 14 / 29
+Node       : node090
+Started    : Wed Jun 17 10:00:15 AM CEST 2026
+==================================================
+Chunk 14/29  —  jobs 208–221 of 431  (14 experiments)
+============================================================
+
+[1/14  global=208]
+[8q | gs=0.1 | ham=0.5 | ov=0.3 | ks=13]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.3)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
+  return splu(A).solve
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  return spsolve(Q, P)
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2207.89it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2294.40it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2330.17it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2349.59it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2326.05it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2309.56it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2304.40it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2298.17it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2325.81it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2311.47it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2323.88it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2326.37it/s]
+    Done. (42.3s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:01<02:10,  1.32s/it]Computing paths:   2%|▏         | 2/100 [00:02<02:18,  1.41s/it]Computing paths:   3%|▎         | 3/100 [00:04<02:37,  1.63s/it]Computing paths:   4%|▍         | 4/100 [00:05<02:23,  1.49s/it]Computing paths:   5%|▌         | 5/100 [00:07<02:19,  1.46s/it]Computing paths:   6%|▌         | 6/100 [00:08<02:11,  1.40s/it]Computing paths:   7%|▋         | 7/100 [00:09<02:05,  1.34s/it]Computing paths:   8%|▊         | 8/100 [00:11<02:17,  1.50s/it]Computing paths:   9%|▉         | 9/100 [00:13<02:17,  1.51s/it]Computing paths:  10%|█         | 10/100 [00:15<02:28,  1.65s/it]Computing paths:  11%|█         | 11/100 [00:16<02:18,  1.55s/it]Computing paths:  12%|█▏        | 12/100 [00:18<02:15,  1.54s/it]Computing paths:  13%|█▎        | 13/100 [00:19<02:11,  1.51s/it]Computing paths:  14%|█▍        | 14/100 [00:20<02:06,  1.47s/it]Computing paths:  15%|█▌        | 15/100 [00:22<02:04,  1.47s/it]Computing paths:  16%|█▌        | 16/100 [00:24<02:09,  1.54s/it]Computing paths:  17%|█▋        | 17/100 [00:25<02:02,  1.48s/it]Computing paths:  18%|█▊        | 18/100 [00:27<02:17,  1.68s/it]Computing paths:  19%|█▉        | 19/100 [00:28<02:03,  1.52s/it]Computing paths:  20%|██        | 20/100 [00:30<02:03,  1.54s/it]Computing paths:  21%|██        | 21/100 [00:32<02:16,  1.72s/it]Computing paths:  22%|██▏       | 22/100 [00:33<02:02,  1.57s/it]Computing paths:  23%|██▎       | 23/100 [00:35<02:03,  1.61s/it]Computing paths:  24%|██▍       | 24/100 [00:36<01:56,  1.53s/it]Computing paths:  25%|██▌       | 25/100 [00:38<01:56,  1.55s/it]Computing paths:  26%|██▌       | 26/100 [00:39<01:47,  1.46s/it]Computing paths:  27%|██▋       | 27/100 [00:41<01:59,  1.63s/it]Computing paths:  28%|██▊       | 28/100 [00:42<01:49,  1.52s/it]Computing paths:  29%|██▉       | 29/100 [00:44<01:46,  1.50s/it]Computing paths:  30%|███       | 30/100 [00:45<01:43,  1.47s/it]Computing paths:  31%|███       | 31/100 [00:46<01:37,  1.41s/it]Computing paths:  32%|███▏      | 32/100 [00:48<01:33,  1.38s/it]Computing paths:  33%|███▎      | 33/100 [00:50<01:45,  1.58s/it]Computing paths:  34%|███▍      | 34/100 [00:51<01:38,  1.49s/it]Computing paths:  35%|███▌      | 35/100 [00:52<01:34,  1.45s/it]Computing paths:  36%|███▌      | 36/100 [00:54<01:33,  1.45s/it]Computing paths:  37%|███▋      | 37/100 [00:55<01:26,  1.38s/it]Computing paths:  38%|███▊      | 38/100 [00:57<01:33,  1.50s/it]Computing paths:  39%|███▉      | 39/100 [00:58<01:29,  1.46s/it]Computing paths:  40%|████      | 40/100 [01:00<01:27,  1.45s/it]Computing paths:  41%|████      | 41/100 [01:01<01:23,  1.41s/it]Computing paths:  42%|████▏     | 42/100 [01:03<01:30,  1.56s/it]Computing paths:  43%|████▎     | 43/100 [01:04<01:24,  1.48s/it]Computing paths:  44%|████▍     | 44/100 [01:06<01:32,  1.65s/it]Computing paths:  45%|████▌     | 45/100 [01:07<01:24,  1.53s/it]Computing paths:  46%|████▌     | 46/100 [01:09<01:23,  1.54s/it]Computing paths:  47%|████▋     | 47/100 [01:10<01:19,  1.50s/it]Computing paths:  48%|████▊     | 48/100 [01:12<01:13,  1.41s/it]Computing paths:  49%|████▉     | 49/100 [01:13<01:15,  1.49s/it]Computing paths:  50%|█████     | 50/100 [01:15<01:11,  1.43s/it]Computing paths:  51%|█████     | 51/100 [01:16<01:09,  1.41s/it]Computing paths:  52%|█████▏    | 52/100 [01:17<01:06,  1.38s/it]Computing paths:  53%|█████▎    | 53/100 [01:19<01:11,  1.52s/it]Computing paths:  54%|█████▍    | 54/100 [01:21<01:09,  1.50s/it]Computing paths:  55%|█████▌    | 55/100 [01:22<01:06,  1.48s/it]Computing paths:  56%|█████▌    | 56/100 [01:23<01:00,  1.37s/it]Computing paths:  57%|█████▋    | 57/100 [01:24<00:57,  1.35s/it]Computing paths:  58%|█████▊    | 58/100 [01:26<00:55,  1.33s/it]Computing paths:  59%|█████▉    | 59/100 [01:27<00:54,  1.34s/it]Computing paths:  60%|██████    | 60/100 [01:28<00:52,  1.31s/it]Computing paths:  61%|██████    | 61/100 [01:30<00:50,  1.30s/it]Computing paths:  62%|██████▏   | 62/100 [01:31<00:49,  1.29s/it]Computing paths:  63%|██████▎   | 63/100 [01:33<00:54,  1.48s/it]Computing paths:  64%|██████▍   | 64/100 [01:35<00:57,  1.58s/it]Computing paths:  65%|██████▌   | 65/100 [01:36<00:51,  1.46s/it]Computing paths:  66%|██████▌   | 66/100 [01:37<00:49,  1.45s/it]Computing paths:  67%|██████▋   | 67/100 [01:39<00:46,  1.41s/it]Computing paths:  68%|██████▊   | 68/100 [01:40<00:49,  1.56s/it]Computing paths:  69%|██████▉   | 69/100 [01:42<00:47,  1.54s/it]Computing paths:  70%|███████   | 70/100 [01:43<00:45,  1.52s/it]Computing paths:  71%|███████   | 71/100 [01:45<00:41,  1.44s/it]Computing paths:  72%|███████▏  | 72/100 [01:46<00:38,  1.37s/it]Computing paths:  73%|███████▎  | 73/100 [01:47<00:35,  1.32s/it]Computing paths:  74%|███████▍  | 74/100 [01:48<00:33,  1.30s/it]Computing paths:  75%|███████▌  | 75/100 [01:50<00:33,  1.32s/it]Computing paths:  76%|███████▌  | 76/100 [01:51<00:31,  1.33s/it]Computing paths:  77%|███████▋  | 77/100 [01:52<00:30,  1.32s/it]Computing paths:  78%|███████▊  | 78/100 [01:54<00:31,  1.42s/it]Computing paths:  79%|███████▉  | 79/100 [01:56<00:34,  1.65s/it]Computing paths:  80%|████████  | 80/100 [01:58<00:32,  1.63s/it]Computing paths:  81%|████████  | 81/100 [01:59<00:29,  1.56s/it]Computing paths:  82%|████████▏ | 82/100 [02:00<00:26,  1.48s/it]Computing paths:  83%|████████▎ | 83/100 [02:02<00:24,  1.44s/it]Computing paths:  84%|████████▍ | 84/100 [02:03<00:22,  1.41s/it]Computing paths:  85%|████████▌ | 85/100 [02:05<00:23,  1.53s/it]Computing paths:  86%|████████▌ | 86/100 [02:06<00:20,  1.47s/it]Computing paths:  87%|████████▋ | 87/100 [02:08<00:18,  1.46s/it]Computing paths:  88%|████████▊ | 88/100 [02:09<00:17,  1.43s/it]Computing paths:  89%|████████▉ | 89/100 [02:10<00:15,  1.39s/it]Computing paths:  90%|█████████ | 90/100 [02:12<00:13,  1.34s/it]Computing paths:  91%|█████████ | 91/100 [02:13<00:13,  1.46s/it]Computing paths:  92%|█████████▏| 92/100 [02:15<00:11,  1.39s/it]Computing paths:  93%|█████████▎| 93/100 [02:16<00:10,  1.51s/it]Computing paths:  94%|█████████▍| 94/100 [02:18<00:08,  1.48s/it]Computing paths:  95%|█████████▌| 95/100 [02:19<00:07,  1.52s/it]Computing paths:  96%|█████████▌| 96/100 [02:21<00:05,  1.41s/it]Computing paths:  97%|█████████▋| 97/100 [02:22<00:04,  1.39s/it]Computing paths:  98%|█████████▊| 98/100 [02:23<00:02,  1.45s/it]Computing paths:  99%|█████████▉| 99/100 [02:25<00:01,  1.45s/it]Computing paths: 100%|██████████| 100/100 [02:26<00:00,  1.45s/it]Computing paths: 100%|██████████| 100/100 [02:26<00:00,  1.47s/it]
+    Done. (146.9s, 189.3s total)
+  Running BARK (keep_states=13) ...
+    Done. (15.2s, 204.4s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.30_ks0013_seed42.png
+  Total wall time: 204.8s
+
+[2/14  global=209]
+[8q | gs=0.1 | ham=0.5 | ov=0.3 | ks=26]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.3)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2312.50it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2298.41it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2302.27it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2293.85it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2295.97it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2295.34it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2310.59it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2329.20it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2303.38it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2304.72it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2297.07it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2262.38it/s]
+    Done. (41.3s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:01<03:14,  1.97s/it]Computing paths:   2%|▏         | 2/100 [00:03<02:47,  1.71s/it]Computing paths:   3%|▎         | 3/100 [00:05<02:43,  1.69s/it]Computing paths:   4%|▍         | 4/100 [00:06<02:30,  1.56s/it]Computing paths:   5%|▌         | 5/100 [00:07<02:18,  1.46s/it]Computing paths:   6%|▌         | 6/100 [00:09<02:24,  1.53s/it]Computing paths:   7%|▋         | 7/100 [00:10<02:16,  1.46s/it]Computing paths:   8%|▊         | 8/100 [00:12<02:18,  1.51s/it]Computing paths:   9%|▉         | 9/100 [00:14<02:24,  1.59s/it]Computing paths:  10%|█         | 10/100 [00:15<02:18,  1.54s/it]Computing paths:  11%|█         | 11/100 [00:17<02:16,  1.54s/it]Computing paths:  12%|█▏        | 12/100 [00:18<02:18,  1.58s/it]Computing paths:  13%|█▎        | 13/100 [00:20<02:11,  1.51s/it]Computing paths:  14%|█▍        | 14/100 [00:21<02:07,  1.48s/it]Computing paths:  15%|█▌        | 15/100 [00:23<02:05,  1.48s/it]Computing paths:  16%|█▌        | 16/100 [00:24<02:00,  1.43s/it]Computing paths:  17%|█▋        | 17/100 [00:25<01:55,  1.39s/it]Computing paths:  18%|█▊        | 18/100 [00:26<01:47,  1.32s/it]Computing paths:  19%|█▉        | 19/100 [00:28<01:48,  1.34s/it]Computing paths:  20%|██        | 20/100 [00:29<01:47,  1.34s/it]Computing paths:  21%|██        | 21/100 [00:31<01:55,  1.46s/it]Computing paths:  22%|██▏       | 22/100 [00:32<01:56,  1.50s/it]Computing paths:  23%|██▎       | 23/100 [00:34<01:49,  1.43s/it]Computing paths:  24%|██▍       | 24/100 [00:36<01:59,  1.57s/it]Computing paths:  25%|██▌       | 25/100 [00:38<02:07,  1.70s/it]Computing paths:  26%|██▌       | 26/100 [00:39<01:55,  1.57s/it]Computing paths:  27%|██▋       | 27/100 [00:41<01:58,  1.63s/it]Computing paths:  28%|██▊       | 28/100 [00:43<02:04,  1.73s/it]Computing paths:  29%|██▉       | 29/100 [00:44<01:54,  1.61s/it]Computing paths:  30%|███       | 30/100 [00:46<02:04,  1.78s/it]Computing paths:  31%|███       | 31/100 [00:47<01:55,  1.68s/it]Computing paths:  32%|███▏      | 32/100 [00:49<01:51,  1.63s/it]Computing paths:  33%|███▎      | 33/100 [00:50<01:44,  1.55s/it]Computing paths:  34%|███▍      | 34/100 [00:52<01:38,  1.48s/it]Computing paths:  35%|███▌      | 35/100 [00:53<01:35,  1.47s/it]Computing paths:  36%|███▌      | 36/100 [00:55<01:33,  1.46s/it]Computing paths:  37%|███▋      | 37/100 [00:56<01:29,  1.42s/it]Computing paths:  38%|███▊      | 38/100 [00:57<01:21,  1.31s/it]Computing paths:  39%|███▉      | 39/100 [00:58<01:21,  1.33s/it]Computing paths:  40%|████      | 40/100 [01:00<01:21,  1.37s/it]Computing paths:  41%|████      | 41/100 [01:01<01:18,  1.33s/it]Computing paths:  42%|████▏     | 42/100 [01:02<01:16,  1.32s/it]Computing paths:  43%|████▎     | 43/100 [01:04<01:17,  1.36s/it]Computing paths:  44%|████▍     | 44/100 [01:05<01:12,  1.30s/it]Computing paths:  45%|████▌     | 45/100 [01:07<01:17,  1.40s/it]Computing paths:  46%|████▌     | 46/100 [01:08<01:18,  1.46s/it]Computing paths:  47%|████▋     | 47/100 [01:10<01:20,  1.52s/it]Computing paths:  48%|████▊     | 48/100 [01:11<01:18,  1.51s/it]Computing paths:  49%|████▉     | 49/100 [01:13<01:14,  1.46s/it]Computing paths:  50%|█████     | 50/100 [01:14<01:12,  1.46s/it]Computing paths:  51%|█████     | 51/100 [01:16<01:17,  1.59s/it]Computing paths:  52%|█████▏    | 52/100 [01:18<01:16,  1.59s/it]Computing paths:  53%|█████▎    | 53/100 [01:19<01:14,  1.59s/it]Computing paths:  54%|█████▍    | 54/100 [01:21<01:14,  1.61s/it]Computing paths:  55%|█████▌    | 55/100 [01:22<01:09,  1.54s/it]Computing paths:  56%|█████▌    | 56/100 [01:24<01:06,  1.51s/it]Computing paths:  57%|█████▋    | 57/100 [01:25<01:04,  1.50s/it]Computing paths:  58%|█████▊    | 58/100 [01:27<01:09,  1.64s/it]Computing paths:  59%|█████▉    | 59/100 [01:29<01:05,  1.61s/it]Computing paths:  60%|██████    | 60/100 [01:30<01:07,  1.68s/it]Computing paths:  61%|██████    | 61/100 [01:32<01:04,  1.65s/it]Computing paths:  62%|██████▏   | 62/100 [01:34<01:00,  1.59s/it]Computing paths:  63%|██████▎   | 63/100 [01:36<01:03,  1.73s/it]Computing paths:  64%|██████▍   | 64/100 [01:37<00:57,  1.61s/it]Computing paths:  65%|██████▌   | 65/100 [01:38<00:53,  1.52s/it]Computing paths:  66%|██████▌   | 66/100 [01:40<00:56,  1.65s/it]Computing paths:  67%|██████▋   | 67/100 [01:42<00:58,  1.77s/it]Computing paths:  68%|██████▊   | 68/100 [01:44<00:55,  1.74s/it]Computing paths:  69%|██████▉   | 69/100 [01:45<00:49,  1.60s/it]Computing paths:  70%|███████   | 70/100 [01:46<00:45,  1.51s/it]Computing paths:  71%|███████   | 71/100 [01:48<00:45,  1.56s/it]Computing paths:  72%|███████▏  | 72/100 [01:50<00:42,  1.51s/it]Computing paths:  73%|███████▎  | 73/100 [01:51<00:38,  1.41s/it]Computing paths:  74%|███████▍  | 74/100 [01:52<00:35,  1.37s/it]Computing paths:  75%|███████▌  | 75/100 [01:53<00:34,  1.39s/it]Computing paths:  76%|███████▌  | 76/100 [01:55<00:32,  1.35s/it]Computing paths:  77%|███████▋  | 77/100 [01:56<00:29,  1.30s/it]Computing paths:  78%|███████▊  | 78/100 [01:57<00:29,  1.35s/it]Computing paths:  79%|███████▉  | 79/100 [01:59<00:28,  1.38s/it]Computing paths:  80%|████████  | 80/100 [02:00<00:28,  1.44s/it]Computing paths:  81%|████████  | 81/100 [02:02<00:27,  1.47s/it]Computing paths:  82%|████████▏ | 82/100 [02:03<00:27,  1.51s/it]Computing paths:  83%|████████▎ | 83/100 [02:05<00:26,  1.53s/it]Computing paths:  84%|████████▍ | 84/100 [02:06<00:23,  1.44s/it]Computing paths:  85%|████████▌ | 85/100 [02:07<00:20,  1.36s/it]Computing paths:  86%|████████▌ | 86/100 [02:09<00:18,  1.33s/it]Computing paths:  87%|████████▋ | 87/100 [02:10<00:16,  1.30s/it]Computing paths:  88%|████████▊ | 88/100 [02:11<00:15,  1.27s/it]Computing paths:  89%|████████▉ | 89/100 [02:12<00:14,  1.28s/it]Computing paths:  90%|█████████ | 90/100 [02:14<00:12,  1.29s/it]Computing paths:  91%|█████████ | 91/100 [02:15<00:11,  1.31s/it]Computing paths:  92%|█████████▏| 92/100 [02:17<00:11,  1.44s/it]Computing paths:  93%|█████████▎| 93/100 [02:18<00:09,  1.37s/it]Computing paths:  94%|█████████▍| 94/100 [02:19<00:08,  1.33s/it]Computing paths:  95%|█████████▌| 95/100 [02:21<00:06,  1.31s/it]Computing paths:  96%|█████████▌| 96/100 [02:22<00:05,  1.36s/it]Computing paths:  97%|█████████▋| 97/100 [02:23<00:03,  1.33s/it]Computing paths:  98%|█████████▊| 98/100 [02:26<00:03,  1.70s/it]Computing paths:  99%|█████████▉| 99/100 [02:27<00:01,  1.66s/it]Computing paths: 100%|██████████| 100/100 [02:29<00:00,  1.54s/it]Computing paths: 100%|██████████| 100/100 [02:29<00:00,  1.49s/it]
+    Done. (149.2s, 190.5s total)
+  Running BARK (keep_states=26) ...
+    Done. (15.5s, 206.0s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.30_ks0026_seed42.png
+  Total wall time: 206.3s
+
+[3/14  global=210]
+[8q | gs=0.1 | ham=0.5 | ov=0.5 | ks=3]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.5)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2276.88it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2289.00it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2279.36it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2298.48it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2317.62it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2302.35it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2305.20it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2321.62it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2279.36it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2321.54it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2254.93it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2306.31it/s]
+    Done. (40.6s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:01<02:10,  1.32s/it]Computing paths:   2%|▏         | 2/100 [00:02<02:00,  1.23s/it]Computing paths:   3%|▎         | 3/100 [00:04<02:36,  1.62s/it]Computing paths:   4%|▍         | 4/100 [00:05<02:20,  1.47s/it]Computing paths:   5%|▌         | 5/100 [00:07<02:16,  1.44s/it]Computing paths:   6%|▌         | 6/100 [00:08<02:01,  1.29s/it]Computing paths:   7%|▋         | 7/100 [00:10<02:23,  1.55s/it]Computing paths:   8%|▊         | 8/100 [00:11<02:21,  1.54s/it]Computing paths:   9%|▉         | 9/100 [00:13<02:17,  1.51s/it]Computing paths:  10%|█         | 10/100 [00:14<02:12,  1.47s/it]Computing paths:  11%|█         | 11/100 [00:16<02:09,  1.46s/it]Computing paths:  12%|█▏        | 12/100 [00:18<02:24,  1.64s/it]Computing paths:  13%|█▎        | 13/100 [00:19<02:11,  1.51s/it]Computing paths:  14%|█▍        | 14/100 [00:21<02:27,  1.71s/it]Computing paths:  15%|█▌        | 15/100 [00:22<02:12,  1.56s/it]Computing paths:  16%|█▌        | 16/100 [00:23<02:02,  1.46s/it]Computing paths:  17%|█▋        | 17/100 [00:26<02:17,  1.66s/it]Computing paths:  18%|█▊        | 18/100 [00:27<02:03,  1.51s/it]Computing paths:  19%|█▉        | 19/100 [00:28<02:00,  1.49s/it]Computing paths:  20%|██        | 20/100 [00:30<01:59,  1.49s/it]Computing paths:  21%|██        | 21/100 [00:31<02:03,  1.57s/it]Computing paths:  22%|██▏       | 22/100 [00:33<02:05,  1.61s/it]Computing paths:  23%|██▎       | 23/100 [00:35<02:02,  1.59s/it]Computing paths:  24%|██▍       | 24/100 [00:36<01:59,  1.57s/it]Computing paths:  25%|██▌       | 25/100 [00:38<02:03,  1.65s/it]Computing paths:  26%|██▌       | 26/100 [00:39<01:55,  1.56s/it]Computing paths:  27%|██▋       | 27/100 [00:41<01:58,  1.62s/it]Computing paths:  28%|██▊       | 28/100 [00:43<01:52,  1.56s/it]Computing paths:  29%|██▉       | 29/100 [00:44<01:48,  1.53s/it]Computing paths:  30%|███       | 30/100 [00:45<01:44,  1.49s/it]Computing paths:  31%|███       | 31/100 [00:47<01:37,  1.41s/it]Computing paths:  32%|███▏      | 32/100 [00:48<01:32,  1.36s/it]Computing paths:  33%|███▎      | 33/100 [00:50<01:42,  1.53s/it]Computing paths:  34%|███▍      | 34/100 [00:51<01:35,  1.45s/it]Computing paths:  35%|███▌      | 35/100 [00:53<01:41,  1.56s/it]Computing paths:  36%|███▌      | 36/100 [00:54<01:35,  1.49s/it]Computing paths:  37%|███▋      | 37/100 [00:56<01:31,  1.45s/it]Computing paths:  38%|███▊      | 38/100 [00:57<01:36,  1.56s/it]Computing paths:  39%|███▉      | 39/100 [00:59<01:28,  1.44s/it]Computing paths:  40%|████      | 40/100 [01:00<01:22,  1.38s/it]Computing paths:  41%|████      | 41/100 [01:01<01:23,  1.42s/it]Computing paths:  42%|████▏     | 42/100 [01:03<01:21,  1.41s/it]Computing paths:  43%|████▎     | 43/100 [01:04<01:24,  1.48s/it]Computing paths:  44%|████▍     | 44/100 [01:06<01:17,  1.39s/it]Computing paths:  45%|████▌     | 45/100 [01:07<01:13,  1.33s/it]Computing paths:  46%|████▌     | 46/100 [01:08<01:14,  1.39s/it]Computing paths:  47%|████▋     | 47/100 [01:10<01:18,  1.49s/it]Computing paths:  48%|████▊     | 48/100 [01:11<01:13,  1.42s/it]Computing paths:  49%|████▉     | 49/100 [01:13<01:16,  1.51s/it]Computing paths:  50%|█████     | 50/100 [01:14<01:10,  1.40s/it]Computing paths:  51%|█████     | 51/100 [01:16<01:16,  1.56s/it]Computing paths:  52%|█████▏    | 52/100 [01:18<01:18,  1.64s/it]Computing paths:  53%|█████▎    | 53/100 [01:19<01:14,  1.59s/it]Computing paths:  54%|█████▍    | 54/100 [01:21<01:08,  1.49s/it]Computing paths:  55%|█████▌    | 55/100 [01:23<01:16,  1.70s/it]Computing paths:  56%|█████▌    | 56/100 [01:24<01:15,  1.70s/it]Computing paths:  57%|█████▋    | 57/100 [01:26<01:11,  1.66s/it]Computing paths:  58%|█████▊    | 58/100 [01:28<01:17,  1.84s/it]Computing paths:  59%|█████▉    | 59/100 [01:30<01:17,  1.88s/it]Computing paths:  60%|██████    | 60/100 [01:32<01:10,  1.76s/it]Computing paths:  61%|██████    | 61/100 [01:34<01:10,  1.80s/it]Computing paths:  62%|██████▏   | 62/100 [01:35<01:01,  1.61s/it]Computing paths:  63%|██████▎   | 63/100 [01:37<01:04,  1.75s/it]Computing paths:  64%|██████▍   | 64/100 [01:38<01:00,  1.68s/it]Computing paths:  65%|██████▌   | 65/100 [01:40<00:53,  1.53s/it]Computing paths:  66%|██████▌   | 66/100 [01:41<00:55,  1.62s/it]Computing paths:  67%|██████▋   | 67/100 [01:43<00:49,  1.49s/it]Computing paths:  68%|██████▊   | 68/100 [01:44<00:47,  1.49s/it]Computing paths:  69%|██████▉   | 69/100 [01:46<00:46,  1.49s/it]Computing paths:  70%|███████   | 70/100 [01:47<00:44,  1.48s/it]Computing paths:  71%|███████   | 71/100 [01:48<00:40,  1.40s/it]Computing paths:  72%|███████▏  | 72/100 [01:50<00:39,  1.41s/it]Computing paths:  73%|███████▎  | 73/100 [01:51<00:36,  1.35s/it]Computing paths:  74%|███████▍  | 74/100 [01:52<00:33,  1.28s/it]Computing paths:  75%|███████▌  | 75/100 [01:53<00:31,  1.27s/it]Computing paths:  76%|███████▌  | 76/100 [01:54<00:30,  1.26s/it]Computing paths:  77%|███████▋  | 77/100 [01:56<00:33,  1.44s/it]Computing paths:  78%|███████▊  | 78/100 [01:58<00:30,  1.39s/it]Computing paths:  79%|███████▉  | 79/100 [01:59<00:28,  1.35s/it]Computing paths:  80%|████████  | 80/100 [02:00<00:28,  1.41s/it]Computing paths:  81%|████████  | 81/100 [02:02<00:29,  1.55s/it]Computing paths:  82%|████████▏ | 82/100 [02:03<00:25,  1.43s/it]Computing paths:  83%|████████▎ | 83/100 [02:05<00:23,  1.39s/it]Computing paths:  84%|████████▍ | 84/100 [02:06<00:20,  1.31s/it]Computing paths:  85%|████████▌ | 85/100 [02:07<00:19,  1.29s/it]Computing paths:  86%|████████▌ | 86/100 [02:09<00:19,  1.37s/it]Computing paths:  87%|████████▋ | 87/100 [02:10<00:17,  1.34s/it]Computing paths:  88%|████████▊ | 88/100 [02:12<00:17,  1.44s/it]Computing paths:  89%|████████▉ | 89/100 [02:13<00:15,  1.44s/it]Computing paths:  90%|█████████ | 90/100 [02:15<00:15,  1.57s/it]Computing paths:  91%|█████████ | 91/100 [02:16<00:13,  1.48s/it]Computing paths:  92%|█████████▏| 92/100 [02:18<00:12,  1.58s/it]Computing paths:  93%|█████████▎| 93/100 [02:19<00:10,  1.50s/it]Computing paths:  94%|█████████▍| 94/100 [02:21<00:09,  1.50s/it]Computing paths:  95%|█████████▌| 95/100 [02:22<00:07,  1.52s/it]Computing paths:  96%|█████████▌| 96/100 [02:23<00:05,  1.39s/it]Computing paths:  97%|█████████▋| 97/100 [02:25<00:04,  1.35s/it]Computing paths:  98%|█████████▊| 98/100 [02:26<00:02,  1.30s/it]Computing paths:  99%|█████████▉| 99/100 [02:28<00:01,  1.53s/it]Computing paths: 100%|██████████| 100/100 [02:30<00:00,  1.55s/it]Computing paths: 100%|██████████| 100/100 [02:30<00:00,  1.50s/it]
+    Done. (150.1s, 190.7s total)
+  Running BARK (keep_states=3) ...
+    Done. (14.9s, 205.6s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.50_ks0003_seed42.png
+  Total wall time: 205.9s
+
+[4/14  global=211]
+[8q | gs=0.1 | ham=0.5 | ov=0.5 | ks=13]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.5)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2346.38it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2351.15it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2365.07it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2351.56it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2349.26it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2359.25it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2352.30it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2335.28it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2331.79it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2333.25it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2340.57it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2367.99it/s]
+    Done. (41.7s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:02<03:37,  2.20s/it]Computing paths:   2%|▏         | 2/100 [00:03<02:40,  1.64s/it]Computing paths:   3%|▎         | 3/100 [00:04<02:22,  1.46s/it]Computing paths:   4%|▍         | 4/100 [00:06<02:34,  1.61s/it]Computing paths:   5%|▌         | 5/100 [00:07<02:19,  1.47s/it]Computing paths:   6%|▌         | 6/100 [00:08<02:09,  1.38s/it]Computing paths:   7%|▋         | 7/100 [00:10<02:12,  1.42s/it]Computing paths:   8%|▊         | 8/100 [00:11<02:06,  1.37s/it]Computing paths:   9%|▉         | 9/100 [00:13<02:05,  1.38s/it]Computing paths:  10%|█         | 10/100 [00:14<02:06,  1.41s/it]Computing paths:  11%|█         | 11/100 [00:15<02:02,  1.37s/it]Computing paths:  12%|█▏        | 12/100 [00:17<01:56,  1.32s/it]Computing paths:  13%|█▎        | 13/100 [00:18<02:00,  1.38s/it]Computing paths:  14%|█▍        | 14/100 [00:20<02:04,  1.44s/it]Computing paths:  15%|█▌        | 15/100 [00:21<02:00,  1.41s/it]Computing paths:  16%|█▌        | 16/100 [00:22<01:57,  1.40s/it]Computing paths:  17%|█▋        | 17/100 [00:24<01:54,  1.38s/it]Computing paths:  18%|█▊        | 18/100 [00:25<02:00,  1.47s/it]Computing paths:  19%|█▉        | 19/100 [00:27<01:58,  1.47s/it]Computing paths:  20%|██        | 20/100 [00:29<02:04,  1.55s/it]Computing paths:  21%|██        | 21/100 [00:30<01:54,  1.45s/it]Computing paths:  22%|██▏       | 22/100 [00:31<01:46,  1.37s/it]Computing paths:  23%|██▎       | 23/100 [00:33<01:50,  1.43s/it]Computing paths:  24%|██▍       | 24/100 [00:34<01:50,  1.45s/it]Computing paths:  25%|██▌       | 25/100 [00:35<01:45,  1.41s/it]Computing paths:  26%|██▌       | 26/100 [00:37<01:49,  1.49s/it]Computing paths:  27%|██▋       | 27/100 [00:39<02:02,  1.67s/it]Computing paths:  28%|██▊       | 28/100 [00:41<01:57,  1.63s/it]Computing paths:  29%|██▉       | 29/100 [00:42<01:50,  1.56s/it]Computing paths:  30%|███       | 30/100 [00:44<01:45,  1.51s/it]Computing paths:  31%|███       | 31/100 [00:45<01:41,  1.47s/it]Computing paths:  32%|███▏      | 32/100 [00:46<01:39,  1.46s/it]Computing paths:  33%|███▎      | 33/100 [00:48<01:36,  1.44s/it]Computing paths:  34%|███▍      | 34/100 [00:49<01:31,  1.38s/it]Computing paths:  35%|███▌      | 35/100 [00:51<01:39,  1.53s/it]Computing paths:  36%|███▌      | 36/100 [00:52<01:34,  1.47s/it]Computing paths:  37%|███▋      | 37/100 [00:54<01:31,  1.46s/it]Computing paths:  38%|███▊      | 38/100 [00:55<01:25,  1.39s/it]Computing paths:  39%|███▉      | 39/100 [00:56<01:21,  1.34s/it]Computing paths:  40%|████      | 40/100 [00:57<01:20,  1.34s/it]Computing paths:  41%|████      | 41/100 [00:59<01:19,  1.36s/it]Computing paths:  42%|████▏     | 42/100 [01:00<01:18,  1.35s/it]Computing paths:  43%|████▎     | 43/100 [01:02<01:30,  1.60s/it]Computing paths:  44%|████▍     | 44/100 [01:03<01:21,  1.45s/it]Computing paths:  45%|████▌     | 45/100 [01:05<01:17,  1.40s/it]Computing paths:  46%|████▌     | 46/100 [01:06<01:19,  1.47s/it]Computing paths:  47%|████▋     | 47/100 [01:08<01:16,  1.44s/it]Computing paths:  48%|████▊     | 48/100 [01:09<01:16,  1.46s/it]Computing paths:  49%|████▉     | 49/100 [01:11<01:14,  1.46s/it]Computing paths:  50%|█████     | 50/100 [01:13<01:18,  1.57s/it]Computing paths:  51%|█████     | 51/100 [01:14<01:12,  1.48s/it]Computing paths:  52%|█████▏    | 52/100 [01:15<01:10,  1.46s/it]Computing paths:  53%|█████▎    | 53/100 [01:17<01:12,  1.55s/it]Computing paths:  54%|█████▍    | 54/100 [01:19<01:16,  1.66s/it]Computing paths:  55%|█████▌    | 55/100 [01:20<01:08,  1.52s/it]Computing paths:  56%|█████▌    | 56/100 [01:21<01:05,  1.49s/it]Computing paths:  57%|█████▋    | 57/100 [01:23<01:04,  1.51s/it]Computing paths:  58%|█████▊    | 58/100 [01:24<01:00,  1.45s/it]Computing paths:  59%|█████▉    | 59/100 [01:26<00:57,  1.40s/it]Computing paths:  60%|██████    | 60/100 [01:27<00:59,  1.48s/it]Computing paths:  61%|██████    | 61/100 [01:29<00:55,  1.42s/it]Computing paths:  62%|██████▏   | 62/100 [01:30<00:51,  1.36s/it]Computing paths:  63%|██████▎   | 63/100 [01:31<00:48,  1.30s/it]Computing paths:  64%|██████▍   | 64/100 [01:33<00:49,  1.38s/it]Computing paths:  65%|██████▌   | 65/100 [01:34<00:47,  1.35s/it]Computing paths:  66%|██████▌   | 66/100 [01:36<00:49,  1.46s/it]Computing paths:  67%|██████▋   | 67/100 [01:37<00:47,  1.44s/it]Computing paths:  68%|██████▊   | 68/100 [01:38<00:46,  1.47s/it]Computing paths:  69%|██████▉   | 69/100 [01:40<00:49,  1.60s/it]Computing paths:  70%|███████   | 70/100 [01:42<00:44,  1.50s/it]Computing paths:  71%|███████   | 71/100 [01:43<00:44,  1.52s/it]Computing paths:  72%|███████▏  | 72/100 [01:45<00:44,  1.61s/it]Computing paths:  73%|███████▎  | 73/100 [01:46<00:40,  1.51s/it]Computing paths:  74%|███████▍  | 74/100 [01:48<00:37,  1.44s/it]Computing paths:  75%|███████▌  | 75/100 [01:49<00:34,  1.37s/it]Computing paths:  76%|███████▌  | 76/100 [01:50<00:31,  1.30s/it]Computing paths:  77%|███████▋  | 77/100 [01:51<00:31,  1.35s/it]Computing paths:  78%|███████▊  | 78/100 [01:54<00:35,  1.62s/it]Computing paths:  79%|███████▉  | 79/100 [01:55<00:33,  1.59s/it]Computing paths:  80%|████████  | 80/100 [01:57<00:32,  1.62s/it]Computing paths:  81%|████████  | 81/100 [01:58<00:28,  1.48s/it]Computing paths:  82%|████████▏ | 82/100 [01:59<00:25,  1.43s/it]Computing paths:  83%|████████▎ | 83/100 [02:01<00:25,  1.51s/it]Computing paths:  84%|████████▍ | 84/100 [02:02<00:22,  1.42s/it]Computing paths:  85%|████████▌ | 85/100 [02:04<00:21,  1.46s/it]Computing paths:  86%|████████▌ | 86/100 [02:05<00:21,  1.52s/it]Computing paths:  87%|████████▋ | 87/100 [02:07<00:18,  1.43s/it]Computing paths:  88%|████████▊ | 88/100 [02:08<00:16,  1.40s/it]Computing paths:  89%|████████▉ | 89/100 [02:09<00:14,  1.35s/it]Computing paths:  90%|█████████ | 90/100 [02:11<00:13,  1.36s/it]Computing paths:  91%|█████████ | 91/100 [02:12<00:11,  1.33s/it]Computing paths:  92%|█████████▏| 92/100 [02:13<00:10,  1.33s/it]Computing paths:  93%|█████████▎| 93/100 [02:15<00:09,  1.42s/it]Computing paths:  94%|█████████▍| 94/100 [02:16<00:08,  1.38s/it]Computing paths:  95%|█████████▌| 95/100 [02:17<00:06,  1.36s/it]Computing paths:  96%|█████████▌| 96/100 [02:19<00:05,  1.37s/it]Computing paths:  97%|█████████▋| 97/100 [02:20<00:04,  1.34s/it]Computing paths:  98%|█████████▊| 98/100 [02:21<00:02,  1.28s/it]Computing paths:  99%|█████████▉| 99/100 [02:22<00:01,  1.24s/it]Computing paths: 100%|██████████| 100/100 [02:24<00:00,  1.25s/it]Computing paths: 100%|██████████| 100/100 [02:24<00:00,  1.44s/it]
+    Done. (144.1s, 185.8s total)
+  Running BARK (keep_states=13) ...
+    Done. (15.2s, 201.0s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.50_ks0013_seed42.png
+  Total wall time: 201.3s
+
+[5/14  global=212]
+[8q | gs=0.1 | ham=0.5 | ov=0.5 | ks=26]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.5)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2339.27it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2355.36it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2338.37it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2343.68it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2329.28it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2345.15it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2338.29it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2343.10it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2373.01it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2342.37it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2358.92it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2332.27it/s]
+    Done. (41.2s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:01<02:58,  1.80s/it]Computing paths:   2%|▏         | 2/100 [00:03<02:33,  1.57s/it]Computing paths:   3%|▎         | 3/100 [00:04<02:13,  1.37s/it]Computing paths:   4%|▍         | 4/100 [00:05<02:10,  1.36s/it]Computing paths:   5%|▌         | 5/100 [00:06<02:05,  1.32s/it]Computing paths:   6%|▌         | 6/100 [00:08<02:00,  1.28s/it]Computing paths:   7%|▋         | 7/100 [00:09<02:15,  1.46s/it]Computing paths:   8%|▊         | 8/100 [00:11<02:06,  1.38s/it]Computing paths:   9%|▉         | 9/100 [00:13<02:21,  1.55s/it]Computing paths:  10%|█         | 10/100 [00:14<02:13,  1.48s/it]Computing paths:  11%|█         | 11/100 [00:16<02:20,  1.58s/it]Computing paths:  12%|█▏        | 12/100 [00:18<02:28,  1.69s/it]Computing paths:  13%|█▎        | 13/100 [00:19<02:18,  1.59s/it]Computing paths:  14%|█▍        | 14/100 [00:20<02:10,  1.52s/it]Computing paths:  15%|█▌        | 15/100 [00:22<02:06,  1.48s/it]Computing paths:  16%|█▌        | 16/100 [00:23<02:05,  1.49s/it]Computing paths:  17%|█▋        | 17/100 [00:25<02:11,  1.59s/it]Computing paths:  18%|█▊        | 18/100 [00:27<02:05,  1.53s/it]Computing paths:  19%|█▉        | 19/100 [00:28<02:00,  1.49s/it]Computing paths:  20%|██        | 20/100 [00:29<01:54,  1.43s/it]Computing paths:  21%|██        | 21/100 [00:31<01:57,  1.49s/it]Computing paths:  22%|██▏       | 22/100 [00:32<01:53,  1.45s/it]Computing paths:  23%|██▎       | 23/100 [00:34<01:59,  1.55s/it]Computing paths:  24%|██▍       | 24/100 [00:35<01:53,  1.50s/it]Computing paths:  25%|██▌       | 25/100 [00:37<01:56,  1.56s/it]Computing paths:  26%|██▌       | 26/100 [00:38<01:47,  1.46s/it]Computing paths:  27%|██▋       | 27/100 [00:40<01:46,  1.46s/it]Computing paths:  28%|██▊       | 28/100 [00:41<01:43,  1.44s/it]Computing paths:  29%|██▉       | 29/100 [00:43<01:41,  1.43s/it]Computing paths:  30%|███       | 30/100 [00:44<01:33,  1.34s/it]Computing paths:  31%|███       | 31/100 [00:45<01:31,  1.32s/it]Computing paths:  32%|███▏      | 32/100 [00:47<01:36,  1.42s/it]Computing paths:  33%|███▎      | 33/100 [00:48<01:44,  1.56s/it]Computing paths:  34%|███▍      | 34/100 [00:50<01:48,  1.64s/it]Computing paths:  35%|███▌      | 35/100 [00:52<01:48,  1.66s/it]Computing paths:  36%|███▌      | 36/100 [00:54<01:48,  1.70s/it]Computing paths:  37%|███▋      | 37/100 [00:55<01:38,  1.57s/it]Computing paths:  38%|███▊      | 38/100 [00:56<01:30,  1.46s/it]Computing paths:  39%|███▉      | 39/100 [00:58<01:32,  1.52s/it]Computing paths:  40%|████      | 40/100 [00:59<01:26,  1.44s/it]Computing paths:  41%|████      | 41/100 [01:00<01:21,  1.38s/it]Computing paths:  42%|████▏     | 42/100 [01:02<01:16,  1.32s/it]Computing paths:  43%|████▎     | 43/100 [01:03<01:13,  1.29s/it]Computing paths:  44%|████▍     | 44/100 [01:05<01:19,  1.42s/it]Computing paths:  45%|████▌     | 45/100 [01:06<01:23,  1.51s/it]Computing paths:  46%|████▌     | 46/100 [01:08<01:18,  1.46s/it]Computing paths:  47%|████▋     | 47/100 [01:09<01:13,  1.38s/it]Computing paths:  48%|████▊     | 48/100 [01:11<01:22,  1.59s/it]Computing paths:  49%|████▉     | 49/100 [01:12<01:16,  1.50s/it]Computing paths:  50%|█████     | 50/100 [01:14<01:12,  1.45s/it]Computing paths:  51%|█████     | 51/100 [01:15<01:15,  1.54s/it]Computing paths:  52%|█████▏    | 52/100 [01:17<01:12,  1.50s/it]Computing paths:  53%|█████▎    | 53/100 [01:18<01:12,  1.55s/it]Computing paths:  54%|█████▍    | 54/100 [01:20<01:07,  1.47s/it]Computing paths:  55%|█████▌    | 55/100 [01:21<01:05,  1.45s/it]Computing paths:  56%|█████▌    | 56/100 [01:22<00:58,  1.34s/it]Computing paths:  57%|█████▋    | 57/100 [01:24<01:02,  1.46s/it]Computing paths:  58%|█████▊    | 58/100 [01:26<01:04,  1.53s/it]Computing paths:  59%|█████▉    | 59/100 [01:27<01:04,  1.57s/it]Computing paths:  60%|██████    | 60/100 [01:28<00:57,  1.45s/it]Computing paths:  61%|██████    | 61/100 [01:30<00:54,  1.40s/it]Computing paths:  62%|██████▏   | 62/100 [01:31<00:56,  1.49s/it]Computing paths:  63%|██████▎   | 63/100 [01:33<00:55,  1.49s/it]Computing paths:  64%|██████▍   | 64/100 [01:34<00:52,  1.47s/it]Computing paths:  65%|██████▌   | 65/100 [01:37<01:01,  1.75s/it]Computing paths:  66%|██████▌   | 66/100 [01:38<00:57,  1.68s/it]Computing paths:  67%|██████▋   | 67/100 [01:40<00:58,  1.77s/it]Computing paths:  68%|██████▊   | 68/100 [01:42<00:52,  1.65s/it]Computing paths:  69%|██████▉   | 69/100 [01:43<00:52,  1.71s/it]Computing paths:  70%|███████   | 70/100 [01:45<00:47,  1.60s/it]Computing paths:  71%|███████   | 71/100 [01:46<00:44,  1.53s/it]Computing paths:  72%|███████▏  | 72/100 [01:47<00:41,  1.47s/it]Computing paths:  73%|███████▎  | 73/100 [01:49<00:42,  1.59s/it]Computing paths:  74%|███████▍  | 74/100 [01:50<00:37,  1.46s/it]Computing paths:  75%|███████▌  | 75/100 [01:53<00:42,  1.69s/it]Computing paths:  76%|███████▌  | 76/100 [01:54<00:40,  1.69s/it]Computing paths:  77%|███████▋  | 77/100 [01:56<00:37,  1.61s/it]Computing paths:  78%|███████▊  | 78/100 [01:58<00:36,  1.68s/it]Computing paths:  79%|███████▉  | 79/100 [01:59<00:32,  1.57s/it]Computing paths:  80%|████████  | 80/100 [02:01<00:31,  1.60s/it]Computing paths:  81%|████████  | 81/100 [02:02<00:28,  1.51s/it]Computing paths:  82%|████████▏ | 82/100 [02:03<00:26,  1.46s/it]Computing paths:  83%|████████▎ | 83/100 [02:05<00:26,  1.56s/it]Computing paths:  84%|████████▍ | 84/100 [02:07<00:24,  1.55s/it]Computing paths:  85%|████████▌ | 85/100 [02:08<00:23,  1.57s/it]Computing paths:  86%|████████▌ | 86/100 [02:09<00:20,  1.46s/it]Computing paths:  87%|████████▋ | 87/100 [02:10<00:17,  1.35s/it]Computing paths:  88%|████████▊ | 88/100 [02:12<00:15,  1.33s/it]Computing paths:  89%|████████▉ | 89/100 [02:13<00:14,  1.28s/it]Computing paths:  90%|█████████ | 90/100 [02:14<00:13,  1.34s/it]Computing paths:  91%|█████████ | 91/100 [02:16<00:12,  1.34s/it]Computing paths:  92%|█████████▏| 92/100 [02:17<00:11,  1.40s/it]Computing paths:  93%|█████████▎| 93/100 [02:19<00:09,  1.37s/it]Computing paths:  94%|█████████▍| 94/100 [02:20<00:07,  1.32s/it]Computing paths:  95%|█████████▌| 95/100 [02:21<00:06,  1.27s/it]Computing paths:  96%|█████████▌| 96/100 [02:23<00:06,  1.52s/it]Computing paths:  97%|█████████▋| 97/100 [02:25<00:04,  1.50s/it]Computing paths:  98%|█████████▊| 98/100 [02:26<00:03,  1.55s/it]Computing paths:  99%|█████████▉| 99/100 [02:28<00:01,  1.63s/it]Computing paths: 100%|██████████| 100/100 [02:29<00:00,  1.54s/it]Computing paths: 100%|██████████| 100/100 [02:29<00:00,  1.50s/it]
+    Done. (149.8s, 191.0s total)
+  Running BARK (keep_states=26) ...
+    Done. (15.5s, 206.4s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.50_ks0026_seed42.png
+  Total wall time: 206.8s
+
+[6/14  global=213]
+[8q | gs=0.1 | ham=0.5 | ov=0.8 | ks=3]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.8)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2309.96it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2371.59it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2334.14it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2326.29it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2346.14it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2341.31it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2340.16it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2321.78it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2367.16it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2373.01it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2369.24it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2365.32it/s]
+    Done. (41.0s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:01<02:12,  1.33s/it]Computing paths:   2%|▏         | 2/100 [00:02<02:17,  1.40s/it]Computing paths:   3%|▎         | 3/100 [00:04<02:44,  1.70s/it]Computing paths:   4%|▍         | 4/100 [00:06<02:34,  1.61s/it]Computing paths:   5%|▌         | 5/100 [00:07<02:20,  1.48s/it]Computing paths:   6%|▌         | 6/100 [00:09<02:42,  1.72s/it]Computing paths:   7%|▋         | 7/100 [00:11<02:31,  1.63s/it]Computing paths:   8%|▊         | 8/100 [00:12<02:23,  1.56s/it]Computing paths:   9%|▉         | 9/100 [00:14<02:32,  1.68s/it]Computing paths:  10%|█         | 10/100 [00:15<02:24,  1.60s/it]Computing paths:  11%|█         | 11/100 [00:17<02:11,  1.48s/it]Computing paths:  12%|█▏        | 12/100 [00:18<02:08,  1.46s/it]Computing paths:  13%|█▎        | 13/100 [00:19<01:58,  1.37s/it]Computing paths:  14%|█▍        | 14/100 [00:21<02:08,  1.49s/it]Computing paths:  15%|█▌        | 15/100 [00:22<02:01,  1.43s/it]Computing paths:  16%|█▌        | 16/100 [00:24<02:01,  1.45s/it]Computing paths:  17%|█▋        | 17/100 [00:26<02:08,  1.55s/it]Computing paths:  18%|█▊        | 18/100 [00:27<02:01,  1.48s/it]Computing paths:  19%|█▉        | 19/100 [00:28<01:58,  1.46s/it]Computing paths:  20%|██        | 20/100 [00:30<02:08,  1.60s/it]Computing paths:  21%|██        | 21/100 [00:31<01:57,  1.49s/it]Computing paths:  22%|██▏       | 22/100 [00:33<01:52,  1.45s/it]Computing paths:  23%|██▎       | 23/100 [00:34<01:49,  1.42s/it]Computing paths:  24%|██▍       | 24/100 [00:36<02:04,  1.64s/it]Computing paths:  25%|██▌       | 25/100 [00:38<01:57,  1.57s/it]Computing paths:  26%|██▌       | 26/100 [00:39<01:48,  1.47s/it]Computing paths:  27%|██▋       | 27/100 [00:40<01:47,  1.47s/it]Computing paths:  28%|██▊       | 28/100 [00:42<01:43,  1.44s/it]Computing paths:  29%|██▉       | 29/100 [00:44<01:57,  1.65s/it]Computing paths:  30%|███       | 30/100 [00:45<01:47,  1.54s/it]Computing paths:  31%|███       | 31/100 [00:46<01:39,  1.45s/it]Computing paths:  32%|███▏      | 32/100 [00:48<01:35,  1.41s/it]Computing paths:  33%|███▎      | 33/100 [00:49<01:34,  1.42s/it]Computing paths:  34%|███▍      | 34/100 [00:50<01:28,  1.35s/it]Computing paths:  35%|███▌      | 35/100 [00:52<01:39,  1.54s/it]Computing paths:  36%|███▌      | 36/100 [00:54<01:41,  1.59s/it]Computing paths:  37%|███▋      | 37/100 [00:55<01:35,  1.51s/it]Computing paths:  38%|███▊      | 38/100 [00:57<01:31,  1.47s/it]Computing paths:  39%|███▉      | 39/100 [00:58<01:27,  1.43s/it]Computing paths:  40%|████      | 40/100 [01:00<01:35,  1.59s/it]Computing paths:  41%|████      | 41/100 [01:02<01:31,  1.55s/it]Computing paths:  42%|████▏     | 42/100 [01:03<01:32,  1.59s/it]Computing paths:  43%|████▎     | 43/100 [01:04<01:23,  1.46s/it]Computing paths:  44%|████▍     | 44/100 [01:06<01:20,  1.44s/it]Computing paths:  45%|████▌     | 45/100 [01:07<01:20,  1.47s/it]Computing paths:  46%|████▌     | 46/100 [01:09<01:21,  1.50s/it]Computing paths:  47%|████▋     | 47/100 [01:10<01:16,  1.44s/it]Computing paths:  48%|████▊     | 48/100 [01:12<01:27,  1.69s/it]Computing paths:  49%|████▉     | 49/100 [01:14<01:19,  1.57s/it]Computing paths:  50%|█████     | 50/100 [01:15<01:13,  1.46s/it]Computing paths:  51%|█████     | 51/100 [01:16<01:08,  1.39s/it]Computing paths:  52%|█████▏    | 52/100 [01:18<01:08,  1.42s/it]Computing paths:  53%|█████▎    | 53/100 [01:19<01:06,  1.41s/it]Computing paths:  54%|█████▍    | 54/100 [01:20<01:03,  1.38s/it]Computing paths:  55%|█████▌    | 55/100 [01:22<01:03,  1.42s/it]Computing paths:  56%|█████▌    | 56/100 [01:23<01:03,  1.45s/it]Computing paths:  57%|█████▋    | 57/100 [01:25<01:01,  1.44s/it]Computing paths:  58%|█████▊    | 58/100 [01:26<00:55,  1.32s/it]Computing paths:  59%|█████▉    | 59/100 [01:28<01:05,  1.61s/it]Computing paths:  60%|██████    | 60/100 [01:29<01:01,  1.53s/it]Computing paths:  61%|██████    | 61/100 [01:31<01:04,  1.66s/it]Computing paths:  62%|██████▏   | 62/100 [01:33<00:59,  1.55s/it]Computing paths:  63%|██████▎   | 63/100 [01:34<00:54,  1.48s/it]Computing paths:  64%|██████▍   | 64/100 [01:35<00:52,  1.46s/it]Computing paths:  65%|██████▌   | 65/100 [01:37<00:52,  1.50s/it]Computing paths:  66%|██████▌   | 66/100 [01:38<00:49,  1.45s/it]Computing paths:  67%|██████▋   | 67/100 [01:40<00:46,  1.39s/it]Computing paths:  68%|██████▊   | 68/100 [01:41<00:42,  1.34s/it]Computing paths:  69%|██████▉   | 69/100 [01:42<00:42,  1.38s/it]Computing paths:  70%|███████   | 70/100 [01:44<00:40,  1.34s/it]Computing paths:  71%|███████   | 71/100 [01:45<00:38,  1.34s/it]Computing paths:  72%|███████▏  | 72/100 [01:47<00:39,  1.43s/it]Computing paths:  73%|███████▎  | 73/100 [01:48<00:39,  1.45s/it]Computing paths:  74%|███████▍  | 74/100 [01:50<00:37,  1.45s/it]Computing paths:  75%|███████▌  | 75/100 [01:51<00:33,  1.36s/it]Computing paths:  76%|███████▌  | 76/100 [01:52<00:34,  1.42s/it]Computing paths:  77%|███████▋  | 77/100 [01:54<00:33,  1.48s/it]Computing paths:  78%|███████▊  | 78/100 [01:55<00:31,  1.45s/it]Computing paths:  79%|███████▉  | 79/100 [01:56<00:28,  1.37s/it]Computing paths:  80%|████████  | 80/100 [01:58<00:28,  1.42s/it]Computing paths:  81%|████████  | 81/100 [01:59<00:27,  1.42s/it]Computing paths:  82%|████████▏ | 82/100 [02:01<00:26,  1.48s/it]Computing paths:  83%|████████▎ | 83/100 [02:02<00:24,  1.43s/it]Computing paths:  84%|████████▍ | 84/100 [02:04<00:22,  1.42s/it]Computing paths:  85%|████████▌ | 85/100 [02:05<00:21,  1.45s/it]Computing paths:  86%|████████▌ | 86/100 [02:07<00:20,  1.44s/it]Computing paths:  87%|████████▋ | 87/100 [02:08<00:19,  1.50s/it]Computing paths:  88%|████████▊ | 88/100 [02:10<00:17,  1.42s/it]Computing paths:  89%|████████▉ | 89/100 [02:11<00:15,  1.42s/it]Computing paths:  90%|█████████ | 90/100 [02:12<00:14,  1.44s/it]Computing paths:  91%|█████████ | 91/100 [02:14<00:14,  1.57s/it]Computing paths:  92%|█████████▏| 92/100 [02:16<00:12,  1.50s/it]Computing paths:  93%|█████████▎| 93/100 [02:17<00:10,  1.45s/it]Computing paths:  94%|█████████▍| 94/100 [02:18<00:08,  1.42s/it]Computing paths:  95%|█████████▌| 95/100 [02:20<00:07,  1.43s/it]Computing paths:  96%|█████████▌| 96/100 [02:21<00:05,  1.46s/it]Computing paths:  97%|█████████▋| 97/100 [02:23<00:04,  1.58s/it]Computing paths:  98%|█████████▊| 98/100 [02:25<00:03,  1.52s/it]Computing paths:  99%|█████████▉| 99/100 [02:26<00:01,  1.45s/it]Computing paths: 100%|██████████| 100/100 [02:27<00:00,  1.37s/it]Computing paths: 100%|██████████| 100/100 [02:27<00:00,  1.47s/it]
+    Done. (147.5s, 188.5s total)
+  Running BARK (keep_states=3) ...
+    Done. (14.9s, 203.4s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.80_ks0003_seed42.png
+  Total wall time: 203.7s
+
+[7/14  global=214]
+[8q | gs=0.1 | ham=0.5 | ov=0.8 | ks=13]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.8)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2360.08it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2405.77it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2404.99it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2416.60it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2407.41it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2416.51it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2398.12it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2378.82it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2403.35it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2402.84it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2403.61it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2398.12it/s]
+    Done. (41.1s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:02<03:29,  2.12s/it]Computing paths:   2%|▏         | 2/100 [00:03<02:50,  1.74s/it]Computing paths:   3%|▎         | 3/100 [00:04<02:29,  1.54s/it]Computing paths:   4%|▍         | 4/100 [00:06<02:23,  1.49s/it]Computing paths:   5%|▌         | 5/100 [00:07<02:22,  1.50s/it]Computing paths:   6%|▌         | 6/100 [00:09<02:24,  1.53s/it]Computing paths:   7%|▋         | 7/100 [00:10<02:19,  1.50s/it]Computing paths:   8%|▊         | 8/100 [00:12<02:22,  1.55s/it]Computing paths:   9%|▉         | 9/100 [00:13<02:09,  1.42s/it]Computing paths:  10%|█         | 10/100 [00:15<02:22,  1.58s/it]Computing paths:  11%|█         | 11/100 [00:17<02:21,  1.59s/it]Computing paths:  12%|█▏        | 12/100 [00:18<02:13,  1.52s/it]Computing paths:  13%|█▎        | 13/100 [00:19<02:06,  1.46s/it]Computing paths:  14%|█▍        | 14/100 [00:21<02:02,  1.42s/it]Computing paths:  15%|█▌        | 15/100 [00:22<01:57,  1.38s/it]Computing paths:  16%|█▌        | 16/100 [00:23<01:52,  1.34s/it]Computing paths:  17%|█▋        | 17/100 [00:25<01:58,  1.43s/it]Computing paths:  18%|█▊        | 18/100 [00:27<02:03,  1.51s/it]Computing paths:  19%|█▉        | 19/100 [00:28<01:57,  1.46s/it]Computing paths:  20%|██        | 20/100 [00:29<01:56,  1.45s/it]Computing paths:  21%|██        | 21/100 [00:31<01:52,  1.42s/it]Computing paths:  22%|██▏       | 22/100 [00:32<01:47,  1.38s/it]Computing paths:  23%|██▎       | 23/100 [00:34<01:58,  1.53s/it]Computing paths:  24%|██▍       | 24/100 [00:35<01:57,  1.55s/it]Computing paths:  25%|██▌       | 25/100 [00:37<01:53,  1.51s/it]Computing paths:  26%|██▌       | 26/100 [00:38<01:48,  1.47s/it]Computing paths:  27%|██▋       | 27/100 [00:40<01:49,  1.50s/it]Computing paths:  28%|██▊       | 28/100 [00:41<01:49,  1.51s/it]Computing paths:  29%|██▉       | 29/100 [00:43<01:46,  1.50s/it]Computing paths:  30%|███       | 30/100 [00:44<01:38,  1.41s/it]Computing paths:  31%|███       | 31/100 [00:45<01:37,  1.41s/it]Computing paths:  32%|███▏      | 32/100 [00:47<01:44,  1.54s/it]Computing paths:  33%|███▎      | 33/100 [00:49<01:38,  1.47s/it]Computing paths:  34%|███▍      | 34/100 [00:50<01:33,  1.42s/it]Computing paths:  35%|███▌      | 35/100 [00:51<01:30,  1.39s/it]Computing paths:  36%|███▌      | 36/100 [00:53<01:38,  1.53s/it]Computing paths:  37%|███▋      | 37/100 [00:55<01:42,  1.63s/it]Computing paths:  38%|███▊      | 38/100 [00:57<01:47,  1.73s/it]Computing paths:  39%|███▉      | 39/100 [00:59<01:45,  1.72s/it]Computing paths:  40%|████      | 40/100 [01:00<01:42,  1.70s/it]Computing paths:  41%|████      | 41/100 [01:01<01:30,  1.53s/it]Computing paths:  42%|████▏     | 42/100 [01:03<01:24,  1.46s/it]Computing paths:  43%|████▎     | 43/100 [01:05<01:42,  1.80s/it]Computing paths:  44%|████▍     | 44/100 [01:07<01:35,  1.71s/it]Computing paths:  45%|████▌     | 45/100 [01:09<01:39,  1.81s/it]Computing paths:  46%|████▌     | 46/100 [01:10<01:30,  1.67s/it]Computing paths:  47%|████▋     | 47/100 [01:11<01:22,  1.55s/it]Computing paths:  48%|████▊     | 48/100 [01:13<01:15,  1.46s/it]Computing paths:  49%|████▉     | 49/100 [01:14<01:18,  1.53s/it]Computing paths:  50%|█████     | 50/100 [01:16<01:14,  1.48s/it]Computing paths:  51%|█████     | 51/100 [01:18<01:17,  1.58s/it]Computing paths:  52%|█████▏    | 52/100 [01:20<01:22,  1.72s/it]Computing paths:  53%|█████▎    | 53/100 [01:21<01:16,  1.62s/it]Computing paths:  54%|█████▍    | 54/100 [01:22<01:08,  1.50s/it]Computing paths:  55%|█████▌    | 55/100 [01:23<01:04,  1.43s/it]Computing paths:  56%|█████▌    | 56/100 [01:25<00:58,  1.34s/it]Computing paths:  57%|█████▋    | 57/100 [01:26<00:58,  1.37s/it]Computing paths:  58%|█████▊    | 58/100 [01:27<00:55,  1.31s/it]Computing paths:  59%|█████▉    | 59/100 [01:29<00:53,  1.31s/it]Computing paths:  60%|██████    | 60/100 [01:30<00:53,  1.33s/it]Computing paths:  61%|██████    | 61/100 [01:31<00:53,  1.37s/it]Computing paths:  62%|██████▏   | 62/100 [01:33<00:52,  1.39s/it]Computing paths:  63%|██████▎   | 63/100 [01:34<00:49,  1.33s/it]Computing paths:  64%|██████▍   | 64/100 [01:36<00:50,  1.40s/it]Computing paths:  65%|██████▌   | 65/100 [01:37<00:47,  1.37s/it]Computing paths:  66%|██████▌   | 66/100 [01:39<00:51,  1.52s/it]Computing paths:  67%|██████▋   | 67/100 [01:40<00:49,  1.51s/it]Computing paths:  68%|██████▊   | 68/100 [01:41<00:44,  1.40s/it]Computing paths:  69%|██████▉   | 69/100 [01:43<00:42,  1.36s/it]Computing paths:  70%|███████   | 70/100 [01:44<00:41,  1.39s/it]Computing paths:  71%|███████   | 71/100 [01:45<00:39,  1.38s/it]Computing paths:  72%|███████▏  | 72/100 [01:47<00:37,  1.33s/it]Computing paths:  73%|███████▎  | 73/100 [01:48<00:35,  1.32s/it]Computing paths:  74%|███████▍  | 74/100 [01:49<00:34,  1.31s/it]Computing paths:  75%|███████▌  | 75/100 [01:51<00:33,  1.33s/it]Computing paths:  76%|███████▌  | 76/100 [01:52<00:33,  1.38s/it]Computing paths:  77%|███████▋  | 77/100 [01:54<00:33,  1.45s/it]Computing paths:  78%|███████▊  | 78/100 [01:55<00:30,  1.40s/it]Computing paths:  79%|███████▉  | 79/100 [01:56<00:29,  1.39s/it]Computing paths:  80%|████████  | 80/100 [01:58<00:27,  1.37s/it]Computing paths:  81%|████████  | 81/100 [01:59<00:27,  1.43s/it]Computing paths:  82%|████████▏ | 82/100 [02:01<00:25,  1.43s/it]Computing paths:  83%|████████▎ | 83/100 [02:02<00:23,  1.37s/it]Computing paths:  84%|████████▍ | 84/100 [02:03<00:22,  1.42s/it]Computing paths:  85%|████████▌ | 85/100 [02:05<00:20,  1.35s/it]Computing paths:  86%|████████▌ | 86/100 [02:06<00:18,  1.36s/it]Computing paths:  87%|████████▋ | 87/100 [02:07<00:17,  1.35s/it]Computing paths:  88%|████████▊ | 88/100 [02:09<00:16,  1.34s/it]Computing paths:  89%|████████▉ | 89/100 [02:10<00:15,  1.44s/it]Computing paths:  90%|█████████ | 90/100 [02:12<00:14,  1.45s/it]Computing paths:  91%|█████████ | 91/100 [02:13<00:12,  1.41s/it]Computing paths:  92%|█████████▏| 92/100 [02:15<00:11,  1.44s/it]Computing paths:  93%|█████████▎| 93/100 [02:16<00:09,  1.39s/it]Computing paths:  94%|█████████▍| 94/100 [02:18<00:09,  1.53s/it]Computing paths:  95%|█████████▌| 95/100 [02:19<00:07,  1.55s/it]Computing paths:  96%|█████████▌| 96/100 [02:21<00:05,  1.45s/it]Computing paths:  97%|█████████▋| 97/100 [02:22<00:04,  1.41s/it]Computing paths:  98%|█████████▊| 98/100 [02:23<00:02,  1.44s/it]Computing paths:  99%|█████████▉| 99/100 [02:25<00:01,  1.46s/it]Computing paths: 100%|██████████| 100/100 [02:26<00:00,  1.38s/it]Computing paths: 100%|██████████| 100/100 [02:26<00:00,  1.47s/it]
+    Done. (146.6s, 187.7s total)
+  Running BARK (keep_states=13) ...
+    Done. (15.2s, 203.0s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.80_ks0013_seed42.png
+  Total wall time: 203.3s
+
+[8/14  global=215]
+[8q | gs=0.1 | ham=0.5 | ov=0.8 | ks=26]
+  Building Hamiltonian ...
+    dim=256, gs_support=27, ham_nnz=33292, gap≈1.0000
+  Initial state: idx=46, |<ψ|init>|²=0.222782 (requested 0.8)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2337.07it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2384.91it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2399.14it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2392.64it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2407.67it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2398.46it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2414.77it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2408.88it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2404.90it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2390.17it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2385.33it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2385.16it/s]
+    Done. (41.1s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]Computing paths:   1%|          | 1/100 [00:01<02:02,  1.23s/it]Computing paths:   2%|▏         | 2/100 [00:02<02:08,  1.31s/it]Computing paths:   3%|▎         | 3/100 [00:04<02:16,  1.41s/it]Computing paths:   4%|▍         | 4/100 [00:05<02:14,  1.40s/it]Computing paths:   5%|▌         | 5/100 [00:06<02:09,  1.37s/it]Computing paths:   6%|▌         | 6/100 [00:08<02:04,  1.32s/it]Computing paths:   7%|▋         | 7/100 [00:09<02:12,  1.42s/it]Computing paths:   8%|▊         | 8/100 [00:11<02:08,  1.40s/it]Computing paths:   9%|▉         | 9/100 [00:12<02:04,  1.36s/it]Computing paths:  10%|█         | 10/100 [00:13<02:01,  1.35s/it]Computing paths:  11%|█         | 11/100 [00:14<01:55,  1.30s/it]Computing paths:  12%|█▏        | 12/100 [00:16<01:59,  1.35s/it]Computing paths:  13%|█▎        | 13/100 [00:17<01:54,  1.32s/it]Computing paths:  14%|█▍        | 14/100 [00:19<01:58,  1.37s/it]Computing paths:  15%|█▌        | 15/100 [00:20<02:08,  1.51s/it]Computing paths:  16%|█▌        | 16/100 [00:22<01:59,  1.42s/it]Computing paths:  17%|█▋        | 17/100 [00:23<02:01,  1.47s/it]Computing paths:  18%|█▊        | 18/100 [00:24<01:56,  1.43s/it]Computing paths:  19%|█▉        | 19/100 [00:26<01:49,  1.36s/it]Computing paths:  20%|██        | 20/100 [00:27<01:49,  1.37s/it]Computing paths:  21%|██        | 21/100 [00:29<01:51,  1.41s/it]Computing paths:  22%|██▏       | 22/100 [00:30<01:47,  1.38s/it]Computing paths:  23%|██▎       | 23/100 [00:31<01:42,  1.34s/it]Computing paths:  24%|██▍       | 24/100 [00:33<01:58,  1.56s/it]Computing paths:  25%|██▌       | 25/100 [00:34<01:50,  1.47s/it]Computing paths:  26%|██▌       | 26/100 [00:36<01:52,  1.52s/it]Computing paths:  27%|██▋       | 27/100 [00:38<01:48,  1.49s/it]Computing paths:  28%|██▊       | 28/100 [00:39<01:52,  1.57s/it]Computing paths:  29%|██▉       | 29/100 [00:41<01:45,  1.48s/it]Computing paths:  30%|███       | 30/100 [00:42<01:40,  1.44s/it]Computing paths:  31%|███       | 31/100 [00:44<01:44,  1.51s/it]Computing paths:  32%|███▏      | 32/100 [00:45<01:39,  1.46s/it]Computing paths:  33%|███▎      | 33/100 [00:46<01:35,  1.42s/it]Computing paths:  34%|███▍      | 34/100 [00:48<01:30,  1.38s/it]Computing paths:  35%|███▌      | 35/100 [00:49<01:31,  1.40s/it]Computing paths:  36%|███▌      | 36/100 [00:51<01:32,  1.45s/it]Computing paths:  37%|███▋      | 37/100 [00:52<01:29,  1.41s/it]Computing paths:  38%|███▊      | 38/100 [00:53<01:24,  1.37s/it]Computing paths:  39%|███▉      | 39/100 [00:54<01:19,  1.30s/it]Computing paths:  40%|████      | 40/100 [00:55<01:15,  1.26s/it]Computing paths:  41%|████      | 41/100 [00:57<01:23,  1.42s/it]Computing paths:  42%|████▏     | 42/100 [00:59<01:27,  1.52s/it]Computing paths:  43%|████▎     | 43/100 [01:01<01:30,  1.59s/it]Computing paths:  44%|████▍     | 44/100 [01:02<01:22,  1.48s/it]Computing paths:  45%|████▌     | 45/100 [01:04<01:28,  1.62s/it]Computing paths:  46%|████▌     | 46/100 [01:05<01:22,  1.53s/it]Computing paths:  47%|████▋     | 47/100 [01:06<01:15,  1.43s/it]Computing paths:  48%|████▊     | 48/100 [01:08<01:14,  1.43s/it]Computing paths:  49%|████▉     | 49/100 [01:09<01:15,  1.48s/it]Computing paths:  50%|█████     | 50/100 [01:11<01:14,  1.49s/it]Computing paths:  51%|█████     | 51/100 [01:13<01:23,  1.71s/it]Computing paths:  52%|█████▏    | 52/100 [01:15<01:18,  1.63s/it]Computing paths:  53%|█████▎    | 53/100 [01:16<01:13,  1.56s/it]Computing paths:  54%|█████▍    | 54/100 [01:17<01:10,  1.53s/it]Computing paths:  55%|█████▌    | 55/100 [01:19<01:08,  1.53s/it]Computing paths:  56%|█████▌    | 56/100 [01:20<01:03,  1.44s/it]Computing paths:  57%|█████▋    | 57/100 [01:22<01:02,  1.45s/it]Computing paths:  58%|█████▊    | 58/100 [01:23<01:00,  1.45s/it]Computing paths:  59%|█████▉    | 59/100 [01:25<00:58,  1.43s/it]Computing paths:  60%|██████    | 60/100 [01:26<00:55,  1.38s/it]Computing paths:  61%|██████    | 61/100 [01:27<00:53,  1.36s/it]Computing paths:  62%|██████▏   | 62/100 [01:28<00:50,  1.34s/it]Computing paths:  63%|██████▎   | 63/100 [01:30<00:47,  1.29s/it]Computing paths:  64%|██████▍   | 64/100 [01:31<00:50,  1.42s/it]Computing paths:  65%|██████▌   | 65/100 [01:34<01:02,  1.77s/it]Computing paths:  66%|██████▌   | 66/100 [01:35<00:57,  1.69s/it]Computing paths:  67%|██████▋   | 67/100 [01:37<00:56,  1.70s/it]Computing paths:  68%|██████▊   | 68/100 [01:38<00:49,  1.56s/it]Computing paths:  69%|██████▉   | 69/100 [01:40<00:49,  1.59s/it]Computing paths:  70%|███████   | 70/100 [01:42<00:47,  1.58s/it]Computing paths:  71%|███████   | 71/100 [01:43<00:42,  1.47s/it]Computing paths:  72%|███████▏  | 72/100 [01:44<00:42,  1.52s/it]Computing paths:  73%|███████▎  | 73/100 [01:46<00:41,  1.54s/it]Computing paths:  74%|███████▍  | 74/100 [01:47<00:38,  1.46s/it]Computing paths:  75%|███████▌  | 75/100 [01:49<00:42,  1.69s/it]Computing paths:  76%|███████▌  | 76/100 [01:51<00:42,  1.76s/it]Computing paths:  77%|███████▋  | 77/100 [01:53<00:36,  1.60s/it]Computing paths:  78%|███████▊  | 78/100 [01:54<00:35,  1.62s/it]Computing paths:  79%|███████▉  | 79/100 [01:57<00:38,  1.81s/it]Computing paths:  80%|████████  | 80/100 [01:58<00:36,  1.81s/it]Computing paths:  81%|████████  | 81/100 [02:00<00:34,  1.84s/it]Computing paths:  82%|████████▏ | 82/100 [02:02<00:30,  1.70s/it]Computing paths:  83%|████████▎ | 83/100 [02:03<00:26,  1.58s/it]Computing paths:  84%|████████▍ | 84/100 [02:04<00:24,  1.52s/it]Computing paths:  85%|████████▌ | 85/100 [02:06<00:21,  1.46s/it]Computing paths:  86%|████████▌ | 86/100 [02:08<00:22,  1.61s/it]Computing paths:  87%|████████▋ | 87/100 [02:09<00:19,  1.52s/it]Computing paths:  88%|████████▊ | 88/100 [02:10<00:16,  1.39s/it]Computing paths:  89%|████████▉ | 89/100 [02:11<00:15,  1.37s/it]Computing paths:  90%|█████████ | 90/100 [02:13<00:13,  1.31s/it]Computing paths:  91%|█████████ | 91/100 [02:14<00:12,  1.38s/it]Computing paths:  92%|█████████▏| 92/100 [02:15<00:10,  1.36s/it]Computing paths:  93%|█████████▎| 93/100 [02:18<00:11,  1.62s/it]Computing paths:  94%|█████████▍| 94/100 [02:19<00:09,  1.50s/it]Computing paths:  95%|█████████▌| 95/100 [02:21<00:08,  1.68s/it]Computing paths:  96%|█████████▌| 96/100 [02:22<00:06,  1.59s/it]Computing paths:  97%|█████████▋| 97/100 [02:24<00:04,  1.53s/it]Computing paths:  98%|█████████▊| 98/100 [02:25<00:02,  1.49s/it]Computing paths:  99%|█████████▉| 99/100 [02:27<00:01,  1.60s/it]Computing paths: 100%|██████████| 100/100 [02:28<00:00,  1.52s/it]Computing paths: 100%|██████████| 100/100 [02:28<00:00,  1.49s/it]
+    Done. (148.8s, 189.9s total)
+  Running BARK (keep_states=26) ...
+    Done. (15.5s, 205.4s total)
+  Saved: results/nq8_gs0.10_ham0.50_ov0.80_ks0026_seed42.png
+  Total wall time: 205.7s
+
+[9/14  global=216]
+[8q | gs=0.25 | ham=0.0 | ov=0.1 | ks=3]
+  Building Hamiltonian ...
+    dim=256, gs_support=65, ham_nnz=384, gap≈1.0000
+  Initial state: idx=50, |<ψ|init>|²=0.076975 (requested 0.1)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]/home/erosanow_hpc/informed_swapping/Permutations/SKQD.py:45: RuntimeWarning: invalid value encountered in divide
+  probabilities_here /= np.sum(probabilities_here)
+No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2540.08it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1241 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1241 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[10/14  global=217]
+[8q | gs=0.25 | ham=0.0 | ov=0.1 | ks=13]
+  Building Hamiltonian ...
+    dim=256, gs_support=65, ham_nnz=384, gap≈1.0000
+  Initial state: idx=50, |<ψ|init>|²=0.076975 (requested 0.1)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2802.39it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1471 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1471 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[11/14  global=218]
+[8q | gs=0.25 | ham=0.0 | ov=0.1 | ks=26]
+  Building Hamiltonian ...
+    dim=256, gs_support=65, ham_nnz=384, gap≈1.0000
+  Initial state: idx=50, |<ψ|init>|²=0.076975 (requested 0.1)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2801.57it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1331 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1331 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[12/14  global=219]
+[8q | gs=0.25 | ham=0.0 | ov=0.3 | ks=3]
+  Building Hamiltonian ...
+    dim=256, gs_support=65, ham_nnz=384, gap≈1.0000
+  Initial state: idx=50, |<ψ|init>|²=0.076975 (requested 0.3)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2819.70it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1341 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1341 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[13/14  global=220]
+[8q | gs=0.25 | ham=0.0 | ov=0.3 | ks=13]
+  Building Hamiltonian ...
+    dim=256, gs_support=65, ham_nnz=384, gap≈1.0000
+  Initial state: idx=50, |<ψ|init>|²=0.076975 (requested 0.3)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2811.31it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1081 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1081 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+[14/14  global=221]
+[8q | gs=0.25 | ham=0.0 | ov=0.3 | ks=26]
+  Building Hamiltonian ...
+    dim=256, gs_support=65, ham_nnz=384, gap≈1.0000
+  Initial state: idx=50, |<ψ|init>|²=0.076975 (requested 0.3)
+  Running SKQD for 12 time steps (16 SKQD steps each) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2815.32it/s]
+  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (1631 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_chunk.py", line 106, in main
+    run(
+  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/run_experiment.py", line 160, in run
+    skqd_paths[t] = get_one_path(H, indices)
+  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
+    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
+    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
+    params.iterate()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
+    self._raise_no_convergence()
+  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
+    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
+scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (1631 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
+  Continuing to next experiment.
+
+Chunk 14 finished in 0.47h  (1676s, 14 experiments).
+==================================================
+Finished   : Wed Jun 17 10:28:11 AM CEST 2026
+==================================================

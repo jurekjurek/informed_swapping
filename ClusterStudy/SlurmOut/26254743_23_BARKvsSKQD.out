@@ -1,0 +1,46 @@
+==================================================
+Array job  : 26254743
+Task (chunk): 23 / 29
+Node       : node024
+Started    : Wed Jun 17 02:54:42 PM CEST 2026
+==================================================
+Chunk 23/29  —  jobs 334–347 of 431  (14 experiments)
+============================================================
+
+[1/14  global=334]
+[10q | gs=0.1 | ham=0.1 | ov=0.8 | ks=51]
+  Building Hamiltonian ...
+    dim=1024, gs_support=103, ham_nnz=107962, gap≈1.0000
+  Initial state: idx=428, |<ψ|init>|²=0.056062 (requested 0.8)
+  Running SKQD for 12 time steps (64 SKQD steps each) ...
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
+  return splu(A).solve
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  return spsolve(Q, P)
+  0%|          | 0/64 [00:00<?, ?it/s] 67%|██████▋   | 43/64 [00:00<00:00, 428.04it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 434.22it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 77%|███████▋  | 49/64 [00:00<00:00, 487.01it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 496.48it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 64%|██████▍   | 41/64 [00:00<00:00, 400.95it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 405.58it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 70%|███████   | 45/64 [00:00<00:00, 443.04it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 448.67it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 64%|██████▍   | 41/64 [00:00<00:00, 401.09it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 404.05it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 62%|██████▎   | 40/64 [00:00<00:00, 393.53it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 397.84it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 75%|███████▌  | 48/64 [00:00<00:00, 475.05it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 481.54it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 70%|███████   | 45/64 [00:00<00:00, 441.60it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 447.44it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 78%|███████▊  | 50/64 [00:00<00:00, 494.79it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 498.66it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 64%|██████▍   | 41/64 [00:00<00:00, 403.03it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 408.66it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 75%|███████▌  | 48/64 [00:00<00:00, 476.07it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 478.98it/s]
+  0%|          | 0/64 [00:00<?, ?it/s] 64%|██████▍   | 41/64 [00:00<00:00, 408.71it/s]No more indices left to sample.
+100%|██████████| 64/64 [00:00<00:00, 412.92it/s]
+    Done. (700.3s elapsed)
+  Computing 100 random paths ...
+Computing paths:   0%|          | 0/100 [00:00<?, ?it/s]
