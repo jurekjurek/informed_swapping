@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Slurm array job: KRAB systematic study
+# Slurm array job: KRAB-vs-SKQD systematic study
 #
 # Workflow
 # --------
@@ -14,8 +14,12 @@
 # 3. Re-submit safely if some jobs time out — completed experiments are
 #    skipped automatically (figure-existence check in run_chunk.py).
 #
-# After all jobs finish, aggregate results and produce scaling plots:
-#       python plot_scaling.py
+# After all jobs finish, produce the comparative analysis plots:
+#       python plot_scaling.py        # reads data/comparison.csv -> analysis/
+#
+# NOTE: each experiment now also runs the full SKQD time-step sweep and a
+# random baseline, so it is far heavier than the KRAB-only study (minutes per
+# experiment at n_qubits=10, dominated by the SKQD path reconstruction).
 # =============================================================================
 
 #SBATCH --job-name=KRAB
@@ -28,8 +32,8 @@
 
 #SBATCH --array=0-29
 
-# KRAB is cheap per iteration (no random paths), but n_qubits=10 with
-# many iterations can still take a while when many experiments are chained.
+# The SKQD sweep + path reconstruction dominates the runtime; n_qubits=10
+# experiments take minutes each, so chained chunks need the full budget.
 #SBATCH --time=24:00:00
 
 #SBATCH --mem=16G
@@ -55,12 +59,13 @@ echo "Started     : $(date)"
 echo "=================================================="
 
 python -u run_chunk.py \
-    --chunk      "$SLURM_ARRAY_TASK_ID" \
-    --n_chunks   30                     \
-    --param_file params/param_grid.txt  \
-    --seed       42                     \
-    --figure_dir results                \
-    --data_dir   data
+    --chunk          "$SLURM_ARRAY_TASK_ID" \
+    --n_chunks       30                     \
+    --param_file     params/param_grid.txt  \
+    --seed           42                     \
+    --figure_dir     figures                \
+    --data_dir       data                   \
+    --n_random_paths 20
 
 echo "=================================================="
 echo "Finished    : $(date)"

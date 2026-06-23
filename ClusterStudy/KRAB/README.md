@@ -1,120 +1,141 @@
-# ClusterStudy / KRAB
+# ClusterStudy / KRAB — KRAB vs SKQD
 
-Systematic cluster study of the **KRAB** (Selected-Subspace Krylov) algorithm
-implemented in `new_approach/krab_4.py`.
+Systematic cluster study comparing the **KRAB** (selected-subspace Krylov)
+algorithm in `new_approach/krab_4.py` against **SKQD** (and a random baseline),
+over a 6-dimensional hyperparameter grid.
 
-For each combination of hyperparameters the study records:
-- The **number of iterations** until relative error `|E_approx − E₀| / |E₀| < 10⁻³`.
-- The **subspace size** at that point.
-- The **estimated wall time** to convergence.
-- A diagnostic figure (energy + relative error + subspace size + new bitstrings per iter).
+The study is built to answer three questions:
 
-These results are aggregated into `data/results.csv` and then turned into scaling
-plots by `plot_scaling.py`.
+1. **Does KRAB beat SKQD?** — for every Hamiltonian, how many sampled basis
+   states does each method need to reach relative energy error `< 10⁻³`?
+2. **Where does it work / not work?** — in which parameter regions does KRAB
+   reach the target, and where does it stall or lose to SKQD?
+3. **How do the resources scale?** — how do the required subspace size,
+   number of sampled states, and wall time grow with system size and the
+   hyperparameters?
 
-## Algorithm overview
+## Common currency: states-to-target
 
-`selected_krylov_ground_state(H, initial_bitstring, Q, delta, epsilon, n_iterations)`
+Every method produces an **ordering** of basis states; `get_one_path` then
+gives the ground-energy estimate as states are added one at a time. The metric
+`n_states_to_target` is the first count of basis states at which the estimate
+reaches relative error `< 10⁻³`.
 
-Each iteration:
-1. **Project** H onto the current active subspace and diagonalize → energy estimate.
-2. **ε-prune** states with `|c_b|² < epsilon` from the active set.
-3. **Apply H** to the pruned state; collect external residuals `r_a = ⟨a|H|ψ⟩`.
-4. **δ-filter** candidates with `|r_a| < delta`.
-5. **Q-cap**: keep the top-Q candidates by residual magnitude.
-6. Add new candidates to the active set and repeat.
+| Method | Ordering used |
+|--------|---------------|
+| **KRAB** | its surviving basis states, in the order it discovered them (`final_indices`) |
+| **SKQD** | the sampling order for each time step `t`; the **best** (fewest states) over the sweep is reported |
+| **Random** | random orderings starting from the same initial state |
 
-Key hyperparameters being scanned:
+KRAB "wins" when it reaches the target with fewer states than the best SKQD
+time step.
+
+## What each job produces
+
+For one combination `(n_qubits, gs_sparsity, ham_sparsity, overlap, Q, epsilon)`:
+
+- **One combined figure** in `figures/`:
+  - top: the **convergence-path comparison** (the BARK-vs-SKQD style plot) —
+    random paths in the background, the SKQD time-step sweep, the KRAB
+    discovery-order path, and markers where KRAB actually diagonalized;
+  - bottom: the **KRAB internal diagnostics** (energy, relative error, subspace
+    size, bitstrings added vs Q, residual reach, state sparsity).
+- **One row** appended to `data/comparison.csv` with comparative metrics
+  (states-to-target for KRAB / best-SKQD / random, convergence flags, subspace
+  sizes, wall times, win flag, advantage ratio).
+
+## Hyperparameters scanned
 
 | Parameter | Values | Role |
 |-----------|--------|------|
-| `Q` | 10, 20, 30, 40 | Max new basis states added per iteration |
-| `epsilon` | 10⁻⁷, 10⁻⁶, 10⁻⁵, 10⁻⁴ | Coefficient pruning threshold |
-| `n_qubits` | 6, 8, 10 | System size |
-| `gs_sparsity` | 0.05, 0.1, 0.25, 0.5 | Ground-state sparsity |
+| `n_qubits` | 6, 8, 10 | System size; Hilbert-space dim = 2ⁿ |
+| `gs_sparsity` | 0.05, 0.1, 0.25 | Ground-state support fraction |
 | `ham_sparsity` | 0.1, 0.25, 0.5 | Hamiltonian off-diagonal density |
-| `overlap` | 0.1, 0.3, 0.5, 0.8 | Initial-state overlap with ground state |
+| `overlap` | 0.1, 0.3, 0.5, 0.8 | Initial-state overlap with the ground state |
+| `Q` | 1%, 3%, 5%, 10% | KRAB: new basis states added per iteration, **as a fraction of 2ⁿ** (resolved to `round(Q·2ⁿ)` per system) |
+| `epsilon` | 10⁻⁷, 10⁻⁶, 10⁻⁵, 10⁻⁴ | KRAB: coefficient pruning threshold |
 
-Fixed parameters: `delta=1e-8`, `n_iterations=30`, `ground_energy=-5`, `gap=1`.
+Fixed: `delta=1e-8`, `ground_energy=-5`, `gap=1`,
+SKQD time-step sweep `[0.001 … 1.0]` (12 values), `n_random_paths=20`.
+KRAB iteration cap = `max(30, round(3/Q))` (so small Q gets more rounds:
+1% → 300, 3% → 100, 5% → 60, 10% → 30).
 
-**Total experiments (full grid):** 3 × 4 × 3 × 4 × 4 × 4 = **2304**
+**Total experiments (full grid):** 3 × 3 × 3 × 4 × 4 × 4 = **1728**
 
 ## Directory layout
 
 ```
 KRAB/
-├── run_experiment.py   # Single-job script (CLI flags)
+├── run_experiment.py   # Single-job: KRAB + SKQD + random, figure + CSV row
 ├── run_chunk.py        # Runs a slice of param_grid.txt sequentially
 ├── generate_jobs.py    # Writes params/param_grid.txt
-├── run_array.slurm     # Slurm array job (30 tasks × up to 24h)
-├── plot_scaling.py     # Aggregates results.csv → 7 scaling plots
-├── params/
-│   └── param_grid.txt  # Generated by generate_jobs.py
-├── results/            # Per-experiment diagnostic PNGs
-├── data/
-│   └── results.csv     # Accumulated during cluster run
-├── SlurmOut/           # Slurm logs
-└── scaling_plots/      # Output of plot_scaling.py
+├── run_array.slurm     # Slurm array job (30 tasks)
+├── plot_scaling.py     # Aggregates comparison.csv -> analysis/*.png
+├── params/param_grid.txt
+├── figures/            # Per-experiment comparison + diagnostics PNGs
+├── data/comparison.csv # Accumulated during the cluster run
+├── analysis/           # Output of plot_scaling.py
+└── SlurmOut/           # Slurm logs
 ```
+
+> The legacy KRAB-only artifacts (`results/`, `data/results.csv`) from the
+> earlier non-comparative run are left untouched for reference.
 
 ## Workflow
 
-### Step 1 — generate the parameter file
 ```bash
 cd ClusterStudy/KRAB
-python generate_jobs.py --preset full
-# prints: Total jobs: 2304  → ~77 experiments per chunk
+source /home/erosanow_hpc/informed_swapping/.SKQD/bin/activate
+
+# 1. parameter file
+python generate_jobs.py --preset full      # 1728 jobs
+
+# 2. submit (edit --account / paths in run_array.slurm first)
+sbatch run_array.slurm                      # 30 array tasks
+
+# 3. analysis once jobs finish
+python plot_scaling.py                      # data/comparison.csv -> analysis/
 ```
 
-### Step 2 — update the Slurm script
-Edit `run_array.slurm` and set:
-- `--account` — your cluster account
-- `source /home/.../activate` — path to virtual environment
-- `cd /home/.../ClusterStudy/KRAB` — absolute path to this directory
+Jobs are spread across the 30 array tasks by **cost-balanced (greedy LPT)**
+assignment, not contiguous slicing: the expensive experiments (large `n_qubits`
+and large `Q`) are dealt out across distinct chunks so every task takes roughly
+the same wall time. The assignment is deterministic, so re-submitting is safe —
+experiments whose figure already exists in `figures/` are skipped.
 
-### Step 3 — submit
-```bash
-sbatch run_array.slurm
-# 30 array tasks, up to 24h each
-```
+## Analysis plots (`analysis/`)
 
-Re-submit freely if some tasks time out — experiments whose figure already
-exists are automatically skipped.
-
-### Step 4 — produce scaling plots
-```bash
-python plot_scaling.py
-# reads data/results.csv, writes scaling_plots/*.png
-```
-
-## Scaling plots produced
-
-| File | What it shows |
-|------|--------------|
-| `iter_vs_nqubits.png` | Iterations to convergence vs n_qubits, panel per (Q, ε) |
-| `iter_vs_Q.png` | Iterations to convergence vs Q, one curve per n_qubits |
-| `iter_vs_epsilon.png` | Iterations to convergence vs ε (log x-axis) |
-| `subspace_vs_nqubits.png` | Subspace size at convergence vs n_qubits vs full dim 2ⁿ |
-| `walltime_vs_nqubits.png` | Estimated wall time to convergence vs n_qubits (log y) |
-| `convergence_rate.png` | Fraction of experiments converging vs each hyperparameter |
-| `heatmap_Q_eps.png` | 2-D convergence rate as a heat map over Q × ε per n_qubits |
+| File | Question | What it shows |
+|------|----------|---------------|
+| `head_to_head.png` | Q1 | KRAB vs SKQD states-to-target scatter + win/loss summary |
+| `win_rate_by_param.png` | Q1 | fraction of cases KRAB wins, per hyperparameter |
+| `convergence_rate.png` | Q2 | KRAB vs SKQD reach-target rate per hyperparameter |
+| `region_heatmaps.png` | Q2 | win-rate & KRAB reach-rate over parameter pairs |
+| `cost_scaling.png` | Q3 | states-to-target vs n_qubits (KRAB / SKQD / random) |
+| `subspace_scaling.png` | Q3 | KRAB subspace size vs n_qubits vs full dim 2ⁿ |
+| `walltime_scaling.png` | Q3 | KRAB vs SKQD wall time vs n_qubits |
+| `krab_hyperparams.png` | — | KRAB reach-rate & cost vs Q and ε |
 
 ## Running a single experiment locally
 
 ```bash
 python run_experiment.py \
     --n_qubits 8 --gs_sparsity 0.1 --ham_sparsity 0.25 \
-    --overlap 0.3 --Q 20 --epsilon 1e-6 \
-    --seed 42 --figure_dir results --data_dir data
+    --overlap 0.3 --Q_frac 0.03 --epsilon 1e-6 \
+    --n_random_paths 20 --seed 42 \
+    --figure_dir figures --data_dir data
 ```
+
+## Runtime note
+
+Each experiment now runs the **full SKQD time-step sweep** plus a random
+baseline, both reconstructed with `get_one_path` (one `eigsh` per added state).
+This is the dominant cost and grows with `2ⁿ`: seconds at n=6, tens of seconds
+at n=8, minutes at n=10. Reduce `--n_random_paths` to speed things up.
 
 ## Dependencies
 
 ```
-numpy scipy matplotlib pandas
+numpy scipy matplotlib pandas tqdm
 ```
-
-Activate the virtual environment before running:
-```bash
-source ../../.BARK/bin/activate
-```
+(virtual environment: `../../.SKQD`)
