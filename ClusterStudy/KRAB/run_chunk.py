@@ -22,7 +22,13 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
-from run_experiment import run, SKQD_TIME_STEPS, resolve_n_iterations
+from run_experiment import (
+    run,
+    SKQD_TIME_STEPS,
+    resolve_n_iterations,
+    resolve_n_iterations_decay,
+    DECAY_Q_START_FRAC,
+)
 
 
 def load_param_lines(param_file: str) -> list[tuple]:
@@ -41,7 +47,8 @@ def load_param_lines(param_file: str) -> list[tuple]:
     return lines
 
 
-def estimate_cost(n_qubits: int, Q_frac: float, n_random_paths: int) -> float:
+def estimate_cost(n_qubits: int, Q_frac: float, n_random_paths: int,
+                  Q_mode: str = "fixed") -> float:
     """Relative wall-time estimate for one experiment (used for load balancing).
 
     Dominated by the SKQD time-step sweep + random baseline, each reconstructed
@@ -51,19 +58,24 @@ def estimate_cost(n_qubits: int, Q_frac: float, n_random_paths: int) -> float:
     dim = 2 ** n_qubits
     n_skqd = len(SKQD_TIME_STEPS)
     skqd_random = (n_skqd + n_random_paths) * dim ** 2
-    q_int = max(1, round(Q_frac * dim))
-    krab = resolve_n_iterations(Q_frac) * q_int * dim
+    if Q_mode == "decay":
+        # initial (largest) budget dominates the KRAB term; iterations fixed
+        q_int = max(1, round(DECAY_Q_START_FRAC * dim))
+        krab = resolve_n_iterations_decay() * q_int * dim
+    else:
+        q_int = max(1, round(Q_frac * dim))
+        krab = resolve_n_iterations(Q_frac) * q_int * dim
     return float(skqd_random + krab)
 
 
 def assign_chunks(all_params: list[tuple], n_chunks: int,
-                  n_random_paths: int) -> dict[int, list[int]]:
+                  n_random_paths: int, Q_mode: str = "fixed") -> dict[int, list[int]]:
     """Greedy longest-processing-time bin packing → balanced total cost per chunk.
 
     Deterministic given the param file and n_random_paths, so the assignment is
     identical across all array tasks.
     """
-    costs = [estimate_cost(p[0], p[4], n_random_paths) for p in all_params]
+    costs = [estimate_cost(p[0], p[4], n_random_paths, Q_mode) for p in all_params]
     order = sorted(range(len(all_params)), key=lambda i: costs[i], reverse=True)
 
     heap = [(0.0, c) for c in range(n_chunks)]          # (current load, chunk id)
@@ -80,10 +92,12 @@ def assign_chunks(all_params: list[tuple], n_chunks: int,
     return chunk_jobs
 
 
-def figure_fname(n_qubits, gs_sp, ham_sp, overlap, Q_frac, epsilon, seed):
+def figure_fname(n_qubits, gs_sp, ham_sp, overlap, Q_frac, epsilon, seed,
+                 Q_mode="fixed"):
+    Q_tag = "Qdecay" if Q_mode == "decay" else f"Qf{Q_frac:.3f}"
     return (
         f"nq{n_qubits}_gs{gs_sp:.2f}_ham{ham_sp:.2f}"
-        f"_ov{overlap:.2f}_Qf{Q_frac:.3f}_eps{epsilon:.0e}_seed{seed}.png"
+        f"_ov{overlap:.2f}_{Q_tag}_eps{epsilon:.0e}_seed{seed}.png"
     )
 
 
@@ -97,6 +111,10 @@ def main() -> None:
     p.add_argument("--data_dir",       type=str, default="data")
     p.add_argument("--n_random_paths", type=int, default=20,
                    help="Random baseline orderings per experiment (0 disables).")
+    p.add_argument("--Q_mode",         type=str, default="fixed",
+                   choices=["fixed", "decay"],
+                   help="fixed: constant per-iteration Q (default). "
+                        "decay: geometric decaying-Q schedule (Q_frac column ignored).")
     args = p.parse_args()
 
     if args.chunk < 0 or args.chunk >= args.n_chunks:
@@ -104,9 +122,10 @@ def main() -> None:
 
     all_params = load_param_lines(args.param_file)
     total = len(all_params)
-    chunk_jobs = assign_chunks(all_params, args.n_chunks, args.n_random_paths)
+    chunk_jobs = assign_chunks(all_params, args.n_chunks, args.n_random_paths, args.Q_mode)
     my_indices = chunk_jobs[args.chunk]
-    est_cost = sum(estimate_cost(all_params[i][0], all_params[i][4], args.n_random_paths)
+    est_cost = sum(estimate_cost(all_params[i][0], all_params[i][4],
+                                 args.n_random_paths, args.Q_mode)
                    for i in my_indices)
 
     print(f"Chunk {args.chunk}/{args.n_chunks - 1}  —  "
@@ -121,7 +140,8 @@ def main() -> None:
         print(f"\n[{local_idx + 1}/{len(my_indices)}  global={global_idx}]", flush=True)
 
         # Skip if figure already exists (safe re-submission)
-        fname = figure_fname(n_qubits, gs_sp, ham_sp, overlap, Q_frac, epsilon, args.seed)
+        fname = figure_fname(n_qubits, gs_sp, ham_sp, overlap, Q_frac, epsilon,
+                             args.seed, args.Q_mode)
         if os.path.exists(os.path.join(args.figure_dir, fname)):
             print(f"  Skipping (figure exists): {fname}", flush=True)
             continue
@@ -138,6 +158,7 @@ def main() -> None:
                 figure_dir=args.figure_dir,
                 data_dir=args.data_dir,
                 n_random_paths=args.n_random_paths,
+                Q_mode=args.Q_mode,
             )
         except Exception as e:
             print(f"  ERROR: {type(e).__name__}: {e}", flush=True)

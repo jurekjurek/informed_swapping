@@ -46,8 +46,8 @@ RAND_COL = "steelblue"
 # IO helpers
 # ---------------------------------------------------------------------------
 
-def load(data_dir: str) -> pd.DataFrame:
-    path = os.path.join(data_dir, "comparison.csv")
+def load(data_dir: str, data_file: str = "comparison.csv") -> pd.DataFrame:
+    path = os.path.join(data_dir, data_file)
     if not os.path.exists(path):
         raise FileNotFoundError(f"Results file not found: {path}")
     df = pd.read_csv(path)
@@ -395,12 +395,17 @@ def print_summary(df):
 
 def main():
     p = argparse.ArgumentParser(description="Comparative KRAB-vs-SKQD analysis plots.")
-    p.add_argument("--data_dir", default="data")
-    p.add_argument("--out_dir",  default="analysis")
+    p.add_argument("--data_dir",  default="data")
+    p.add_argument("--data_file", default="comparison.csv",
+                   help="CSV inside --data_dir (use comparison_decay.csv for the "
+                        "decaying-Q study).")
+    p.add_argument("--out_dir",   default="analysis",
+                   help="Output dir for plots (use analysis_decay for the "
+                        "decaying-Q study).")
     args = p.parse_args()
 
-    print(f"Loading {args.data_dir}/comparison.csv ...")
-    df = load(args.data_dir)
+    print(f"Loading {args.data_dir}/{args.data_file} ...")
+    df = load(args.data_dir, args.data_file)
     print_summary(df)
 
     print("Producing plots ...")

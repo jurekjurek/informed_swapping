@@ -67,6 +67,15 @@ GROUND_ENERGY = -5.0
 GAP = 1.0
 RELATIVE_ERROR_TARGET = 1e-3
 
+# --- Decaying-Q study (Q_mode="decay") -------------------------------------
+# KRAB's per-iteration budget Q decays geometrically with the Hamiltonian
+# application index `app`, starting from DECAY_Q_START_FRAC·2ⁿ and shrinking by
+# DECAY_Q_FACTOR each application, with a floor at DECAY_Q_FLOOR_FRAC·2ⁿ:
+#     Q(app) = max(DECAY_Q_FLOOR_FRAC·2ⁿ, int(DECAY_Q_START_FRAC·2ⁿ · f**app))
+DECAY_Q_START_FRAC = 0.20      # initial budget, fraction of 2ⁿ
+DECAY_Q_FLOOR_FRAC = 0.01      # floor budget, fraction of 2ⁿ
+DECAY_Q_FACTOR = 0.75          # geometric decay per application
+
 
 def resolve_n_iterations(Q_frac: float) -> int:
     """KRAB iteration cap: at least N_ITERATIONS_MIN, up to 3/Q_frac.
@@ -76,6 +85,36 @@ def resolve_n_iterations(Q_frac: float) -> int:
     (1% -> 300, 3% -> 100, 5% -> 60, 10% -> 30.)
     """
     return max(N_ITERATIONS_MIN, int(round(3.0 / Q_frac)))
+
+
+def make_decay_schedule(dim: int):
+    """Geometric decaying-Q schedule for the decay study.
+
+    Returns (Q_callable, Q_start_int, Q_floor_int). The callable maps the
+    Hamiltonian-application index to an integer budget; KRAB resolves it per
+    application via resolve_Q.
+    """
+    q_start = max(1, int(round(DECAY_Q_START_FRAC * dim)))
+    q_floor = max(1, int(round(DECAY_Q_FLOOR_FRAC * dim)))
+
+    def schedule(app: int, _s=q_start, _f=q_floor) -> int:
+        return max(_f, int(_s * DECAY_Q_FACTOR ** app))
+
+    return schedule, q_start, q_floor
+
+
+def resolve_n_iterations_decay() -> int:
+    """KRAB iteration cap for the decay study.
+
+    Q starts large and decays to the 1% floor in
+    log(FLOOR/START)/log(FACTOR) ≈ 10–11 applications; give enough rounds to
+    reach the floor and then run a stretch of floor-sized iterations on top.
+    """
+    import math
+    apps_to_floor = math.ceil(
+        math.log(DECAY_Q_FLOOR_FRAC / DECAY_Q_START_FRAC) / math.log(DECAY_Q_FACTOR)
+    )
+    return max(N_ITERATIONS_MIN, apps_to_floor + N_ITERATIONS_MIN)
 
 # SKQD time steps swept (same sweep as the BARK-vs-SKQD study)
 SKQD_TIME_STEPS = [0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
@@ -152,7 +191,7 @@ def save_figure(
     figure_dir, fname_stub,
     true_energy, target_band,
     n_qubits, gs_sparsity, ham_sparsity, overlap, actual_overlap,
-    Q_frac, Q_int, epsilon, seed,
+    Q_frac, Q_int, epsilon, seed, q_label,
     random_paths, skqd_paths, krab_path,
     krab_native_sizes, krab_native_energies,
     krab_n_states, skqd_best_n_states, skqd_best_t,
@@ -183,7 +222,7 @@ def save_figure(
     # KRAB discovery-order path (apples-to-apples with SKQD)
     ax.plot(np.arange(1, len(krab_path) + 1), krab_path,
             color="red", linewidth=2.8, linestyle="--",
-            label=f"KRAB path (Q={Q_frac:.0%}={Q_int})")
+            label=f"KRAB path ({q_label})")
 
     # KRAB native trajectory: where KRAB actually diagonalized a subspace
     ax.plot(krab_native_sizes, krab_native_energies, color="black",
@@ -211,7 +250,7 @@ def save_figure(
     ax.set_title(
         f"KRAB vs SKQD  |  n={n_qubits}q, gs={gs_sparsity:.2f}, ham={ham_sparsity:.2f}, "
         f"overlap target={overlap:.2f} (actual {actual_overlap:.3f}),  "
-        f"Q={Q_frac:.0%}={Q_int}, ε={epsilon:.0e}\n"
+        f"{q_label}, ε={epsilon:.0e}\n"
         f"states to reach rel.err<{RELATIVE_ERROR_TARGET:.0e}:  "
         f"KRAB={krab_txt}    best SKQD={skqd_txt}",
         fontsize=11,
@@ -275,9 +314,9 @@ def save_figure(
     return out_path
 
 
-def append_csv_row(data_dir: str, row: dict) -> None:
+def append_csv_row(data_dir: str, row: dict, csv_name: str = "comparison.csv") -> None:
     os.makedirs(data_dir, exist_ok=True)
-    csv_path = os.path.join(data_dir, "comparison.csv")
+    csv_path = os.path.join(data_dir, csv_name)
     write_header = not os.path.exists(csv_path)
     with open(csv_path, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
@@ -301,18 +340,35 @@ def run(
     figure_dir: str,
     data_dir: str,
     n_random_paths: int = 20,
+    Q_mode: str = "fixed",
 ) -> dict:
     dim = 2 ** n_qubits
-    # Q is a fraction of the full Hilbert space; resolve to an integer number
-    # of new basis states KRAB keeps per iteration (at least 1).
-    Q_int = max(1, int(round(Q_frac * dim)))
+    decay = Q_mode == "decay"
+    if decay:
+        # Q decays geometrically with the application index; the integer budget
+        # KRAB keeps per iteration is given by the schedule callable. Q_int is
+        # the initial (largest) budget, used for reporting/labels.
+        Q_arg, Q_int, Q_floor_int = make_decay_schedule(dim)
+        n_iterations = resolve_n_iterations_decay()
+    else:
+        # Q is a fraction of the full Hilbert space; resolve to an integer
+        # number of new basis states KRAB keeps per iteration (at least 1).
+        Q_int = max(1, int(round(Q_frac * dim)))
+        Q_floor_int = Q_int
+        Q_arg = Q_int
+        n_iterations = resolve_n_iterations(Q_frac)
     target_band = abs(GROUND_ENERGY) * RELATIVE_ERROR_TARGET
     # SKQD steps: keep num_steps a divisor of dim (matches BARK study convention).
     n_skqd_steps = max(8, min(dim, dim // 16))
 
+    if decay:
+        Q_desc = f"Q decay {DECAY_Q_START_FRAC:.0%}→{DECAY_Q_FLOOR_FRAC:.0%} (×{DECAY_Q_FACTOR})={Q_int}→{Q_floor_int}"
+    else:
+        Q_desc = f"Q={Q_frac:.0%}={Q_int}"
+
     t0 = time.perf_counter()
     print(f"[{n_qubits}q | gs={gs_sparsity} | ham={ham_sparsity} | "
-          f"ov={overlap} | Q={Q_frac:.0%}={Q_int} | eps={epsilon:.0e}]", flush=True)
+          f"ov={overlap} | {Q_desc} | eps={epsilon:.0e}]", flush=True)
 
     # ------------------------------------------------------------------
     # 1. Hamiltonian + true ground energy
@@ -343,14 +399,13 @@ def run(
     # ------------------------------------------------------------------
     # 2. KRAB
     # ------------------------------------------------------------------
-    n_iterations = resolve_n_iterations(Q_frac)
-    print(f"  Running KRAB (Q={Q_frac:.0%}={Q_int}, ε={epsilon:.0e}, "
+    print(f"  Running KRAB ({Q_desc}, ε={epsilon:.0e}, "
           f"max_iter={n_iterations}) ...", flush=True)
     tK = time.perf_counter()
     result = selected_krylov_ground_state(
         H=H,
         initial_bitstring=initial_bitstring,
-        Q=Q_int,
+        Q=Q_arg,
         delta=DELTA,
         epsilon=epsilon,
         n_iterations=n_iterations,
@@ -457,16 +512,17 @@ def run(
     # ------------------------------------------------------------------
     # 6. Figure
     # ------------------------------------------------------------------
+    Q_tag = "Qdecay" if decay else f"Qf{Q_frac:.3f}"
     fname_stub = (
         f"nq{n_qubits}_gs{gs_sparsity:.2f}_ham{ham_sparsity:.2f}"
-        f"_ov{overlap:.2f}_Qf{Q_frac:.3f}_eps{epsilon:.0e}_seed{seed}"
+        f"_ov{overlap:.2f}_{Q_tag}_eps{epsilon:.0e}_seed{seed}"
     )
     fig_path = save_figure(
         figure_dir=figure_dir, fname_stub=fname_stub,
         true_energy=true_energy, target_band=target_band,
         n_qubits=n_qubits, gs_sparsity=gs_sparsity, ham_sparsity=ham_sparsity,
         overlap=overlap, actual_overlap=actual_overlap,
-        Q_frac=Q_frac, Q_int=Q_int, epsilon=epsilon, seed=seed,
+        Q_frac=Q_frac, Q_int=Q_int, epsilon=epsilon, seed=seed, q_label=Q_desc,
         random_paths=random_paths, skqd_paths=skqd_paths, krab_path=krab_path,
         krab_native_sizes=krab_active_start, krab_native_energies=krab_energies,
         krab_n_states=krab_n_states,
@@ -478,10 +534,13 @@ def run(
     # ------------------------------------------------------------------
     # 7. CSV row
     # ------------------------------------------------------------------
+    # In decay mode Q_frac/Q_int report the *initial* (largest) budget; the
+    # per-application schedule is captured in the figure's "Q budget" curve.
+    row_Q_frac = DECAY_Q_START_FRAC if decay else Q_frac
     row = {
         "n_qubits": n_qubits, "gs_sparsity": gs_sparsity, "ham_sparsity": ham_sparsity,
         "overlap": overlap, "actual_overlap": actual_overlap,
-        "Q_frac": Q_frac, "Q_int": Q_int, "epsilon": epsilon, "seed": seed,
+        "Q_frac": row_Q_frac, "Q_int": Q_int, "epsilon": epsilon, "seed": seed,
         "dim": dim, "gs_support_size": info["ground_state_support_size"],
         "ham_nnz": info["hamiltonian_nnz"], "gap": gap_val,
         "true_ground_energy": true_energy,
@@ -506,7 +565,8 @@ def run(
         "krab_beats_skqd": krab_beats_skqd,
         "advantage_ratio": advantage_ratio,
     }
-    append_csv_row(data_dir, row)
+    csv_name = "comparison_decay.csv" if decay else "comparison.csv"
+    append_csv_row(data_dir, row, csv_name=csv_name)
     print(f"  Total wall time: {time.perf_counter()-t0:.1f}s", flush=True)
     return row
 
@@ -525,7 +585,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--overlap",        type=float, required=True)
     p.add_argument("--Q_frac",         type=float, required=True,
                    help="KRAB: new basis states kept per iteration, as a fraction "
-                        "of the full Hilbert space 2ⁿ (e.g. 0.03 = 3%%).")
+                        "of the full Hilbert space 2ⁿ (e.g. 0.03 = 3%%). "
+                        "Ignored when --Q_mode decay (the budget comes from the "
+                        "decay schedule instead).")
+    p.add_argument("--Q_mode",         type=str, default="fixed",
+                   choices=["fixed", "decay"],
+                   help="fixed: constant Q=round(Q_frac·2ⁿ) per iteration (default). "
+                        "decay: geometric Q(app)=max(1%%·2ⁿ, int(20%%·2ⁿ·0.75**app)).")
     p.add_argument("--epsilon",        type=float, required=True,
                    help="KRAB: coefficient pruning threshold after diagonalization.")
     p.add_argument("--n_random_paths", type=int,   default=20,
@@ -549,4 +615,5 @@ if __name__ == "__main__":
         figure_dir=args.figure_dir,
         data_dir=args.data_dir,
         n_random_paths=args.n_random_paths,
+        Q_mode=args.Q_mode,
     )
