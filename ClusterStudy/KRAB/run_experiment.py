@@ -383,6 +383,7 @@ def run(
         gap=GAP,
         return_info=True,
         make_pauli_op=False,
+        max_amplitude=overlap
     )
     gap_val = info.get("actual_gap", info.get("requested_gap", float("nan")))
 
@@ -430,8 +431,14 @@ def run(
     else:
         krab_subspace_at_target = None
 
-    # discovery-order path (apples-to-apples with SKQD)
-    krab_path = get_one_path(H, result.final_indices)
+    # discovery-order path (apples-to-apples with SKQD). KRAB's final_indices
+    # ordering is arbitrary, so move the initial state to the front to ensure the
+    # path starts from the true initial state (and not at a huge energy).
+    krab_indices = list(result.final_indices)
+    if initial_idx in krab_indices:
+        krab_indices.remove(initial_idx)
+    krab_indices.insert(0, initial_idx)
+    krab_path = get_one_path(H, krab_indices)
     krab_n_states = n_states_to_target(krab_path, true_energy)
 
     krab_final_energy = float(result.final_energy)

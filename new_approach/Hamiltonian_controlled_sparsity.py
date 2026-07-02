@@ -3,6 +3,75 @@ import scipy.sparse as sp
 from qiskit.quantum_info import Operator, SparsePauliOp
 
 
+def _build_ground_state_amps(rng, k, max_amplitude, zero_tol=1e-12):
+    """
+    Build k complex amplitudes for the ground state, unit-normalized.
+
+    If max_amplitude is None: complex-normal amplitudes, normalized.
+
+    If max_amplitude = p is given, it is interpreted as a PROBABILITY:
+    one chosen amplitude satisfies |c_i|^2 = p exactly (with a random phase),
+    and the remaining k-1 amplitudes have random phases and magnitudes whose
+    squared moduli sum to exactly 1 - p. The dominant amplitude is kept the
+    strict maximum in modulus; |c_i|^2 = p is never altered.
+
+    Feasibility: 1/k <= p <= 1, since the dominant probability cannot fall
+    below the equal-weight value 1/k while remaining the largest.
+    """
+    if max_amplitude is None:
+        amps = rng.standard_normal(k) + 1j * rng.standard_normal(k)
+        amps /= np.linalg.norm(amps)
+        return amps
+
+    p = float(max_amplitude)
+    if not (0.0 < p <= 1.0):
+        raise ValueError("max_amplitude (a probability |c|^2) must be in (0, 1].")
+
+    if k == 1:
+        if abs(p - 1.0) > 1e-9:
+            raise ValueError("With k=1 the only amplitude must have |c|^2 = 1.")
+        return np.array([1.0 + 0j])
+
+    lower = 1.0 / k
+    if p < lower - 1e-12:
+        raise ValueError(
+            f"max_amplitude={p:.4g} is too small for k={k}; "
+            f"need max_amplitude >= 1/k = {lower:.4g} to remain the maximum."
+        )
+
+    dom_mod = np.sqrt(p)
+
+    # Random probabilities for the rest, summing to exactly (1 - p),
+    # each capped below p so the dominant one stays the strict maximum.
+    remaining = 1.0 - p
+    # Dirichlet gives a random split of `remaining` over k-1 parts.
+    probs = rng.dirichlet(np.ones(k - 1)) * remaining
+
+    # Enforce each rest-probability < p (strict maximum). Clip and redistribute.
+    # With p >= 1/k this is always feasible.
+    for _ in range(64):
+        over = probs >= p
+        if not np.any(over):
+            break
+        excess = np.sum(probs[over] - (p * (1 - 1e-9)))
+        probs[over] = p * (1 - 1e-9)
+        under = ~over
+        if np.any(under):
+            probs[under] += excess * probs[under] / np.sum(probs[under])
+        else:
+            break
+
+    rest_mod = np.sqrt(probs)
+    rest_phase = np.exp(1j * 2 * np.pi * rng.random(k - 1))
+    rest = rest_mod * rest_phase
+
+    dom = dom_mod * np.exp(1j * 2 * np.pi * rng.random())
+
+    amps = np.concatenate([[dom], rest])
+    rng.shuffle(amps)
+    return amps
+
+
 def make_controlled_sparse_ground_state_hamiltonian_from_qubits(
     n_qubits: int,
     ground_state_sparsity: float | int,
@@ -14,6 +83,7 @@ def make_controlled_sparse_ground_state_hamiltonian_from_qubits(
     return_info: bool = True,
     force_nondiagonal: bool = True,
     zero_tol: float = 1e-12,
+    max_amplitude: float | None = None,
 ):
     """
     Returns
@@ -32,6 +102,14 @@ def make_controlled_sparse_ground_state_hamiltonian_from_qubits(
 
     info : dict, optional
         Diagnostics.
+
+    Notes
+    -----
+    max_amplitude : float | None
+        If given, the largest contributing basis-state amplitude has this
+        modulus; the remaining amplitudes are random and the full vector is
+        normalized to unit norm. Requires 1/sqrt(k) <= max_amplitude <= 1,
+        where k is the ground-state support size.
     """
 
     if not isinstance(n_qubits, int) or n_qubits < 1:
@@ -74,8 +152,7 @@ def make_controlled_sparse_ground_state_hamiltonian_from_qubits(
     support_set = set(int(x) for x in support)
     complement = np.array([i for i in range(dim) if i not in support_set])
 
-    amps = rng.standard_normal(k) + 1j * rng.standard_normal(k)
-    amps /= np.linalg.norm(amps)
+    amps = _build_ground_state_amps(rng, k, max_amplitude, zero_tol=zero_tol)
 
     psi = np.zeros(dim, dtype=np.complex128)
     psi[support] = amps
@@ -292,12 +369,15 @@ def make_controlled_sparse_ground_state_hamiltonian_from_qubits(
     evals = np.linalg.eigvalsh(H_dense)
     actual_gap = float(evals[1] - evals[0]) if dim > 1 else np.inf
 
+    gs_abs = np.abs(psi[support])
     info = {
         "n_qubits": n_qubits,
         "dim": dim,
         "ground_state_support_size": gs_nnz,
         "ground_state_density": gs_nnz / dim,
         "ground_state_control_sparsity": (gs_nnz - 1) / (dim - 1),
+        "ground_state_max_amplitude": float(np.max(gs_abs)) if gs_nnz else 0.0,
+        "requested_max_amplitude": max_amplitude,
         "hamiltonian_nnz": ham_nnz,
         "hamiltonian_density": ham_nnz / (dim * dim),
         "hamiltonian_offdiag_nnz": offdiag_nnz,
@@ -318,10 +398,6 @@ def make_controlled_sparse_ground_state_hamiltonian_from_qubits(
         return H_csr, H_pauli, psi, support, info
 
     return H_csr, H_pauli, psi, support
-
-
-
-
 
 
 # Faster Alternative
@@ -345,6 +421,7 @@ def make_controlled_sparse_ground_state_hamiltonian_fast(
     make_pauli_op: bool = True,
     pauli_chop_tol: float = 1e-12,
     return_info: bool = True,
+    max_amplitude: float | None = None,
 ):
     """
     Efficient construction of a computational-basis sparse Hamiltonian with a
@@ -367,6 +444,14 @@ def make_controlled_sparse_ground_state_hamiltonian_fast(
 
     info : dict, optional
         Diagnostics.
+
+    Notes
+    -----
+    max_amplitude : float | None
+        If given, the largest contributing basis-state amplitude has this
+        modulus; the remaining amplitudes are random and the full vector is
+        normalized to unit norm. Requires 1/sqrt(k) <= max_amplitude <= 1,
+        where k is the ground-state support size.
     """
 
     if not isinstance(n_qubits, int) or n_qubits < 1:
@@ -417,8 +502,7 @@ def make_controlled_sparse_ground_state_hamiltonian_fast(
     in_support[support] = True
     complement = np.flatnonzero(~in_support)
 
-    amps = rng.standard_normal(k) + 1j * rng.standard_normal(k)
-    amps /= np.linalg.norm(amps)
+    amps = _build_ground_state_amps(rng, k, max_amplitude, zero_tol=zero_tol)
 
     psi = np.zeros(dim, dtype=np.complex128)
     psi[support] = amps
@@ -710,6 +794,7 @@ def make_controlled_sparse_ground_state_hamiltonian_fast(
     offdiag_nnz = int(np.count_nonzero(offdiag_mask))
 
     gs_nnz = int(np.count_nonzero(np.abs(psi) > zero_tol))
+    gs_abs = np.abs(psi[support])
 
     info = {
         "n_qubits": n_qubits,
@@ -717,6 +802,8 @@ def make_controlled_sparse_ground_state_hamiltonian_fast(
         "ground_state_support_size": gs_nnz,
         "ground_state_density": gs_nnz / dim,
         "ground_state_control_sparsity": (gs_nnz - 1) / (dim - 1),
+        "ground_state_max_amplitude": float(np.max(gs_abs)) if gs_nnz else 0.0,
+        "requested_max_amplitude": max_amplitude,
         "hamiltonian_nnz": int(H_csr.nnz),
         "hamiltonian_density": H_csr.nnz / (dim * dim),
         "hamiltonian_offdiag_nnz": offdiag_nnz,

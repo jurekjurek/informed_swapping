@@ -1,0 +1,304 @@
+==================================================
+Array job   : 26387090
+Chunk       : 26 / 29  (decaying-Q study)
+Node        : node024
+Started     : Mon Jun 29 05:35:46 PM CEST 2026
+==================================================
+Chunk 26/29  —  22 experiments (cost-balanced) of 432 total  (relative cost ≈ 2.16e+08)
+=================================================================
+
+[1/22  global=146]
+[8q | gs=0.05 | ham=0.1 | ov=0.1 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-05]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.1000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-05, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=2, path states_to_target=14
+  Running SKQD (12 time steps × 16 steps) ...
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
+  return splu(A).solve
+/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
+  return spsolve(Q, P)
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2100.17it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2134.37it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2140.16it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2201.08it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2138.59it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2139.41it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2200.07it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2106.30it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2127.54it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2152.24it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2127.27it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2129.36it/s]
+    SKQD: 14.63s, best t=0.7, best states_to_target=26
+  Computing 20 random paths ...
+Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:00<00:12,  1.50it/s]Computing paths:  10%|█         | 2/20 [00:01<00:11,  1.51it/s]Computing paths:  15%|█▌        | 3/20 [00:02<00:11,  1.43it/s]Computing paths:  20%|██        | 4/20 [00:02<00:10,  1.49it/s]Computing paths:  25%|██▌       | 5/20 [00:03<00:10,  1.47it/s]Computing paths:  30%|███       | 6/20 [00:04<00:10,  1.35it/s]Computing paths:  35%|███▌      | 7/20 [00:04<00:09,  1.37it/s]Computing paths:  40%|████      | 8/20 [00:05<00:08,  1.36it/s]Computing paths:  45%|████▌     | 9/20 [00:06<00:07,  1.38it/s]Computing paths:  50%|█████     | 10/20 [00:07<00:07,  1.37it/s]Computing paths:  55%|█████▌    | 11/20 [00:07<00:06,  1.44it/s]Computing paths:  60%|██████    | 12/20 [00:08<00:05,  1.45it/s]Computing paths:  65%|██████▌   | 13/20 [00:09<00:04,  1.46it/s]Computing paths:  70%|███████   | 14/20 [00:09<00:04,  1.44it/s]Computing paths:  75%|███████▌  | 15/20 [00:10<00:03,  1.46it/s]Computing paths:  80%|████████  | 16/20 [00:11<00:02,  1.50it/s]Computing paths:  85%|████████▌ | 17/20 [00:11<00:02,  1.49it/s]Computing paths:  90%|█████████ | 18/20 [00:12<00:01,  1.51it/s]Computing paths:  95%|█████████▌| 19/20 [00:13<00:00,  1.51it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.56it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.46it/s]
+    Figure: figures_decay/nq8_gs0.05_ham0.10_ov0.10_Qdecay_eps1e-05_seed42.png
+  Total wall time: 29.2s
+
+[2/22  global=152]
+[8q | gs=0.05 | ham=0.1 | ov=0.5 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-07]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.5000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-07, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=2, path states_to_target=14
+  Running SKQD (12 time steps × 16 steps) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2283.24it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2279.98it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2189.38it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2005.88it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2262.45it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2194.03it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2266.27it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2199.14it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2238.16it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2240.55it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2236.81it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2288.30it/s]
+    SKQD: 15.85s, best t=0.7, best states_to_target=26
+  Computing 20 random paths ...
+Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:00<00:14,  1.35it/s]Computing paths:  10%|█         | 2/20 [00:01<00:12,  1.46it/s]Computing paths:  15%|█▌        | 3/20 [00:02<00:12,  1.41it/s]Computing paths:  20%|██        | 4/20 [00:02<00:11,  1.40it/s]Computing paths:  25%|██▌       | 5/20 [00:03<00:11,  1.31it/s]Computing paths:  30%|███       | 6/20 [00:04<00:10,  1.35it/s]Computing paths:  35%|███▌      | 7/20 [00:05<00:10,  1.29it/s]Computing paths:  40%|████      | 8/20 [00:06<00:09,  1.27it/s]Computing paths:  45%|████▌     | 9/20 [00:06<00:08,  1.25it/s]Computing paths:  50%|█████     | 10/20 [00:07<00:08,  1.25it/s]Computing paths:  55%|█████▌    | 11/20 [00:08<00:07,  1.27it/s]Computing paths:  60%|██████    | 12/20 [00:09<00:06,  1.32it/s]Computing paths:  65%|██████▌   | 13/20 [00:10<00:05,  1.20it/s]Computing paths:  70%|███████   | 14/20 [00:10<00:04,  1.24it/s]Computing paths:  75%|███████▌  | 15/20 [00:11<00:03,  1.28it/s]Computing paths:  80%|████████  | 16/20 [00:12<00:02,  1.33it/s]Computing paths:  85%|████████▌ | 17/20 [00:13<00:02,  1.34it/s]Computing paths:  90%|█████████ | 18/20 [00:13<00:01,  1.40it/s]Computing paths:  95%|█████████▌| 19/20 [00:14<00:00,  1.39it/s]Computing paths: 100%|██████████| 20/20 [00:15<00:00,  1.41it/s]Computing paths: 100%|██████████| 20/20 [00:15<00:00,  1.33it/s]
+    Figure: figures_decay/nq8_gs0.05_ham0.10_ov0.50_Qdecay_eps1e-07_seed42.png
+  Total wall time: 31.8s
+
+[3/22  global=158]
+[8q | gs=0.05 | ham=0.1 | ov=0.8 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-05]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.8000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-05, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=3, path states_to_target=13
+  Running SKQD (12 time steps × 16 steps) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2238.45it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2125.78it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2210.58it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2183.33it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2236.89it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2244.52it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2237.11it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2080.96it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2241.97it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2060.58it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2254.47it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2190.17it/s]
+    SKQD: 18.08s, best t=0.7, best states_to_target=16
+  Computing 20 random paths ...
+Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:00<00:16,  1.19it/s]Computing paths:  10%|█         | 2/20 [00:01<00:14,  1.24it/s]Computing paths:  15%|█▌        | 3/20 [00:02<00:14,  1.14it/s]Computing paths:  20%|██        | 4/20 [00:03<00:14,  1.13it/s]Computing paths:  25%|██▌       | 5/20 [00:04<00:13,  1.12it/s]Computing paths:  30%|███       | 6/20 [00:05<00:12,  1.12it/s]Computing paths:  35%|███▌      | 7/20 [00:06<00:10,  1.19it/s]Computing paths:  40%|████      | 8/20 [00:06<00:09,  1.22it/s]Computing paths:  45%|████▌     | 9/20 [00:07<00:09,  1.16it/s]Computing paths:  50%|█████     | 10/20 [00:08<00:08,  1.19it/s]Computing paths:  55%|█████▌    | 11/20 [00:09<00:07,  1.16it/s]Computing paths:  60%|██████    | 12/20 [00:10<00:06,  1.14it/s]Computing paths:  65%|██████▌   | 13/20 [00:11<00:06,  1.16it/s]Computing paths:  70%|███████   | 14/20 [00:12<00:05,  1.17it/s]Computing paths:  75%|███████▌  | 15/20 [00:13<00:04,  1.09it/s]Computing paths:  80%|████████  | 16/20 [00:14<00:03,  1.09it/s]Computing paths:  85%|████████▌ | 17/20 [00:14<00:02,  1.12it/s]Computing paths:  90%|█████████ | 18/20 [00:15<00:01,  1.13it/s]Computing paths:  95%|█████████▌| 19/20 [00:16<00:00,  1.09it/s]Computing paths: 100%|██████████| 20/20 [00:17<00:00,  1.11it/s]Computing paths: 100%|██████████| 20/20 [00:17<00:00,  1.14it/s]
+    Figure: figures_decay/nq8_gs0.05_ham0.10_ov0.80_Qdecay_eps1e-05_seed42.png
+  Total wall time: 36.4s
+
+[4/22  global=164]
+[8q | gs=0.05 | ham=0.25 | ov=0.3 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-07]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.3000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-07, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=2, path states_to_target=14
+  Running SKQD (12 time steps × 16 steps) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2157.98it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2056.85it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2117.20it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2056.98it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 1978.56it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2083.67it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 1956.13it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2023.00it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2109.68it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2136.68it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2052.45it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2193.46it/s]
+    SKQD: 14.25s, best t=1.0, best states_to_target=23
+  Computing 20 random paths ...
+Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:00<00:12,  1.57it/s]Computing paths:  10%|█         | 2/20 [00:01<00:11,  1.63it/s]Computing paths:  15%|█▌        | 3/20 [00:01<00:10,  1.62it/s]Computing paths:  20%|██        | 4/20 [00:02<00:09,  1.63it/s]Computing paths:  25%|██▌       | 5/20 [00:03<00:09,  1.59it/s]Computing paths:  30%|███       | 6/20 [00:03<00:08,  1.64it/s]Computing paths:  35%|███▌      | 7/20 [00:04<00:08,  1.57it/s]Computing paths:  40%|████      | 8/20 [00:05<00:07,  1.52it/s]Computing paths:  45%|████▌     | 9/20 [00:05<00:07,  1.51it/s]Computing paths:  50%|█████     | 10/20 [00:06<00:06,  1.48it/s]Computing paths:  55%|█████▌    | 11/20 [00:07<00:05,  1.53it/s]Computing paths:  60%|██████    | 12/20 [00:07<00:04,  1.61it/s]Computing paths:  65%|██████▌   | 13/20 [00:08<00:04,  1.59it/s]Computing paths:  70%|███████   | 14/20 [00:08<00:03,  1.62it/s]Computing paths:  75%|███████▌  | 15/20 [00:09<00:03,  1.57it/s]Computing paths:  80%|████████  | 16/20 [00:10<00:02,  1.61it/s]Computing paths:  85%|████████▌ | 17/20 [00:10<00:01,  1.53it/s]Computing paths:  90%|█████████ | 18/20 [00:11<00:01,  1.56it/s]Computing paths:  95%|█████████▌| 19/20 [00:12<00:00,  1.57it/s]Computing paths: 100%|██████████| 20/20 [00:12<00:00,  1.56it/s]Computing paths: 100%|██████████| 20/20 [00:12<00:00,  1.57it/s]
+    Figure: figures_decay/nq8_gs0.05_ham0.25_ov0.30_Qdecay_eps1e-07_seed42.png
+  Total wall time: 27.9s
+
+[5/22  global=170]
+[8q | gs=0.05 | ham=0.25 | ov=0.5 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-05]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.5000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-05, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=2, path states_to_target=14
+  Running SKQD (12 time steps × 16 steps) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2213.86it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2281.30it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2264.21it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2282.61it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2287.91it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2269.03it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2294.87it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2263.22it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2291.11it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2245.42it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2270.95it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2265.66it/s]
+    SKQD: 13.92s, best t=0.9, best states_to_target=18
+  Computing 20 random paths ...
+Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:00<00:13,  1.46it/s]Computing paths:  10%|█         | 2/20 [00:01<00:11,  1.54it/s]Computing paths:  15%|█▌        | 3/20 [00:02<00:11,  1.48it/s]Computing paths:  20%|██        | 4/20 [00:02<00:10,  1.53it/s]Computing paths:  25%|██▌       | 5/20 [00:03<00:09,  1.55it/s]Computing paths:  30%|███       | 6/20 [00:03<00:09,  1.52it/s]Computing paths:  35%|███▌      | 7/20 [00:04<00:08,  1.49it/s]Computing paths:  40%|████      | 8/20 [00:05<00:07,  1.52it/s]Computing paths:  45%|████▌     | 9/20 [00:06<00:07,  1.47it/s]Computing paths:  50%|█████     | 10/20 [00:06<00:06,  1.48it/s]Computing paths:  55%|█████▌    | 11/20 [00:07<00:06,  1.47it/s]Computing paths:  60%|██████    | 12/20 [00:08<00:05,  1.49it/s]Computing paths:  65%|██████▌   | 13/20 [00:08<00:04,  1.50it/s]Computing paths:  70%|███████   | 14/20 [00:09<00:04,  1.48it/s]Computing paths:  75%|███████▌  | 15/20 [00:10<00:03,  1.50it/s]Computing paths:  80%|████████  | 16/20 [00:10<00:02,  1.50it/s]Computing paths:  85%|████████▌ | 17/20 [00:11<00:02,  1.48it/s]Computing paths:  90%|█████████ | 18/20 [00:12<00:01,  1.46it/s]Computing paths:  95%|█████████▌| 19/20 [00:12<00:00,  1.47it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.52it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.50it/s]
+    Figure: figures_decay/nq8_gs0.05_ham0.25_ov0.50_Qdecay_eps1e-05_seed42.png
+  Total wall time: 28.2s
+
+[6/22  global=176]
+[8q | gs=0.05 | ham=0.5 | ov=0.1 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-07]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.1000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-07, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=1, path states_to_target=14
+  Running SKQD (12 time steps × 16 steps) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2208.76it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2178.58it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2000.62it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2190.59it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2242.72it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2106.83it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2250.31it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2062.29it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2084.84it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2030.89it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2015.10it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2100.96it/s]
+    SKQD: 13.33s, best t=0.3, best states_to_target=19
+  Computing 20 random paths ...
+Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:00<00:13,  1.42it/s]Computing paths:  10%|█         | 2/20 [00:01<00:11,  1.56it/s]Computing paths:  15%|█▌        | 3/20 [00:01<00:10,  1.55it/s]Computing paths:  20%|██        | 4/20 [00:02<00:10,  1.55it/s]Computing paths:  25%|██▌       | 5/20 [00:03<00:09,  1.59it/s]Computing paths:  30%|███       | 6/20 [00:03<00:09,  1.54it/s]Computing paths:  35%|███▌      | 7/20 [00:04<00:08,  1.57it/s]Computing paths:  40%|████      | 8/20 [00:05<00:08,  1.50it/s]Computing paths:  45%|████▌     | 9/20 [00:05<00:07,  1.56it/s]Computing paths:  50%|█████     | 10/20 [00:06<00:06,  1.53it/s]Computing paths:  55%|█████▌    | 11/20 [00:07<00:06,  1.48it/s]Computing paths:  60%|██████    | 12/20 [00:07<00:05,  1.51it/s]Computing paths:  65%|██████▌   | 13/20 [00:08<00:04,  1.55it/s]Computing paths:  70%|███████   | 14/20 [00:09<00:03,  1.52it/s]Computing paths:  75%|███████▌  | 15/20 [00:09<00:03,  1.50it/s]Computing paths:  80%|████████  | 16/20 [00:10<00:02,  1.44it/s]Computing paths:  85%|████████▌ | 17/20 [00:11<00:02,  1.45it/s]Computing paths:  90%|█████████ | 18/20 [00:11<00:01,  1.51it/s]Computing paths:  95%|█████████▌| 19/20 [00:12<00:00,  1.46it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.49it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.51it/s]
+    Figure: figures_decay/nq8_gs0.05_ham0.50_ov0.10_Qdecay_eps1e-07_seed42.png
+  Total wall time: 27.5s
+
+[7/22  global=182]
+[8q | gs=0.05 | ham=0.5 | ov=0.3 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-05]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.3000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-05, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=2, path states_to_target=14
+  Running SKQD (12 time steps × 16 steps) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2103.46it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2140.57it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2024.03it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2033.79it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2113.73it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2047.50it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2118.47it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2099.19it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2137.84it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2237.93it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2214.81it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2151.61it/s]
+    SKQD: 14.67s, best t=0.9, best states_to_target=21
+  Computing 20 random paths ...
+Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:00<00:11,  1.62it/s]Computing paths:  10%|█         | 2/20 [00:01<00:12,  1.46it/s]Computing paths:  15%|█▌        | 3/20 [00:01<00:11,  1.51it/s]Computing paths:  20%|██        | 4/20 [00:02<00:10,  1.57it/s]Computing paths:  25%|██▌       | 5/20 [00:03<00:09,  1.56it/s]Computing paths:  30%|███       | 6/20 [00:03<00:09,  1.54it/s]Computing paths:  35%|███▌      | 7/20 [00:04<00:08,  1.50it/s]Computing paths:  40%|████      | 8/20 [00:05<00:07,  1.53it/s]Computing paths:  45%|████▌     | 9/20 [00:05<00:07,  1.56it/s]Computing paths:  50%|█████     | 10/20 [00:06<00:06,  1.53it/s]Computing paths:  55%|█████▌    | 11/20 [00:07<00:05,  1.55it/s]Computing paths:  60%|██████    | 12/20 [00:07<00:05,  1.56it/s]Computing paths:  65%|██████▌   | 13/20 [00:08<00:04,  1.54it/s]Computing paths:  70%|███████   | 14/20 [00:09<00:03,  1.51it/s]Computing paths:  75%|███████▌  | 15/20 [00:09<00:03,  1.53it/s]Computing paths:  80%|████████  | 16/20 [00:10<00:02,  1.46it/s]Computing paths:  85%|████████▌ | 17/20 [00:11<00:02,  1.43it/s]Computing paths:  90%|█████████ | 18/20 [00:11<00:01,  1.45it/s]Computing paths:  95%|█████████▌| 19/20 [00:12<00:00,  1.36it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.40it/s]Computing paths: 100%|██████████| 20/20 [00:13<00:00,  1.49it/s]
+    Figure: figures_decay/nq8_gs0.05_ham0.50_ov0.30_Qdecay_eps1e-05_seed42.png
+  Total wall time: 29.1s
+
+[8/22  global=188]
+[8q | gs=0.05 | ham=0.5 | ov=0.8 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-07]
+  Building Hamiltonian ...
+    dim=256, E₀=-5.000000, gap≈1.000, init idx=107, |<ψ|init>|²=0.8000
+  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-07, max_iter=41) ...
+    KRAB: 0.01s, final E=-5.000000, final subspace=14, native iter_to_target=1, path states_to_target=13
+  Running SKQD (12 time steps × 16 steps) ...
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2070.62it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2038.48it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2104.98it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2149.96it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2156.52it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2128.62it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2153.34it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2121.55it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2084.32it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2171.25it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2165.08it/s]
+  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
+100%|██████████| 16/16 [00:00<00:00, 2083.74it/s]
+[2026-06-29T17:39:34.231] error: *** JOB 26387153 ON node024 CANCELLED AT 2026-06-29T17:39:34 DUE to SIGNAL Terminated ***
