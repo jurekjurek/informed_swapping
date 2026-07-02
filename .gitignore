@@ -1,0 +1,24 @@
+# virtualenv
+.SKQD/
+
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# generated study / experiment outputs
+cluster_studies/**/figures/
+cluster_studies/**/figures_decay/
+cluster_studies/**/data/
+cluster_studies/**/analysis/
+cluster_studies/**/analysis_decay/
+cluster_studies/**/results/
+cluster_studies/**/SlurmOut/*
+experiments/out/
+experiments/*.png

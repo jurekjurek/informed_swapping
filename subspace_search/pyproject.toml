@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "subspace_search"
+version = "0.1.0"
+description = "Classical subspace-selecting ground-state search algorithms (KRAB, BARK) and the SKQD reference, plus controlled-sparsity Hamiltonian generators and shared plotting utilities."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Emil Rosanowski", email = "emilrosanowski@gmail.com" }]
+keywords = ["quantum", "krylov", "SKQD", "ground-state", "subspace-diagonalization"]
+
+dependencies = [
+    "numpy>=1.23",
+    "scipy>=1.10",
+    "matplotlib>=3.6",
+    "tqdm>=4.64",
+    "qiskit>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "jupyter", "pandas>=1.5"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

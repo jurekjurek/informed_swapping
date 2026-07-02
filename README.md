@@ -1,67 +1,82 @@
 # informed_swapping
 
-This repository investigates whether quantum-classical hybrid algorithms based on
-**SKQD** (Subspace-based Krylov Quantum Diagonalization) can be "debunked" —
-i.e. whether their advantage can be reproduced or surpassed by purely classical
-heuristics.  The central idea is **informed swapping**: using information already
-available (structure of the Hamiltonian, overlap with the initial state) to build
-a Krylov-like basis without running a quantum circuit.
+Research code investigating whether **classical, subspace-selecting heuristics**
+can reproduce or beat **SKQD** (Subspace-based Krylov Quantum Diagonalization) at
+finding sparse ground states of a Hamiltonian.
 
-## Core algorithms
+The central question: SKQD builds a Krylov-like subspace by time-evolving a state
+and sampling high-amplitude computational-basis states. Can we get the same (or
+better) convergence *classically* — by using the structure of the Hamiltonian
+and the initial-state overlap to choose which basis states to keep? The
+dog-named algorithms **KRAB** and **BARK** are the attempts.
 
-| Algorithm | File | Description |
-|-----------|------|-------------|
-| **BARK** | `BARK.py` | *Bitstring Algorithm for Recursive Krylov* — a purely classical analogue of SKQD that works directly on computational-basis bitstrings via Pauli-string propagation. |
-| **SKQD** (reference) | `SystematicScanOfConvergence/SKQD.py`, `Permutations/SKQD.py` | Classical simulation of SKQD: time-evolves the state with `U = exp(-iHt)` and samples the highest-amplitude basis states at each step to build the subspace. |
-| **JBARK** | `SystematicScanOfConvergence/JBARK.py` | Simpler matrix-level BARK variant: applies `H` directly (no Pauli decomposition), picks the top-amplitude states at each step, projects, and fills missing states at the end. |
+> **This repository was restructured on 2026-07-02.** Everything that existed
+> before is preserved verbatim in [`backup/`](backup/). The layout below is the
+> clean rebuild.
 
-## Key ideas
-
-* **Krylov subspace construction** — both BARK and SKQD grow a subspace of
-  computational-basis states iteratively; the hope is that the ground-state
-  support is covered early.
-* **Stopping time** — the primary figure of merit: how many basis states must
-  be sampled before the full support of the ground state is covered?
-* **Ground-state sparsity vs Hamiltonian sparsity** — two independent knobs
-  that control how hard the problem is. These are studied systematically in
-  `SystematicScanOfConvergence/` and `new_approach/`.
-
-## Repository layout
+## Layout
 
 ```
 informed_swapping/
-├── BARK.py                          # Root-level BARK (Pauli/Qiskit version)
-├── schwingermodel.py                # Schwinger model Hamiltonian builder
-├── Debug.py                         # Ad-hoc debugging helpers
-├── TestSchwinger.py                 # Quick tests on Schwinger model
-├── compare_bark_skqd*.ipynb         # Head-to-head BARK vs SKQD comparisons
-├── informed_swapping.ipynb          # Original exploration notebook
-├── hamiltonian_from_paper.ipynb     # Reproduces Hamiltonians from the SKQD paper
-├── random_perms*.ipynb              # Random-permutation baselines
-├── straight_forward.ipynb           # Straightforward baseline approach
-├── test_bark_skqd_new_ham.ipynb     # Tests with new Hamiltonian generator
+├── subspace_search/      # pip-installable package — the reusable core
+│   ├── pyproject.toml
+│   ├── README.md
+│   └── src/subspace_search/
+│       ├── hamiltonians/ # controlled-sparsity Hamiltonian generators
+│       ├── skqd/         # SKQD reference routine (+ power-iteration sampler)
+│       ├── algorithms/   # KRAB, BARK, and space for new algorithms
+│       ├── paths.py      # subspace projection + convergence paths
+│       └── plotting.py   # Hamiltonian / spectrum / convergence plots
 │
-├── SystematicScanOfConvergence/     # Grid scan of (sparsity, overlap, qubits)
-├── Permutations/                    # SKQD ordering / permutation study
-├── UnitaryVsPower/                  # Unitary vs power-iteration comparison
-└── new_approach/                    # Hamiltonian generator with controlled sparsity
+├── experiments/          # quick local test & exploration scripts
+├── cluster_studies/      # Slurm grid studies of the algorithms
+│   ├── KRAB/             # KRAB-vs-SKQD systematic study
+│   └── BARK/             # BARK-vs-SKQD systematic study
+│
+├── docs/
+│   └── LOGBOOK.md        # running log of documentation updates
+│
+├── backup/               # everything from before the 2026-07-02 restructure
+├── CLAUDE.md             # repo guide + the "Update Documentation" routine
+└── README.md            # this file
 ```
 
-## Dependencies
+## Getting started
 
-```
-pip install numpy scipy qiskit matplotlib pandas tqdm
-```
+The project lives in the `.SKQD/` virtual environment. Install the package once,
+in editable mode, so every experiment and study picks up code changes
+automatically:
 
-The `.BARK/` directory is a local Python virtual environment — activate it with:
 ```bash
-source .BARK/bin/activate
+source .SKQD/bin/activate
+pip install -e subspace_search
 ```
 
-## Quick start
+Then, from anywhere:
 
-Open any of the `compare_bark_skqd*.ipynb` notebooks in Jupyter to see BARK and
-SKQD running side-by-side on the same Hamiltonian.
+```python
+from subspace_search.hamiltonians import make_controlled_sparse_ground_state_hamiltonian_fast
+from subspace_search.skqd import do_skqd
+from subspace_search.algorithms import selected_krylov_ground_state   # KRAB
+from subspace_search.algorithms import BarkBarkBark                   # BARK
+from subspace_search.paths import get_one_path, get_all_paths
+from subspace_search.plotting import plot_hamiltonian, plot_convergence_paths
+```
 
-For a systematic numerical experiment see `SystematicScanOfConvergence/` and its
-`GridScan.py`.
+## Where things are
+
+| I want to... | Go to |
+|--------------|-------|
+| Understand / import the core routines | [`subspace_search/README.md`](subspace_search/README.md) |
+| Add a new algorithm (a new BARK/KRAB) | [`subspace_search/src/subspace_search/algorithms/README.md`](subspace_search/src/subspace_search/algorithms/README.md) |
+| Try something quickly / prototype | [`experiments/README.md`](experiments/README.md) |
+| Run a systematic study on the cluster | [`cluster_studies/README.md`](cluster_studies/README.md) |
+| See what changed and when | [`docs/LOGBOOK.md`](docs/LOGBOOK.md) |
+| Find the old code | [`backup/`](backup/) |
+
+## Keeping docs in sync
+
+Type **"Update Documentation"** in a Claude Code session and the assistant will
+review the changes since the last logbook entry, update every affected README,
+and append a dated entry to [`docs/LOGBOOK.md`](docs/LOGBOOK.md). The routine is
+defined in [`CLAUDE.md`](CLAUDE.md).
