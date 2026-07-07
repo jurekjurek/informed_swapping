@@ -22,3 +22,7 @@ cluster_studies/**/results/
 cluster_studies/**/SlurmOut/*
 experiments/out/
 experiments/*.png
+
+# Ignore all Jupyter Notebooks
+*.ipynb
+.ipynb_checkpoints/

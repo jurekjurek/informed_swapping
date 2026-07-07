@@ -15,9 +15,12 @@ import matplotlib
 matplotlib.use("Agg")   # headless-safe; drop this line to view interactively
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.sparse import csr_matrix
 
 from subspace_search.hamiltonians import (
+    diagnostics,
     make_controlled_sparse_ground_state_hamiltonian_fast,
+    make_planted_hamiltonian,
 )
 from subspace_search.skqd import do_skqd
 from subspace_search.algorithms import selected_krylov_ground_state
@@ -44,6 +47,19 @@ def main() -> None:
     initial = int(np.argmax(np.abs(psi) ** 2))
     print(f"dim={H.shape[0]}, support={info['ground_state_support_size']}, "
           f"E0={true_energy:.4f}, initial index={initial}")
+
+    # Optional example: the newer planted Pauli Hamiltonian has the form
+    # H = -Delta |g><g| + lambda R. It returns a SparsePauliOp, so convert it
+    # to CSR before passing it to the same SKQD / path utilities used below.
+    H_pauli, planted_info = make_planted_hamiltonian(
+        num_qubits=n_qubits, ground_support_size=6, pauli_density=0.1,
+        Delta=10.0, lam=0.05, seed=seed,
+    )
+    H_planted = csr_matrix(H_pauli.to_matrix(sparse=True))
+    planted_diag = diagnostics(H_pauli, planted_info["planted_ground_state"])
+    print(f"planted demo: dim={H_planted.shape[0]}, "
+          f"E0={planted_diag['E0']:.4f}, "
+          f"initial={planted_info['suggested_initial_bitstring']}")
 
     paths = {}
 

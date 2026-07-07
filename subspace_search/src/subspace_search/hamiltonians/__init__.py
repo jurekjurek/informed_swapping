@@ -1,17 +1,17 @@
 """Hamiltonian generators with controlled sparsity.
 
-Currently exposes the two generators from :mod:`controlled_sparsity`, which
-build a computational-basis Hamiltonian whose exact ground state has a
-*controlled* number of nonzero amplitudes and whose off-diagonal fill can be
-tuned independently.
+Exposes Hamiltonian generators with controlled sparse planted ground states.
 """
 
 from .controlled_sparsity import (
     make_controlled_sparse_ground_state_hamiltonian_from_qubits,
     make_controlled_sparse_ground_state_hamiltonian_fast,
 )
+from .new_hamiltonian_approach import diagnostics, make_planted_hamiltonian
 
 __all__ = [
+    "diagnostics",
+    "make_planted_hamiltonian",
     "make_controlled_sparse_ground_state_hamiltonian_from_qubits",
     "make_controlled_sparse_ground_state_hamiltonian_fast",
 ]
