@@ -7,6 +7,49 @@ first.
 
 ---
 
+## 2026-07-08 — Planted Hamiltonian + SKQD energy proxy
+
+**What happened**
+
+- New Hamiltonian family
+  `hamiltonians/new_hamiltonian_approach.py` (commit `895bb38`): builds
+  `H = -Δ|g⟩⟨g| + λ R` from a sparse planted ground state `|g⟩` plus a random
+  off-diagonal Pauli background `R`. Public API `make_planted_hamiltonian(...)`
+  (returns a `SparsePauliOp` + an `info` dict with support, amplitudes, dense
+  planted state, and a `suggested_initial_bitstring`) and `diagnostics(H, g)`
+  (`E0`, planted-state fidelity, IPR, effective support). Both re-exported from
+  `subspace_search.hamiltonians`.
+- SKQD energy tracking: new `skqd/energy_tracking.py`
+  (`update_ground_state_proxy`, `EnergyTrackingStep`) and a new
+  `do_skqd_with_energy_tracking(...)` in `skqd/skqd.py` that maintains an
+  iterative variational ground-state proxy over the sampled states and returns
+  `(ordering, [EnergyTrackingStep, ...])`. The original `do_skqd(...)` is kept
+  backward-compatible (ordering only); the sampling loop also gained a
+  zero-probability / empty-leftover guard. New symbols re-exported from
+  `subspace_search.skqd`.
+- `experiments/compare_methods.py` gained a demo of the planted Pauli
+  Hamiltonian (convert `SparsePauliOp` → CSR, print `diagnostics`).
+- New top-level `AGENTS.md` mirroring `CLAUDE.md` (already documents the
+  energy-tracking API).
+
+**Verification**
+
+- `.SKQD` venv: `make_planted_hamiltonian` + `diagnostics` on a 5-qubit system
+  recover the planted state (E₀ ≈ −9.99, fidelity 1.000).
+- `do_skqd_with_energy_tracking` runs end-to-end: returns the length-`dim`
+  ordering plus one `EnergyTrackingStep` per step (proxy energy improves from
+  −4.40 to −9.99 on step 0); `isinstance(step, EnergyTrackingStep)` holds.
+- All new symbols import from `subspace_search.hamiltonians` / `.skqd`; package
+  version unchanged at `0.1.0`.
+
+**Docs updated:** `subspace_search/README.md` (package map + hamiltonians &
+skqd API sections), `subspace_search/src/subspace_search/__init__.py` overview
+docstring, `experiments/README.md` (compare_methods description), root
+`README.md` (layout comment). Algorithms / cluster_studies / BARK READMEs
+reviewed — no code changes there, left as-is.
+
+---
+
 ## 2026-07-02 — Repository restructure & documentation rebuild
 
 **What happened**

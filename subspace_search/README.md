@@ -24,25 +24,30 @@ are installed automatically; `pip install -e ".[dev]"` adds pytest/jupyter/panda
 
 ```
 src/subspace_search/
-├── __init__.py            # version + overview docstring
-├── hamiltonians/          # controlled-sparsity Hamiltonian generators
-│   └── controlled_sparsity.py
-├── skqd/                  # SKQD reference routine + power-iteration sampler
-│   ├── skqd.py            # do_skqd, get_exponential
-│   └── power.py           # do_power
-├── algorithms/            # classical subspace-search algorithms (see its README)
-│   ├── krab.py            # selected_krylov_ground_state (KRAB) + diagnostics
-│   └── bark.py            # BarkBarkBark (BARK)
-├── paths.py               # project_down, get_one_path, get_all_paths, get_permutations
-└── plotting.py            # plot_hamiltonian, plot_ground_state, plot_convergence_paths
+├── __init__.py                  # version + overview docstring
+├── hamiltonians/                # Hamiltonian generators
+│   ├── controlled_sparsity.py   # make_controlled_sparse_ground_state_hamiltonian_*
+│   └── new_hamiltonian_approach.py  # make_planted_hamiltonian, diagnostics
+├── skqd/                        # SKQD reference routine + power-iteration sampler
+│   ├── skqd.py                  # do_skqd, do_skqd_with_energy_tracking, get_exponential
+│   ├── energy_tracking.py       # update_ground_state_proxy, EnergyTrackingStep
+│   └── power.py                 # do_power
+├── algorithms/                  # classical subspace-search algorithms (see its README)
+│   ├── krab.py                  # selected_krylov_ground_state (KRAB) + diagnostics
+│   └── bark.py                  # BarkBarkBark (BARK)
+├── paths.py                     # project_down, get_one_path, get_all_paths, get_permutations
+└── plotting.py                  # plot_hamiltonian, plot_ground_state, plot_convergence_paths
 ```
 
 ## Public API by module
 
 ### `subspace_search.hamiltonians`
-Build a computational-basis Hamiltonian whose exact ground state has a
-*controlled* number of nonzero amplitudes, with independently tunable
-off-diagonal fill.
+Two families of computational-basis Hamiltonians with a sparse planted ground
+state.
+
+**Controlled-sparsity** (`controlled_sparsity.py`) — build `H` whose exact
+ground state has a *controlled* number of nonzero amplitudes, with independently
+tunable off-diagonal fill:
 
 - `make_controlled_sparse_ground_state_hamiltonian_fast(...)` — efficient
   version (samples candidate couplings once, builds `K = AᴴA` once). Use this.
@@ -55,14 +60,38 @@ densities, support size, ...). Key knobs: `ground_state_sparsity`,
 `hamiltonian_sparsity`, `ground_energy`, `gap`, `max_amplitude` (fixes the
 dominant basis-state probability = initial-state overlap), `seed`.
 
+**Planted projector** (`new_hamiltonian_approach.py`) — build
+`H = -Δ|g⟩⟨g| + λ R`, where `|g⟩` is sparse in the computational basis and `R`
+is a random (off-diagonal) Pauli background of controllable density:
+
+- `make_planted_hamiltonian(num_qubits, ground_support_size, pauli_density, Delta=10.0, lam=0.1, seed=None, ...)`
+  → `(H_pauli, info)`. Returns a **`SparsePauliOp`** (convert with
+  `csr_matrix(H_pauli.to_matrix(sparse=True))` before feeding SKQD/`paths`).
+  `info` carries the planted `support`, `amplitudes`, dense
+  `planted_ground_state`, term counts, and a `suggested_initial_bitstring`
+  (largest-overlap basis state) with its `suggested_initial_overlap`. Optional
+  `initial_bitstring` + `target_initial_overlap` pin `|⟨initial|g⟩|²`.
+- `diagnostics(H_pauli, planted_g)` → `{E0, fidelity_with_planted_state, IPR,
+  effective_support_size}` (dense `eigh`; use for small systems).
+
 ### `subspace_search.skqd`
 - `do_skqd(H, num_steps, t, initial=None)` — the SKQD reference: evolve with
   `U = exp(-iHt)`, sample high-amplitude basis states each step, return the
   discovery ordering (a length-`dim` array with `-1` sentinels for unfilled
   slots).
+- `do_skqd_with_energy_tracking(H, num_steps, t, initial=None)` →
+  `(ordering, [EnergyTrackingStep, ...])` — the same run, but after each step it
+  updates an iterative **ground-state proxy** over the states seen so far and
+  records diagnostics: proxy energy before/after, `improvement`, the best
+  single-bitstring update, the multi-bitstring `correlation_benefit`, the
+  variational `amplitudes`, and the `new_indices` sampled. The plain `do_skqd`
+  API is unchanged (returns the ordering only).
 - `do_power(H, num_steps, initial=None)` — same sampling loop but using the
   inverse of a shifted `H` (power iteration) instead of a real-time propagator.
 - `get_exponential(H, t)` — `expm(-iHt)`.
+- `update_ground_state_proxy(H, state, new_indices, step)` /
+  `EnergyTrackingStep` (`energy_tracking.py`) — the per-step variational update
+  and its diagnostics dataclass, reusable outside SKQD.
 
 ### `subspace_search.algorithms`
 - `selected_krylov_ground_state(...)` → `SelectedKrylovResult` — **KRAB**, with

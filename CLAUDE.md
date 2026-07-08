@@ -27,6 +27,14 @@ Krylov Quantum Diagonalization) at finding sparse ground states. See
 - New algorithms go in `subspace_search/src/subspace_search/algorithms/` and are
   re-exported in that package's `__init__.py`. See its README for the contract
   (produce an ordering of basis indices so it plugs into `paths`/`plotting`).
+- SKQD lives in `subspace_search/src/subspace_search/skqd/`. The original
+  `do_skqd(...)` API is kept backward-compatible and returns only the sampled
+  ordering. Energy tracking for the iterative ground-state proxy is implemented
+  separately in `skqd/energy_tracking.py` and exposed through
+  `do_skqd_with_energy_tracking(...)`, which returns `(ordering, metrics)`.
+  Each metric records the proxy energy before/after an iteration, improvement,
+  best one-bitstring update, multi-bitstring correlation benefit, amplitudes,
+  and newly sampled indices.
 - Keep the `.SKQD` venv as the interpreter for running/testing.
 - Don't commit generated outputs (figures, CSVs, `results/`, `analysis/`).
 

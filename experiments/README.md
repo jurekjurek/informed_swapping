@@ -32,4 +32,4 @@ python compare_methods.py
 
 | File | Purpose |
 |------|---------|
-| `compare_methods.py` | End-to-end example: build a controlled-sparsity Hamiltonian, run KRAB / SKQD / a random baseline, and plot their convergence paths on one axis. A good starting template to copy. |
+| `compare_methods.py` | End-to-end example: build a controlled-sparsity Hamiltonian, run KRAB / SKQD / a random baseline, and plot their convergence paths on one axis. Also shows the newer planted Pauli Hamiltonian (`make_planted_hamiltonian` → `SparsePauliOp`, converted to CSR) with its `diagnostics`. A good starting template to copy. |

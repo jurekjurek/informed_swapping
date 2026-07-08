@@ -8,10 +8,12 @@ Quantum Diagonalization) at finding sparse ground states?
 Subpackages / modules
 ---------------------
 ``subspace_search.hamiltonians``
-    Generators for computational-basis Hamiltonians with a controlled-sparsity
-    exact ground state.
+    Generators for computational-basis Hamiltonians with a sparse planted ground
+    state: the controlled-sparsity builders and the planted-projector form
+    ``H = -Delta|g><g| + lambda R`` (``make_planted_hamiltonian``).
 ``subspace_search.skqd``
-    The SKQD reference routine (``do_skqd``) and the power-iteration sampler.
+    The SKQD reference routine (``do_skqd``, plus ``do_skqd_with_energy_tracking``
+    for the iterative ground-state proxy) and the power-iteration sampler.
 ``subspace_search.algorithms``
     Classical Krylov-style search algorithms: KRAB
     (``selected_krylov_ground_state``) and BARK (``BarkBarkBark``). New

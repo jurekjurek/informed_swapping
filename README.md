@@ -22,7 +22,7 @@ informed_swapping/
 │   ├── pyproject.toml
 │   ├── README.md
 │   └── src/subspace_search/
-│       ├── hamiltonians/ # controlled-sparsity Hamiltonian generators
+│       ├── hamiltonians/ # sparse-ground-state generators (controlled-sparsity + planted projector)
 │       ├── skqd/         # SKQD reference routine (+ power-iteration sampler)
 │       ├── algorithms/   # KRAB, BARK, and space for new algorithms
 │       ├── paths.py      # subspace projection + convergence paths
