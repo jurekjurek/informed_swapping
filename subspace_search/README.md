@@ -27,7 +27,8 @@ src/subspace_search/
 ├── __init__.py                  # version + overview docstring
 ├── hamiltonians/                # Hamiltonian generators
 │   ├── controlled_sparsity.py   # make_controlled_sparse_ground_state_hamiltonian_*
-│   └── new_hamiltonian_approach.py  # make_planted_hamiltonian, diagnostics
+│   ├── new_hamiltonian_approach.py  # make_planted_hamiltonian, diagnostics
+│   └── random_spin_models.py    # make_random_spin_hamiltonian, sample_interaction_graph
 ├── skqd/                        # SKQD reference routine + power-iteration sampler
 │   ├── skqd.py                  # do_skqd, do_skqd_with_energy_tracking, get_exponential
 │   ├── energy_tracking.py       # update_ground_state_proxy, EnergyTrackingStep
@@ -42,8 +43,8 @@ src/subspace_search/
 ## Public API by module
 
 ### `subspace_search.hamiltonians`
-Two families of computational-basis Hamiltonians with a sparse planted ground
-state.
+Three Hamiltonian families: two with a sparse *planted* ground state
+(controlled-sparsity and planted-projector), plus a random-disorder spin model.
 
 **Controlled-sparsity** (`controlled_sparsity.py`) — build `H` whose exact
 ground state has a *controlled* number of nonzero amplitudes, with independently
@@ -73,6 +74,24 @@ is a random (off-diagonal) Pauli background of controllable density:
   `initial_bitstring` + `target_initial_overlap` pin `|⟨initial|g⟩|²`.
 - `diagnostics(H_pauli, planted_g)` → `{E0, fidelity_with_planted_state, IPR,
   effective_support_size}` (dense `eigh`; use for small systems).
+
+**Random spin models** (`random_spin_models.py`) — build a disordered spin-½
+Hamiltonian
+`H = -Σ_{i<j} Σ_α J^α_{ij} S^α_i S^α_j - Σ_i Σ_α B^α_i S^α_i`
+with randomly sampled couplings and fields (no planted ground state):
+
+- `make_random_spin_hamiltonian(num_sites, max_interactions=None, J_max=1.0, B_max=1.0, ...)`
+  → `(H_pauli, info)`, a **`SparsePauliOp`**. `max_interactions` caps the
+  interaction-graph degree, so each row of every `J^α` matrix has at most that
+  many non-zero entries (`None` = all-to-all); `J_max` / `B_max` bound the
+  maximal coupling/field amplitude. Other knobs: `J_components` / `B_components`
+  (which of `x,y,z` are active, e.g. `("z",)` for Ising), `coupling_distribution`
+  / `field_distribution` (`"uniform"` | `"normal"` | `"bimodal"`), `spin`
+  (`S^α = spin·σ^α`; `0.5` = physical spin-½, `1.0` = bare Paulis), `seed`.
+  `info` carries the sampled `J`/`B` dicts, `edges`, per-site `degrees`,
+  `max_degree`, and term counts.
+- `sample_interaction_graph(num_sites, max_interactions, rng)` → the degree-capped
+  bond list, exposed separately for reuse.
 
 ### `subspace_search.skqd`
 - `do_skqd(H, num_steps, t, initial=None)` — the SKQD reference: evolve with

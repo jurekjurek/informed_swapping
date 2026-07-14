@@ -7,6 +7,47 @@ first.
 
 ---
 
+## 2026-07-14 — Random spin models
+
+**What happened**
+
+- New Hamiltonian family `hamiltonians/random_spin_models.py` (commit `210733a`):
+  builds a disordered spin-½ model
+  `H = -Σ_{i<j} Σ_α J^α_{ij} S^α_i S^α_j - Σ_i Σ_α B^α_i S^α_i`
+  with randomly sampled couplings/fields (no planted ground state — this is the
+  third hamiltonians family alongside controlled-sparsity and the planted
+  projector). Public API:
+  - `make_random_spin_hamiltonian(num_sites, max_interactions=None, J_max=1.0, B_max=1.0, J_components=("x","y","z"), B_components=("x","y","z"), coupling_distribution="uniform", field_distribution="uniform", spin=0.5, seed=None)`
+    → `(H, info)`, a `SparsePauliOp`. `max_interactions` caps the interaction-graph
+    degree so each row of every `J^α` matrix has at most that many non-zero
+    entries (`None` = all-to-all); `J_max` / `B_max` bound the maximal
+    coupling/field amplitude. `spin` scales `S^α = spin·σ^α` (0.5 = physical
+    spin-½, 1.0 = bare Paulis). `info` carries the sampled `J`/`B` dicts, `edges`,
+    per-site `degrees`, `max_degree`, and term counts.
+  - `sample_interaction_graph(num_sites, max_interactions, rng)` → the
+    degree-capped bond list, exposed separately for reuse.
+  - Both re-exported from `subspace_search.hamiltonians`.
+
+**Verification**
+
+- `.SKQD` venv: both symbols import from `subspace_search.hamiltonians`; package
+  version unchanged at `0.1.0`.
+- `make_random_spin_hamiltonian` runs end-to-end on 6–8 sites: the returned
+  `SparsePauliOp` is Hermitian; with `max_interactions=3` on 8 sites the graph
+  `max_degree` is 3 (cap respected); sampled `|J| ≤ J_max` and `|B| ≤ B_max`;
+  component-restricted (`("z",)` / `("x",)`), `bimodal`, and `spin=1.0` variants
+  all build; `max_interactions=None` gives the complete graph (10 edges on 5
+  sites).
+
+**Docs updated:** `subspace_search/README.md` (package map + a new
+"Random spin models" subsection, and "two families" → "three families"),
+`subspace_search/src/subspace_search/__init__.py` overview docstring, root
+`README.md` (hamiltonians layout comment). Algorithms / experiments /
+cluster_studies / KRAB / BARK READMEs reviewed — no changes needed (they don't
+reference the new module).
+
+---
+
 ## 2026-07-08 — Planted Hamiltonian + SKQD energy proxy
 
 **What happened**

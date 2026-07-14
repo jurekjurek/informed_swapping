@@ -8,9 +8,10 @@ Quantum Diagonalization) at finding sparse ground states?
 Subpackages / modules
 ---------------------
 ``subspace_search.hamiltonians``
-    Generators for computational-basis Hamiltonians with a sparse planted ground
-    state: the controlled-sparsity builders and the planted-projector form
-    ``H = -Delta|g><g| + lambda R`` (``make_planted_hamiltonian``).
+    Hamiltonian generators: the controlled-sparsity builders and the
+    planted-projector form ``H = -Delta|g><g| + lambda R``
+    (``make_planted_hamiltonian``), both with a sparse planted ground state, plus
+    a random-disorder spin model (``make_random_spin_hamiltonian``).
 ``subspace_search.skqd``
     The SKQD reference routine (``do_skqd``, plus ``do_skqd_with_energy_tracking``
     for the iterative ground-state proxy) and the power-iteration sampler.
