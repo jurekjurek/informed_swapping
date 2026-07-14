@@ -8,10 +8,16 @@ from .controlled_sparsity import (
     make_controlled_sparse_ground_state_hamiltonian_fast,
 )
 from .new_hamiltonian_approach import diagnostics, make_planted_hamiltonian
+from .random_spin_models import (
+    make_random_spin_hamiltonian,
+    sample_interaction_graph,
+)
 
 __all__ = [
     "diagnostics",
     "make_planted_hamiltonian",
     "make_controlled_sparse_ground_state_hamiltonian_from_qubits",
     "make_controlled_sparse_ground_state_hamiltonian_fast",
+    "make_random_spin_hamiltonian",
+    "sample_interaction_graph",
 ]
