@@ -24,10 +24,12 @@ from .krab import (
     plot_selected_krylov_diagnostics,
 )
 from .bark import BarkBarkBark
+from .bark_best_first_baab import BarkBarkBark as BarkBestFirstPerturbative
 
 __all__ = [
     "selected_krylov_ground_state",
     "SelectedKrylovResult",
     "plot_selected_krylov_diagnostics",
     "BarkBarkBark",
+    "BarkBestFirstPerturbative",
 ]

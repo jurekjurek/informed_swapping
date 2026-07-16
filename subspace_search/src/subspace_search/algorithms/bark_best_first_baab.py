@@ -66,6 +66,12 @@ class BarkBarkBark:
         where E_g and |g> are obtained from the current projected subspace.
         Falls back to amplitude scoring before a ground approximation is available.
 
+    - score_mode="two_dimensional"
+        score(b) = E_g - E_-(b), where E_-(b) is the lower eigenvalue of
+        the 2D Hamiltonian in span{|g>, |b>}. Here |g> is updated greedily
+        by 2D diagonalizations when new bitstrings are accepted, so this mode
+        does not require repeated full-subspace diagonalization.
+
     The default options reproduce the old pool-based top-M behavior.
     """
 
@@ -81,7 +87,7 @@ class BarkBarkBark:
         restrict_equal_ones_zeros: bool = False,
         return_only_applied_bitstrings: bool = False,
         selection_strategy: str = "pool",              # "pool" or "best_first"
-        score_mode: str = "amplitude",                 # "amplitude", "probability", "coupling", "perturbative"
+        score_mode: str = "amplitude",                 # "amplitude", "probability", "coupling", "perturbative", "two_dimensional"
         perturbative_epsilon: float = 1e-12,
         ground_update_interval: int = 1,
         aggregate_frontier_amplitudes: bool = True,
@@ -97,8 +103,8 @@ class BarkBarkBark:
             raise ValueError("sampling_score must be 'amplitude' or 'probability'")
         if selection_strategy not in {"pool", "best_first"}:
             raise ValueError("selection_strategy must be 'pool' or 'best_first'")
-        if score_mode not in {"amplitude", "probability", "coupling", "perturbative"}:
-            raise ValueError("score_mode must be 'amplitude', 'probability', 'coupling', or 'perturbative'")
+        if score_mode not in {"amplitude", "probability", "coupling", "perturbative", "two_dimensional"}:
+            raise ValueError("score_mode must be 'amplitude', 'probability', 'coupling', 'perturbative', or 'two_dimensional'")
         if perturbative_epsilon <= 0:
             raise ValueError("perturbative_epsilon must be positive")
         if ground_update_interval <= 0:
@@ -277,6 +283,121 @@ class BarkBarkBark:
         self._ground_state = g_state
         self._ground_couplings = self.apply_hamiltonian(g_state)
 
+    # ------------------------------------------------------------------
+    # Greedy 2D ground-state helper
+    # ------------------------------------------------------------------
+    def initialize_two_dimensional_ground(self) -> None:
+        """
+        Initialize the greedy 2D ground approximation with the initial bitstring.
+
+        This is used by score_mode="two_dimensional". It avoids full-subspace
+        diagonalization; subsequent accepted bitstrings update this state through
+        2D diagonalizations only.
+        """
+        self._ground_basis = [self.initial_state]
+        self._ground_energy = self.diagonal_element(self.initial_state)
+        self._ground_state = {self.initial_state: 1.0 + 0.0j}
+        self._ground_couplings = self.apply_hamiltonian(self._ground_state)
+
+    def two_dimensional_lower_energy(self, bitstring: str) -> float:
+        """
+        Return the lower eigenvalue in span{|g>, |bitstring>}.
+
+        Assumes |g> and |bitstring> are orthogonal, which is true for a new
+        computational basis bitstring not already in the greedy ground support.
+        """
+        if self._ground_energy is None or self._ground_state is None:
+            self.initialize_two_dimensional_ground()
+
+        Eg = float(self._ground_energy)
+        Hbb = self.diagonal_element(bitstring)
+        coupling = self._ground_couplings.get(bitstring, 0.0 + 0.0j)  # <b|H|g>
+
+        center = 0.5 * (Eg + Hbb)
+        half_gap = 0.5 * (Hbb - Eg)
+        return float(center - np.sqrt(half_gap * half_gap + abs(coupling) ** 2))
+
+    def two_dimensional_energy_improvement(self, bitstring: str) -> float:
+        """
+        Score candidate bitstring by the variational energy decrease obtained
+        from the 2D subspace span{|g>, |bitstring>}.
+        """
+        if self._ground_energy is None or self._ground_state is None:
+            self.initialize_two_dimensional_ground()
+
+        e_lower = self.two_dimensional_lower_energy(bitstring)
+        return float(max(0.0, self._ground_energy - e_lower))
+
+    def update_two_dimensional_ground_with_bitstring(self, bitstring: str) -> None:
+        """
+        Greedily update |g> by diagonalizing the 2D subspace span{|g>, |bitstring>}.
+
+        This function does not diagonalize the full accumulated selected subspace.
+        It only mixes the current best approximation with one newly accepted
+        computational-basis bitstring.
+        """
+        if self._ground_energy is None or self._ground_state is None:
+            self.initialize_two_dimensional_ground()
+
+        # If the candidate already has support in |g>, the 2D orthogonal-basis
+        # assumption is invalid. This should not happen in the standard run logic,
+        # but skipping is safer than applying an invalid update.
+        if bitstring in self._ground_state and abs(self._ground_state[bitstring]) > 1e-14:
+            return
+
+        Eg = float(self._ground_energy)
+        Hbb = self.diagonal_element(bitstring)
+        coupling_bg = self._ground_couplings.get(bitstring, 0.0 + 0.0j)  # <b|H|g>
+
+        H2 = np.array(
+            [
+                [Eg, np.conj(coupling_bg)],
+                [coupling_bg, Hbb],
+            ],
+            dtype=np.complex128,
+        )
+        evals, evecs = np.linalg.eigh(H2)
+        idx = int(np.argmin(evals))
+        new_Eg = float(np.real(evals[idx]))
+        alpha = complex(evecs[0, idx])
+        beta = complex(evecs[1, idx])
+
+        old_ground = self._ground_state
+        old_couplings = self._ground_couplings
+        Hb = self.apply_hamiltonian({bitstring: 1.0 + 0.0j})
+
+        new_ground: Dict[str, complex] = {}
+        for b, amp in old_ground.items():
+            val = alpha * amp
+            if abs(val) > 1e-14:
+                new_ground[b] = val
+        if abs(beta) > 1e-14:
+            new_ground[bitstring] = new_ground.get(bitstring, 0.0 + 0.0j) + beta
+
+        # Numerical normalization guard.
+        norm = np.sqrt(sum(abs(v) ** 2 for v in new_ground.values()))
+        if norm > 0:
+            new_ground = {b: amp / norm for b, amp in new_ground.items()}
+            alpha = alpha / norm
+            beta = beta / norm
+
+        new_couplings: Dict[str, complex] = defaultdict(complex)
+        for b, amp in old_couplings.items():
+            new_couplings[b] += alpha * amp
+        for b, amp in Hb.items():
+            new_couplings[b] += beta * amp
+
+        self._ground_energy = new_Eg
+        self._ground_state = dict(new_ground)
+        self._ground_basis = list(new_ground.keys())
+        self._ground_couplings = dict(new_couplings)
+
+    def _update_two_dimensional_ground_after_acceptance(self, chosen: Sequence[str]) -> None:
+        if self.score_mode != "two_dimensional":
+            return
+        for b in chosen:
+            self.update_two_dimensional_ground_with_bitstring(b)
+
     def _maybe_update_ground(self, applied_sequence: Sequence[str], applications_done: int) -> None:
         if self.score_mode not in {"coupling", "perturbative"}:
             return
@@ -303,6 +424,9 @@ class BarkBarkBark:
         """
         if self.score_mode in {"amplitude", "probability"}:
             return self._fallback_score(bitstring, candidate_amplitudes)
+
+        if self.score_mode == "two_dimensional":
+            return self.two_dimensional_energy_improvement(bitstring)
 
         if self._ground_energy is None or self._ground_state is None:
             return float(abs(candidate_amplitudes.get(bitstring, 0.0 + 0.0j)))
@@ -418,6 +542,9 @@ class BarkBarkBark:
         applied_set: Set[str] = {self.initial_state}
         applied_sequence: List[str] = [self.initial_state]
 
+        if self.score_mode == "two_dimensional":
+            self.initialize_two_dimensional_ground()
+
         first_pool_amps = self.apply_hamiltonian({self.initial_state: 1.0 + 0.0j})
         for b in first_pool_amps:
             if b not in encountered:
@@ -454,10 +581,13 @@ class BarkBarkBark:
                 current_pool_idx = backtrack_idx
                 continue
 
-            for b in chosen:
+            accepted_now = list(chosen.keys())
+            for b in accepted_now:
                 applied_sequence.append(b)
                 applied_set.add(b)
                 current_pool.unexpanded.discard(b)
+
+            self._update_two_dimensional_ground_after_acceptance(accepted_now)
 
             next_pool_amps = self.apply_hamiltonian(chosen)
             for b in next_pool_amps:
@@ -493,6 +623,9 @@ class BarkBarkBark:
         applied_set: Set[str] = {self.initial_state}
         applied_sequence: List[str] = [self.initial_state]
 
+        if self.score_mode == "two_dimensional":
+            self.initialize_two_dimensional_ground()
+
         frontier: Dict[str, complex] = {}
 
         first_children = self.apply_hamiltonian({self.initial_state: 1.0 + 0.0j})
@@ -515,10 +648,13 @@ class BarkBarkBark:
             if not chosen:
                 break
 
-            for b in chosen:
+            accepted_now = list(chosen.keys())
+            for b in accepted_now:
                 frontier.pop(b, None)
                 applied_set.add(b)
                 applied_sequence.append(b)
+
+            self._update_two_dimensional_ground_after_acceptance(accepted_now)
 
             next_children = self.apply_hamiltonian(chosen)
             for b in next_children:
