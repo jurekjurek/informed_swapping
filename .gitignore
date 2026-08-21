@@ -1,6 +1,6 @@
 # virtualenv
 .SKQD/
-
+.BARK/
 # python
 __pycache__/
 *.pyc
@@ -22,6 +22,9 @@ cluster_studies/**/results/
 cluster_studies/**/SlurmOut/*
 experiments/out/
 experiments/*.png
+experiments/**/results/
+experiments/**/figures/
+experiments/bark_variant_results*/
 
 # Ignore all Jupyter Notebooks
 *.ipynb
