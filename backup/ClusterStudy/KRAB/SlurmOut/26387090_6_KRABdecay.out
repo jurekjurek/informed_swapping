@@ -1,100 +1,0 @@
-==================================================
-Array job   : 26387090
-Chunk       : 6 / 29  (decaying-Q study)
-Node        : node083
-Started     : Mon Jun 29 05:34:46 PM CEST 2026
-==================================================
-Chunk 6/29  —  7 experiments (cost-balanced) of 432 total  (relative cost ≈ 2.16e+08)
-=================================================================
-
-[1/7  global=252]
-[8q | gs=0.25 | ham=0.1 | ov=0.8 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-07]
-  Building Hamiltonian ...
-    dim=256, E₀=-5.000000, gap≈1.000, init idx=14, |<ψ|init>|²=0.8000
-  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-07, max_iter=41) ...
-    KRAB: 0.04s, final E=-4.766552, final subspace=7, native iter_to_target=None, path states_to_target=None
-  Running SKQD (12 time steps × 16 steps) ...
-/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:597: SparseEfficiencyWarning: splu converted its input to CSC format
-  return splu(A).solve
-/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_matfuncs.py:707: SparseEfficiencyWarning: spsolve is more efficient when sparse b is in the CSC matrix format
-  return spsolve(Q, P)
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2192.81it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2241.67it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2279.82it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2259.10it/s]
-  ERROR: ArpackNoConvergence: ARPACK error -1: No convergence (621 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
-Traceback (most recent call last):
-  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/KRAB/run_chunk.py", line 150, in main
-    run(
-  File "/home/erosanow_hpc/informed_swapping/ClusterStudy/KRAB/run_experiment.py", line 469, in run
-    path = get_one_path(H, indices)
-  File "/home/erosanow_hpc/informed_swapping/Permutations/Helpers.py", line 67, in get_one_path
-    energies[i] = eigsh(H_proj, k=1, which='SA', return_eigenvectors=False)[0]
-  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1575, in eigsh
-    ret = eigs(A, k, M=M, sigma=sigma, which=which, v0=v0,
-  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 1354, in eigs
-    params.iterate()
-  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 766, in iterate
-    self._raise_no_convergence()
-  File "/home/erosanow_hpc/informed_swapping/.SKQD/lib/python3.10/site-packages/scipy/sparse/linalg/_eigen/arpack/arpack.py", line 385, in _raise_no_convergence
-    raise ArpackNoConvergence(msg % (num_iter, k_ok, self.k), ev, vec)
-scipy.sparse.linalg._eigen.arpack.arpack.ArpackNoConvergence: ARPACK error -1: No convergence (621 iterations, 0/1 eigenvectors converged) [ARPACK error -14: ZNAUPD did not find any eigenvalues to sufficient accuracy.]
-  Continuing to next experiment.
-
-[2/7  global=282]
-[8q | gs=0.25 | ham=0.5 | ov=0.5 | Q decay 20%→1% (×0.75)=51→3 | eps=1e-05]
-  Building Hamiltonian ...
-    dim=256, E₀=-5.000000, gap≈1.000, init idx=14, |<ψ|init>|²=0.5000
-  Running KRAB (Q decay 20%→1% (×0.75)=51→3, ε=1e-05, max_iter=41) ...
-    KRAB: 0.04s, final E=-5.000000, final subspace=65, native iter_to_target=6, path states_to_target=61
-  Running SKQD (12 time steps × 16 steps) ...
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2295.42it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2252.88it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2237.86it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2274.11it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2228.72it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2240.10it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2212.40it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2230.94it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2259.33it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2188.17it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2198.34it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]No more indices left to sample.
-100%|██████████| 16/16 [00:00<00:00, 2176.53it/s]
-    SKQD: 34.37s, best t=0.3, best states_to_target=86
-  Computing 20 random paths ...
-Computing paths:   0%|          | 0/20 [00:00<?, ?it/s]Computing paths:   5%|▌         | 1/20 [00:03<01:05,  3.45s/it]Computing paths:  10%|█         | 2/20 [00:06<01:01,  3.42s/it]Computing paths:  15%|█▌        | 3/20 [00:10<01:03,  3.72s/it]Computing paths:  20%|██        | 4/20 [00:13<00:52,  3.26s/it]Computing paths:  25%|██▌       | 5/20 [00:16<00:45,  3.05s/it]Computing paths:  30%|███       | 6/20 [00:19<00:43,  3.10s/it]Computing paths:  35%|███▌      | 7/20 [00:21<00:37,  2.88s/it]Computing paths:  40%|████      | 8/20 [00:24<00:33,  2.79s/it]Computing paths:  45%|████▌     | 9/20 [00:26<00:29,  2.66s/it]Computing paths:  50%|█████     | 10/20 [00:29<00:26,  2.65s/it]Computing paths:  55%|█████▌    | 11/20 [00:32<00:24,  2.67s/it]Computing paths:  60%|██████    | 12/20 [00:35<00:23,  2.95s/it]Computing paths:  65%|██████▌   | 13/20 [00:38<00:19,  2.81s/it]Computing paths:  70%|███████   | 14/20 [00:41<00:17,  2.98s/it]Computing paths:  75%|███████▌  | 15/20 [00:44<00:14,  2.91s/it]Computing paths:  80%|████████  | 16/20 [00:47<00:11,  2.95s/it]Computing paths:  85%|████████▌ | 17/20 [00:49<00:08,  2.83s/it]Computing paths:  90%|█████████ | 18/20 [00:52<00:05,  2.81s/it]Computing paths:  95%|█████████▌| 19/20 [00:56<00:03,  3.03s/it]Computing paths: 100%|██████████| 20/20 [00:58<00:00,  2.87s/it]Computing paths: 100%|██████████| 20/20 [00:58<00:00,  2.93s/it]
-    Figure: figures_decay/nq8_gs0.25_ham0.50_ov0.50_Qdecay_eps1e-05_seed42.png
-  Total wall time: 94.7s
-
-[3/7  global=294]
-[10q | gs=0.05 | ham=0.1 | ov=0.3 | Q decay 20%→1% (×0.75)=205→10 | eps=1e-05]
-  Building Hamiltonian ...
-    dim=1024, E₀=-5.000000, gap≈1.000, init idx=84, |<ψ|init>|²=0.3000
-  Running KRAB (Q decay 20%→1% (×0.75)=205→10, ε=1e-05, max_iter=41) ...
-    KRAB: 0.16s, final E=-5.000000, final subspace=52, native iter_to_target=2, path states_to_target=50
-  Running SKQD (12 time steps × 64 steps) ...
-  0%|          | 0/64 [00:00<?, ?it/s] 81%|████████▏ | 52/64 [00:00<00:00, 518.48it/s]No more indices left to sample.
-100%|██████████| 64/64 [00:00<00:00, 523.86it/s]
-  0%|          | 0/64 [00:00<?, ?it/s] 75%|███████▌  | 48/64 [00:00<00:00, 476.23it/s]No more indices left to sample.
-100%|██████████| 64/64 [00:00<00:00, 484.48it/s]
-  0%|          | 0/64 [00:00<?, ?it/s] 66%|██████▌   | 42/64 [00:00<00:00, 413.91it/s]No more indices left to sample.
-100%|██████████| 64/64 [00:00<00:00, 421.99it/s]
-  0%|          | 0/64 [00:00<?, ?it/s] 70%|███████   | 45/64 [00:00<00:00, 444.23it/s]No more indices left to sample.
-100%|██████████| 64/64 [00:00<00:00, 454.80it/s]
-[2026-06-29T17:39:34.278] error: *** JOB 26387104 ON node083 CANCELLED AT 2026-06-29T17:39:34 DUE to SIGNAL Terminated ***
