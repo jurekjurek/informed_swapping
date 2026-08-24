@@ -14,7 +14,7 @@ In every iteration, the Hamiltonian is projected onto the pool and diagonalized 
 import numpy as np
 from scipy.linalg import expm, eigh
 from scipy.sparse import issparse, csr_matrix
-from scipy.sparse.linalg import expm as sparse_expm
+from scipy.sparse.linalg import expm as sparse_expm, expm_multiply
 
 class SKQD:
     def __init__(self, hamiltonian: np.ndarray,
@@ -33,7 +33,10 @@ class SKQD:
         self._csr = csr_matrix(hamiltonian) if self.is_sparse else None
         self.eigenvalues = None if eigenvalues is None else np.asarray(eigenvalues)
         self.eigenvectors = None if eigenvectors is None else np.asarray(eigenvectors)
+        self._eigenvectors_h = None if self.eigenvectors is None else self.eigenvectors.conj().T
         self._unitary_cache = {}
+        self._phase_cache = {}
+        self._generator_cache = {}
 
     def compute_unitary(self, t: float) -> np.ndarray:
         """
@@ -65,6 +68,34 @@ class SKQD:
         """
         return unitary @ state
 
+    def evolve(self, state: np.ndarray, t: float) -> np.ndarray:
+        """
+        Return U(t) @ state, avoiding the construction of U(t) where possible.
+
+        Mathematically identical to ``apply_unitary(state, compute_unitary(t))``,
+        only cheaper. Three routes:
+
+        * eigendecomposition supplied: apply the phases in the eigenbasis, which
+          costs two matrix-vector products instead of assembling U;
+        * sparse Hamiltonian: Krylov ``expm_multiply``, which never forms U at
+          all -- ``sparse_expm`` would return a matrix that is dense in content,
+          so it is both slow and no cheaper in memory;
+        * dense Hamiltonian: the cached ``expm``, as before.
+        """
+        key = float(t)
+
+        if self.eigenvalues is not None and self.eigenvectors is not None:
+            if key not in self._phase_cache:
+                self._phase_cache[key] = np.exp(-1j * self.eigenvalues * key)
+            return self.eigenvectors @ (self._phase_cache[key] * (self._eigenvectors_h @ state))
+
+        if self.is_sparse:
+            if key not in self._generator_cache:
+                self._generator_cache[key] = (-1j * key) * self._csr
+            return expm_multiply(self._generator_cache[key], state)
+
+        return self.apply_unitary(state, self.compute_unitary(key))
+
     def project_hamiltonian(self, pool: np.ndarray) -> np.ndarray:
         """
         Project the Hamiltonian onto the subspace spanned by the states in the pool.
@@ -85,12 +116,10 @@ class SKQD:
         last_approximation = np.zeros(self.hamiltonian.shape[0], dtype=complex)
         last_approximation[initial_state_index] = 1.0  # Start with the initial state
 
-        unitary = self.compute_unitary(t)
-
         pool_size = 1
 
         while True:
-            new_states = self.apply_unitary(last_approximation, unitary)
+            new_states = self.evolve(last_approximation, t)
 
             last_approximation = new_states
 

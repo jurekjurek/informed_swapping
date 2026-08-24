@@ -18,7 +18,7 @@ from scipy.sparse.linalg import lobpcg
 
 
 class BARK:
-    def __init__(self, hamiltonian: np.ndarray, warm_start_threshold: int = 250):
+    def __init__(self, hamiltonian: np.ndarray, warm_start_threshold: int = 150):
         """
         Initialize the BARK protocol with a given Hamiltonian and initial state.
 
@@ -129,8 +129,12 @@ class BARK:
             # rather than with zero, which LOBPCG could never rotate into.
             guess[size - 1, 0] = 1e-3
             try:
+                # Keep tol comfortably tighter than the 1e-8 acceptance gate below.
+                # A looser tol is a false economy: LOBPCG then fails the gate and we
+                # pay for the iterative solve *and* the exact fallback (measured:
+                # tol=1e-6 is slower than never warm-starting at all).
                 values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
-                                         tol=1e-12, maxiter=200)
+                                         tol=1e-9, maxiter=200)
                 value = float(np.real(values[0]))
                 vector = vectors[:, 0]
                 residual = np.linalg.norm(projected_hamiltonian @ vector - value * vector)
