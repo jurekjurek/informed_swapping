@@ -1,0 +1,11 @@
+host=node053 task=27 threads=2
+[job 27/40] 11 cells (3 x n=6, 3 x n=8, 3 x n=10, 2 x n=14)
+[job 27] 1/11 n=6 mi=1 ham=7 took 31.6s (elapsed 31.6s)
+[job 27] 2/11 n=6 mi=2 ham=7 took 33.7s (elapsed 65.3s)
+[job 27] 3/11 n=6 mi=3 ham=7 took 31.0s (elapsed 96.3s)
+[job 27] 4/11 n=8 mi=1 ham=7 took 88.9s (elapsed 185.1s)
+[job 27] 5/11 n=8 mi=2 ham=7 took 100.3s (elapsed 285.5s)
+[job 27] 6/11 n=8 mi=3 ham=7 took 152.7s (elapsed 438.3s)
+[job 27] 7/11 n=10 mi=1 ham=7 took 430.9s (elapsed 869.2s)
+[job 27] 8/11 n=10 mi=2 ham=7 took 1030.8s (elapsed 1900.0s)
+[job 27] 9/11 n=10 mi=3 ham=7 took 1481.4s (elapsed 3381.4s)

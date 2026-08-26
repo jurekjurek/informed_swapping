@@ -1,0 +1,4 @@
+host=node092 task=3 threads=2
+[job 3/40] 4 cells (3 x n=12, 1 x n=14)
+[job 3] 1/4 n=12 mi=1 ham=3 took 9538.3s (elapsed 9538.3s)
+[job 3] 2/4 n=12 mi=2 ham=3 took 44399.7s (elapsed 53938.1s)

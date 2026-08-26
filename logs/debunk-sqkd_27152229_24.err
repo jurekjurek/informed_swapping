@@ -1,0 +1,12 @@
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.26989473e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 50 instead with accuracy 
+1.1975471827797414e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.197547e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+[2026-08-26T10:37:05.002] error: *** JOB 27152269 ON node051 CANCELLED AT 2026-08-26T10:37:05 DUE TO TIME LIMIT ***

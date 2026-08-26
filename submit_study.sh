@@ -11,8 +11,8 @@
 #   PARTITION=long TIME=48:00:00 ./submit_study.sh
 #   ./submit_study.sh --plan                # just print the split, submit nothing
 #
-# Because every array task gets the same mix of system sizes, one TIME and one
-# MEM setting fits every task -- that is the whole point of the stratified split.
+# Because every array task gets the same estimated load, one TIME and one MEM
+# setting fits every task -- that is the whole point of the cost-balanced split.
 # ---------------------------------------------------------------------------
 #SBATCH --job-name=debunk-sqkd
 #SBATCH --ntasks=1
@@ -21,23 +21,33 @@
 
 set -euo pipefail
 
+module load Python/3.10.4-GCCcore-11.3.0 && source /home/erosanow_hpc/informed_swapping/.SKQD/bin/activate
+
 # ----------------------------- configuration -------------------------------
-NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-10}
+NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-20}
 NUM_SITES=${NUM_SITES:-"6 8 10 12 14"}
 MAX_INTERACTIONS=${MAX_INTERACTIONS:-"1 2 3"}
 FIDELITIES=${FIDELITIES:-"0.8 0.85 0.9 0.95 0.99"}
 NUM_JOBS=${NUM_JOBS:-40}
 
-PARTITION=${PARTITION:-}                 # empty -> cluster default
+PARTITION=${PARTITION:-intelsr_medium}                 # empty -> cluster default
 TIME=${TIME:-24:00:00}
-MEM=${MEM:-16G}
-CPUS=${CPUS:-1}
+MEM=${MEM:-100G}
+# The work is a very large number of small-to-medium dense LAPACK calls plus
+# single-threaded sampling, not a few big ones. Ten BLAS threads on a 200x200
+# zheevd is mostly synchronisation, so the tasks held 10 cores each while one or
+# two did the work. Two threads keep the largest blocks useful without wasting
+# the rest of the allocation; spend the freed cores on a larger array instead.
+CPUS=${CPUS:-2}
 THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
 
+BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
+DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
+                                         # full eigendecomposition; 0 disables
 SHARD_DIR=${SHARD_DIR:-shards}
 OUTPUT=${OUTPUT:-systematic_study_results.csv}
 PYTHON=${PYTHON:-python}
-EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--dense" or "--overwrite"
+EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 # ---------------------------------------------------------------------------
 
 STUDY_ARGS=(
@@ -47,6 +57,8 @@ STUDY_ARGS=(
   --fidelities $FIDELITIES
   --num-jobs "$NUM_JOBS"
   --shard-dir "$SHARD_DIR"
+  --balance "$BALANCE"
+  --dense-limit "$DENSE_LIMIT"
 )
 
 # ------------------------------ worker mode --------------------------------
@@ -101,4 +113,5 @@ echo "logs:    logs/"
 echo "result:  $OUTPUT"
 echo
 echo "If some tasks time out, raise TIME and re-run ./submit_study.sh -- finished"
-echo "shards in $SHARD_DIR are skipped, so only the missing work is redone."
+echo "shards in $SHARD_DIR are skipped, and a task that died mid-shard resumes"
+echo "from its .partial file, so only the missing cells are redone."

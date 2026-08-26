@@ -291,4 +291,4 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT) -> None:
 
 
 if __name__ == "__main__":
-    plot_results("systematic_study_results.csv")
+    plot_results("/home/erosanow_hpc/informed_swapping/systematic_study_results_2026-08-26_partial.csv")
