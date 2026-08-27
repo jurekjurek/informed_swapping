@@ -233,6 +233,9 @@ def run_cell(cell: Cell, fidelities, sparse: bool = True,
     hamiltonian = make_random_spin_hamiltonian(
         num_sites=cell.num_sites,
         max_interactions=cell.max_interactions,
+        J_components=("z"),
+        B_components=("z"),
+        B_max = 10,
         seed=seed,
     )[0].to_matrix(sparse=sparse)
 
