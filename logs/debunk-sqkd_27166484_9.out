@@ -1,0 +1,5 @@
+host=node163 task=9 threads=2
+[job 9/40] 4 cells (3 x n=12, 1 x n=14)
+[job 9] resuming: 1 of 4 cells already in shards/shard_00009.csv.partial
+[job 9] 1/4 n=12 mi=1 ham=9 already done, skipping
+[job 9] 2/4 n=12 mi=2 ham=9 took 72339.9s (elapsed 72339.9s)

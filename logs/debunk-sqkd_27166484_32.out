@@ -1,0 +1,12 @@
+host=node094 task=32 threads=2
+[job 32/40] 11 cells (3 x n=6, 3 x n=8, 3 x n=10, 2 x n=14)
+[job 32] resuming: 9 of 11 cells already in shards/shard_00032.csv.partial
+[job 32] 1/11 n=6 mi=1 ham=12 already done, skipping
+[job 32] 2/11 n=6 mi=2 ham=12 already done, skipping
+[job 32] 3/11 n=6 mi=3 ham=12 already done, skipping
+[job 32] 4/11 n=8 mi=1 ham=12 already done, skipping
+[job 32] 5/11 n=8 mi=2 ham=12 already done, skipping
+[job 32] 6/11 n=8 mi=3 ham=12 already done, skipping
+[job 32] 7/11 n=10 mi=1 ham=12 already done, skipping
+[job 32] 8/11 n=10 mi=2 ham=12 already done, skipping
+[job 32] 9/11 n=10 mi=3 ham=12 already done, skipping

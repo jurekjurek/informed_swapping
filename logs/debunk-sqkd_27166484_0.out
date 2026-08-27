@@ -1,0 +1,4 @@
+host=node024 task=0 threads=2
+[job 0/40] 4 cells (3 x n=12, 1 x n=14)
+[job 0] resuming: 1 of 4 cells already in shards/shard_00000.csv.partial
+[job 0] 1/4 n=12 mi=1 ham=0 already done, skipping
