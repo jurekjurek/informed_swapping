@@ -109,6 +109,8 @@ def make_random_spin_hamiltonian(
     field_distribution: str = "uniform",
     spin: float = 0.5,
     seed: int | None = None,
+    N_target: int | None = None,          
+    penalty_strength: float = 0.0,
 ):
     """
     Build a random spin-1/2 Hamiltonian with controllable disorder.
@@ -133,7 +135,8 @@ def make_random_spin_hamiltonian(
         spin: spin length scaling ``S^alpha = spin * sigma^alpha``. Default 0.5
             gives physical spin-1/2 operators; 1.0 uses bare Pauli operators.
         seed: seed for the NumPy random generator.
-
+        N_target: target number of excitations (for penalty term).
+        penalty_strength: strength of the penalty term for enforcing the target excitation number.
     Returns:
         H: SparsePauliOp for the Hamiltonian.
         info: dict with the sampled couplings, fields, interaction graph, and
@@ -180,6 +183,31 @@ def make_random_spin_hamiltonian(
             if coeff != 0.0:
                 sparse_terms.append((pauli, [i], coeff))
 
+    # Particle Number Penalty
+    if N_target is not None and penalty_strength != 0.0:
+
+        a = num_sites / 2 - N_target
+
+        # the following terms come from squaring the operator: 
+        # (N-N_target)^2 = constant + single-Z terms + ZZ terms
+        # constant term
+        sparse_terms.append(
+            ("I", [0], penalty_strength * (a**2 + num_sites / 4))
+        )
+
+        # single-Z terms
+        for i in range(num_sites):
+            sparse_terms.append(
+                ("Z", [i], -penalty_strength * a)
+            )
+
+        # ZZ terms
+        for i in range(num_sites):
+            for j in range(i + 1, num_sites):
+                sparse_terms.append(
+                    ("ZZ", [i, j], penalty_strength / 2)
+                )
+
     if sparse_terms:
         H = SparsePauliOp.from_sparse_list(
             sparse_terms, num_qubits=num_sites
@@ -208,6 +236,8 @@ def make_random_spin_hamiltonian(
         "coupling_distribution": coupling_distribution,
         "field_distribution": field_distribution,
         "num_pauli_terms": len(H.paulis),
+        "N_target": N_target,
+        "penalty_strength": penalty_strength,
     }
 
     return H, info
