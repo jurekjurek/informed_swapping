@@ -213,7 +213,8 @@ def solve_ground_state(hamiltonian, dense_limit: int):
 
 
 def run_cell(cell: Cell, fidelities, sparse: bool = True,
-             dense_limit: int = DEFAULT_DENSE_LIMIT) -> list:
+             dense_limit: int = DEFAULT_DENSE_LIMIT, n_target: int | None = None,
+             penalty_strength: float = 0.0,) -> list:
     """
     Run one cell and return its rows as a list of dicts.
 
@@ -237,6 +238,8 @@ def run_cell(cell: Cell, fidelities, sparse: bool = True,
         B_components=("x"),
         B_max = 10,
         seed=seed,
+        N_target=n_target,
+        penalty_strength=penalty_strength,
     )[0].to_matrix(sparse=sparse)
 
     ground_state, all_eigenvalues, all_eigenvectors = solve_ground_state(
@@ -390,7 +393,8 @@ def run_job(args):
 
         cell_started = time.time()
         rows.extend(run_cell(cell, args.fidelities, sparse=args.sparse,
-                             dense_limit=args.dense_limit))
+                             dense_limit=args.dense_limit, n_target=args.n_target, 
+                             penalty_strength=args.penalty_strength,))
         print(f"[job {args.job_index}] {position}/{len(mine)} "
               f"n={cell.num_sites} mi={cell.max_interactions} "
               f"ham={cell.hamiltonian_index} took {time.time() - cell_started:.1f}s "
@@ -474,6 +478,8 @@ def build_parser():
                         help="number of random Hamiltonians per (num_sites, max_interactions)")
     parser.add_argument("--num-sites", type=int, nargs="+", default=DEFAULT_NUM_SITES)
     parser.add_argument("--max-interactions", type=int, nargs="+", default=DEFAULT_MAX_INTERACTIONS)
+    parser.add_argument("--n-target", type=int, default=None)
+    parser.add_argument("--penalty-strength", type=float, default=0.0)
     parser.add_argument("--fidelities", type=float, nargs="+", default=DEFAULT_FIDELITIES)
     parser.add_argument("--num-jobs", type=int, default=20,
                         help="size of the SLURM array")
