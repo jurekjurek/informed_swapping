@@ -1,0 +1,990 @@
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.04931873e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0493187292213228e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.04931815e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.07413187e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0741318662126795e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.0741324e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.1676256e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1676255979238011e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.16762483e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.17107821e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1710782125829376e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.17107712e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.0711504e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0711503994760995e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.07115003e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.08254703e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0825470294381433e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.08254686e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.28448838e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2844883798202193e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.28448848e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.12161359e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1216135938410557e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.1216133e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.07195668e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0719566783954224e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.07195621e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.55137561e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.5513756053656056e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.5513755e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.75558817e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.7555881728242097e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.75558867e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.46960518e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.4696051802183348e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.46960474e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[2.13653925e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+2.1365392479593346e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[2.13653948e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.01454122e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0145412205941096e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.01454132e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.0803751e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0803750954445936e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.08037494e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.39014418e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3901441775503895e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.39014386e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.3113392e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3113392028564144e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.31133936e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.9935205e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.9935204973194494e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.99352096e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.00402697e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0040269744029083e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.00402637e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.08254214e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0825421422211932e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.08254199e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.28448321e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2844832118474931e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.28448311e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.1216206e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1216205954666258e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.12162022e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.07195673e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0719567310380134e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.07195615e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.55137521e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.5513752066708897e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.55137478e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.75558277e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.7555827723986929e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.75558285e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.46959924e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.469599240375168e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.46959915e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[2.13653836e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+2.1365383645543418e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[2.13653857e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.014539e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0145389992948674e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.01453907e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.08037416e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0803741553050368e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.08037401e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.39014207e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3901420732529083e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.39014223e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.3113341e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3113341012958915e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.31133373e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.99352167e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.993521674000318e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.99352202e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.0040289e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0040289032721147e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.00402839e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.08254513e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0825451308774364e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.08254538e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.28448335e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2844833473746205e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.28448317e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.12161177e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.121611768649864e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.12161194e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.07196441e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0719644148654279e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.07196392e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.55137409e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.5513740890274197e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.55137394e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.75558407e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.755584073707207e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.75558368e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.46960379e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.469603785721001e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.46960374e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[2.13653886e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+2.136538857230181e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[2.13653913e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.01453972e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0145397185611113e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.01453982e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.08037952e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.080379516502916e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.0803797e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.3901445e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3901444957795335e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.39014408e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.31133434e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3113343359406469e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.31133443e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.993522e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.993521995084008e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.99352211e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.00403078e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0040307777267497e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.00403095e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.42734015e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.4273401529039513e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.42734016e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.01249418e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0124941787960036e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.01249409e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.29926703e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2992670336944531e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.29926741e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.69807148e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.6980714814904834e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.69807122e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.11597708e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1159770812806596e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.11597692e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.42733408e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.4273340843003729e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.42733426e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.01249364e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0124936393283206e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.01249381e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.29926887e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.299268865044897e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.29926929e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.69806541e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.6980654054909065e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.6980655e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.11597286e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1159728614455192e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.11597289e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.31037823e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3103782342346934e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.31037807e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.07181751e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.071817505977677e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.07181692e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.13835676e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1383567649670105e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.13835655e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.03923358e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0392335804922173e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.03923323e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.49004814e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.4900481397151449e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.49004832e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.31037812e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.310378119693672e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.31037761e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.07181741e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0718174079992777e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.07181695e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.13835586e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1383558649724e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.13835562e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.03923441e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0392344103357891e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.03923445e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.49005542e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.4900554242091975e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.49005553e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.32025013e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3202501308600249e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.32024979e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.09495e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0949500006049946e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.09495025e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.29854219e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2985421862270189e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.29854194e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.46488108e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.46488108269048e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.4648814e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.32025453e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.3202545299103965e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.3202543e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.09494982e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0949498245527364e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.09494969e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.29854082e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2985408221122794e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.29854111e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.46488251e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.4648825146217753e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.46488231e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.15729244e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1572924448591277e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.15729211e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.03547135e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0354713491380327e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.03547129e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.24607247e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.24607246507058e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.24607306e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.2383471e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2383471015537714e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.23834706e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.24148691e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.2414869117690117e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.24148652e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.87184909e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.871849093491118e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.87184914e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.27299178e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.272991784256932e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.27299228e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.18854763e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.1885476334875308e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.18854788e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.32475074e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.32475074039582e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.3247506e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.06580694e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0658069428003595e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.06580695e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.04975357e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.0497535730923818e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.04975329e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.5931005e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.5931005046405808e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.59310056e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.61277387e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.6127738693743639e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.61277387e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[1.50412148e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+1.5041214832630895e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[1.50412151e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited at iteration 50 with accuracies 
+[2.44888875e-09]
+not reaching the requested tolerance 1e-09.
+Use iteration 51 instead with accuracy 
+2.448888754175862e-09.
+
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+/home/erosanow_hpc/informed_swapping/BARK.py:156: UserWarning: Exited postprocessing with accuracies 
+[2.44888878e-09]
+not reaching the requested tolerance 1e-09.
+  values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,

@@ -25,27 +25,27 @@ module load Python/3.10.4-GCCcore-11.3.0 && source /home/erosanow_hpc/informed_s
 
 # ----------------------------- configuration -------------------------------
 NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-20}
-NUM_SITES=${NUM_SITES:-"6 8 10 12 14"}
+NUM_SITES=${NUM_SITES:-"6 8 10 12"}
 MAX_INTERACTIONS=${MAX_INTERACTIONS:-"1 2 3"}
 FIDELITIES=${FIDELITIES:-"0.8 0.85 0.9 0.95 0.99"}
 NUM_JOBS=${NUM_JOBS:-40}
 
-PARTITION=${PARTITION:-intelsr_medium}                 # empty -> cluster default
-TIME=${TIME:-24:00:00}
-MEM=${MEM:-100G}
+PARTITION=${PARTITION:-intelsr_long}                 # empty -> cluster default
+TIME=${TIME:-03-00:00:00}
+MEM=${MEM:-30G}
 # The work is a very large number of small-to-medium dense LAPACK calls plus
 # single-threaded sampling, not a few big ones. Ten BLAS threads on a 200x200
 # zheevd is mostly synchronisation, so the tasks held 10 cores each while one or
 # two did the work. Two threads keep the largest blocks useful without wasting
 # the rest of the allocation; spend the freed cores on a larger array instead.
-CPUS=${CPUS:-2}
+CPUS=${CPUS:-3}
 THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
 
 BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
-DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
+DENSE_LIMIT=${DENSE_LIMIT:-1024}         # dimension up to which SKQD gets the
                                          # full eigendecomposition; 0 disables
-SHARD_DIR=${SHARD_DIR:-shards}
-OUTPUT=${OUTPUT:-systematic_study_results.csv}
+SHARD_DIR=${SHARD_DIR:-ising_shards}
+OUTPUT=${OUTPUT:-ising_systematic_study_results.csv}
 PYTHON=${PYTHON:-python}
 EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 # ---------------------------------------------------------------------------

@@ -1,0 +1,11 @@
+host=node165 task=39 threads=3
+[job 39/40] 8 cells (3 x n=6, 3 x n=8, 2 x n=12)
+[job 39] 1/8 n=6 mi=1 ham=19 took 0.2s (elapsed 0.2s)
+[job 39] 2/8 n=6 mi=2 ham=19 took 0.1s (elapsed 0.2s)
+[job 39] 3/8 n=6 mi=3 ham=19 took 0.1s (elapsed 0.4s)
+[job 39] 4/8 n=8 mi=1 ham=19 took 0.3s (elapsed 0.7s)
+[job 39] 5/8 n=8 mi=2 ham=19 took 0.3s (elapsed 1.0s)
+[job 39] 6/8 n=8 mi=3 ham=19 took 0.2s (elapsed 1.3s)
+[job 39] 7/8 n=12 mi=1 ham=19 took 3.4s (elapsed 4.7s)
+[job 39] 8/8 n=12 mi=2 ham=19 took 5.4s (elapsed 10.2s)
+[job 39] wrote 400 rows to ising_shards/shard_00039.csv in 10.2s

@@ -1,0 +1,7 @@
+host=node093 task=5 threads=3
+[job 5/40] 4 cells (3 x n=10, 1 x n=12)
+[job 5] 1/4 n=10 mi=1 ham=5 took 0.8s (elapsed 0.8s)
+[job 5] 2/4 n=10 mi=2 ham=5 took 0.8s (elapsed 1.6s)
+[job 5] 3/4 n=10 mi=3 ham=5 took 0.8s (elapsed 2.4s)
+[job 5] 4/4 n=12 mi=3 ham=5 took 4.2s (elapsed 6.6s)
+[job 5] wrote 200 rows to ising_shards/shard_00005.csv in 6.6s

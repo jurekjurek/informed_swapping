@@ -1,0 +1,9 @@
+host=node159 task=30 threads=3
+[job 30/40] 8 cells (3 x n=6, 3 x n=8, 2 x n=12)
+[job 30] 1/8 n=6 mi=1 ham=10 took 124.1s (elapsed 124.1s)
+[job 30] 2/8 n=6 mi=2 ham=10 took 124.6s (elapsed 248.7s)
+[job 30] 3/8 n=6 mi=3 ham=10 took 147.4s (elapsed 396.0s)
+[job 30] 4/8 n=8 mi=1 ham=10 took 335.8s (elapsed 731.8s)
+[job 30] 5/8 n=8 mi=2 ham=10 took 310.6s (elapsed 1042.4s)
+[job 30] 6/8 n=8 mi=3 ham=10 took 291.4s (elapsed 1333.8s)
+[job 30] 7/8 n=12 mi=1 ham=10 took 211028.0s (elapsed 212361.8s)
