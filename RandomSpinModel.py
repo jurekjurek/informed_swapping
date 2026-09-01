@@ -186,6 +186,8 @@ def make_random_spin_hamiltonian(
     # Particle Number Penalty
     if N_target is not None and penalty_strength != 0.0:
 
+        penalty_strength *= 1024/(2**num_sites)  # Scale penalty strength with system size
+
         a = num_sites / 2 - N_target
 
         # the following terms come from squaring the operator: 
