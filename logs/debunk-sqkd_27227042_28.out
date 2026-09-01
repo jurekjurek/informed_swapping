@@ -1,0 +1,13 @@
+host=node012 task=28 threads=4
+[job 28/40] 16 cells (8 x n=8, 3 x n=10, 5 x n=12)
+[job 28] 1/16 n=8 mi=1 ham=1 ps=2.0 took 131.4s (elapsed 131.4s)
+[job 28] 2/16 n=8 mi=1 ham=8 ps=0.0 took 252.5s (elapsed 383.8s)
+[job 28] 3/16 n=8 mi=2 ham=1 ps=2.0 took 178.6s (elapsed 562.4s)
+[job 28] 4/16 n=8 mi=2 ham=4 ps=10.0 took 56.0s (elapsed 618.4s)
+[job 28] 5/16 n=8 mi=2 ham=8 ps=0.0 took 364.2s (elapsed 982.6s)
+[job 28] 6/16 n=8 mi=3 ham=1 ps=2.0 took 143.6s (elapsed 1126.3s)
+[job 28] 7/16 n=8 mi=3 ham=4 ps=10.0 took 133.9s (elapsed 1260.1s)
+[job 28] 8/16 n=8 mi=3 ham=8 ps=0.0 took 305.9s (elapsed 1566.1s)
+[job 28] 9/16 n=10 mi=1 ham=4 ps=10.0 took 1266.0s (elapsed 2832.0s)
+[job 28] 10/16 n=10 mi=2 ham=8 ps=0.0 took 1817.8s (elapsed 4649.9s)
+[job 28] 11/16 n=10 mi=3 ham=8 ps=0.0 took 2478.7s (elapsed 7128.6s)

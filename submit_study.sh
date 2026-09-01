@@ -24,28 +24,29 @@ set -euo pipefail
 module load Python/3.10.4-GCCcore-11.3.0 && source /home/erosanow_hpc/informed_swapping/.SKQD/bin/activate
 
 # ----------------------------- configuration -------------------------------
-NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-20}
+NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-10}
 NUM_SITES=${NUM_SITES:-"6 8 10 12"}
 MAX_INTERACTIONS=${MAX_INTERACTIONS:-"1 2 3"}
 FIDELITIES=${FIDELITIES:-"0.8 0.85 0.9 0.95 0.99"}
 NUM_JOBS=${NUM_JOBS:-40}
+PENALTIES=${PENALTIES:-"0 1 2 5 10 50"}
 
 PARTITION=${PARTITION:-intelsr_long}                 # empty -> cluster default
-TIME=${TIME:-03-00:00:00}
-MEM=${MEM:-30G}
+TIME=${TIME:-04-00:00:00}
+MEM=${MEM:-40G}
 # The work is a very large number of small-to-medium dense LAPACK calls plus
 # single-threaded sampling, not a few big ones. Ten BLAS threads on a 200x200
 # zheevd is mostly synchronisation, so the tasks held 10 cores each while one or
 # two did the work. Two threads keep the largest blocks useful without wasting
 # the rest of the allocation; spend the freed cores on a larger array instead.
-CPUS=${CPUS:-3}
+CPUS=${CPUS:-4}
 THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
 
 BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
 DENSE_LIMIT=${DENSE_LIMIT:-1024}         # dimension up to which SKQD gets the
                                          # full eigendecomposition; 0 disables
-SHARD_DIR=${SHARD_DIR:-ising_shards}
-OUTPUT=${OUTPUT:-ising_systematic_study_results.csv}
+SHARD_DIR=${SHARD_DIR:-ising_shards_with_penalties}  # where to store the shards
+OUTPUT=${OUTPUT:-ising_systematic_study_results_with_penalties.csv}
 PYTHON=${PYTHON:-python}
 EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 # ---------------------------------------------------------------------------
@@ -59,6 +60,7 @@ STUDY_ARGS=(
   --shard-dir "$SHARD_DIR"
   --balance "$BALANCE"
   --dense-limit "$DENSE_LIMIT"
+  --penalty-strengths $PENALTIES
 )
 
 # ------------------------------ worker mode --------------------------------

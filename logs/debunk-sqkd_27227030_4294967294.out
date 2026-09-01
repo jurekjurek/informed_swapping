@@ -1,0 +1,64 @@
+=== planned split ===
+720 cells over 40 jobs (36000 rows total, balance=cost)
+
+ Job  Cells  n=6  n=8  n=10  n=12     Load
+   0     20    9    1     6     4 120497.1
+   1     20    9    1     6     4 120497.1
+   2     20    9    1     6     4 120497.1
+   3     20    9    1     6     4 120497.1
+   4     20    9    1     6     4 120497.1
+   5     20    9    1     6     4 120497.1
+   6     20    9    1     6     4 120497.1
+   7     20    9    1     6     4 120497.1
+   8     20    9    1     6     4 120497.1
+   9     20    9    1     6     4 120497.1
+  10     20    9    1     6     4 120497.1
+  11     20    9    1     6     4 120497.1
+  12     20    9    1     6     4 120497.1
+  13     20    9    1     6     4 120497.1
+  14     20    9    1     6     4 120497.1
+  15     20    9    1     6     4 120497.1
+  16     20    9    1     6     4 120497.1
+  17     20    9    1     6     4 120497.1
+  18     20    9    1     6     4 120497.1
+  19     20    9    1     6     4 120497.1
+  20     16    0    8     3     5 120502.0
+  21     16    0    8     3     5 120502.0
+  22     16    0    8     3     5 120502.0
+  23     16    0    8     3     5 120502.0
+  24     16    0    8     3     5 120502.0
+  25     16    0    8     3     5 120502.0
+  26     16    0    8     3     5 120502.0
+  27     16    0    8     3     5 120502.0
+  28     16    0    8     3     5 120502.0
+  29     16    0    8     3     5 120502.0
+  30     16    0    8     3     5 120502.0
+  31     16    0    8     3     5 120502.0
+  32     16    0    8     3     5 120502.0
+  33     16    0    8     3     5 120502.0
+  34     16    0    8     3     5 120502.0
+  35     16    0    8     3     5 120502.0
+  36     16    0    8     3     5 120502.0
+  37     16    0    8     3     5 120502.0
+  38     16    0    8     3     5 120502.0
+  39     16    0    8     3     5 120502.0
+
+cells per job: min 16, max 20 (spread 4)
+estimated load: min 120497.1, max 120502.0 (heaviest job is 1.00x the lightest)
+  n=6: uneven by 9 (expected under cost balancing -- Load is what is equalised)
+  n=8: uneven by 7 (expected under cost balancing -- Load is what is equalised)
+  n=10: uneven by 3 (expected under cost balancing -- Load is what is equalised)
+  n=12: uneven by 1 (expected under cost balancing -- Load is what is equalised)
+
+sbatch --array=0-39 submit_study.sh
+
+submitted array job 27227042 (0-39)
+submitted merge job 27227043 (runs after the array succeeds)
+
+watch:   squeue -j 27227042,27227043
+logs:    logs/
+result:  ising_systematic_study_results_with_penalties.csv
+
+If some tasks time out, raise TIME and re-run ./submit_study.sh -- finished
+shards in ising_shards_with_penalties are skipped, and a task that died mid-shard resumes
+from its .partial file, so only the missing cells are redone.
