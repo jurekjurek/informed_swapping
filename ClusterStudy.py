@@ -250,12 +250,12 @@ def run_cell(cell: Cell, fidelities, sparse: bool = True,
     hamiltonian = make_random_spin_hamiltonian(
         num_sites=cell.num_sites,
         max_interactions=cell.max_interactions,
-        J_components=("z"),
-        B_components=("x"),
-        B_max = 10,
+        J_components=("x", "y"),
+        B_components=("z"),
+        B_max = cell.penalty_strength,
         seed=seed,
         N_target=n_target,
-        penalty_strength=cell.penalty_strength,
+        penalty_strength=0,
     )[0].to_matrix(sparse=sparse)
 
     ground_state, all_eigenvalues, all_eigenvectors = solve_ground_state(

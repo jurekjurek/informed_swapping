@@ -122281,3 +122281,4 @@ Use iteration 51 instead with accuracy
 [1.19048702e-07]
 not reaching the requested tolerance 1e-09.
   values, vectors = lobpcg(projected_hamiltonian, guess, largest=False,
+[2026-09-01T16:10:23.603] error: *** JOB 27230793 ON node005 CANCELLED AT 2026-09-01T16:10:23 DUE to SIGNAL Terminated ***

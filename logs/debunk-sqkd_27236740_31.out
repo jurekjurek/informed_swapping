@@ -1,0 +1,13 @@
+host=node128 task=31 threads=4
+[job 31/40] 16 cells (8 x n=8, 3 x n=10, 5 x n=12)
+[job 31] 1/16 n=8 mi=1 ham=1 ps=30.0 took 13.8s (elapsed 13.8s)
+[job 31] 2/16 n=8 mi=1 ham=8 ps=5.0 took 19.0s (elapsed 32.9s)
+[job 31] 3/16 n=8 mi=2 ham=1 ps=30.0 took 8.8s (elapsed 41.6s)
+[job 31] 4/16 n=8 mi=2 ham=5 ps=1.0 took 66.0s (elapsed 107.6s)
+[job 31] 5/16 n=8 mi=2 ham=8 ps=5.0 took 12.2s (elapsed 119.9s)
+[job 31] 6/16 n=8 mi=3 ham=1 ps=30.0 took 10.8s (elapsed 130.6s)
+[job 31] 7/16 n=8 mi=3 ham=5 ps=1.0 took 14.8s (elapsed 145.4s)
+[job 31] 8/16 n=8 mi=3 ham=8 ps=5.0 took 12.4s (elapsed 157.8s)
+[job 31] 9/16 n=10 mi=1 ham=5 ps=1.0 took 550.4s (elapsed 708.2s)
+[job 31] 10/16 n=10 mi=2 ham=8 ps=5.0 took 296.4s (elapsed 1004.6s)
+[job 31] 11/16 n=10 mi=3 ham=8 ps=5.0 took 224.4s (elapsed 1229.1s)

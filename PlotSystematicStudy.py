@@ -34,7 +34,7 @@ PROTOCOLS = (
 
 GRID_KWARGS = dict(color="#c9c8c3", linewidth=0.6, alpha=0.7)
 BIN_LABELS = ("low", "mid", "high")
-OUTPUT_ROOT = Path("ising_plots")
+OUTPUT_ROOT = Path("tmp_plots")
 
 
 # --------------------------------------------------------------------------------------
@@ -291,4 +291,4 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT) -> None:
 
 
 if __name__ == "__main__":
-    plot_results("/home/erosanow_hpc/informed_swapping/ising_systematic_study_results.csv")
+    plot_results("/home/erosanow_hpc/informed_swapping/tmp.csv")
