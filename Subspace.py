@@ -191,5 +191,22 @@ class GrowingProjection:
         """The pooled basis-state indices, in block order."""
         return self._pool[: self.size]
 
+    def prefix_block(self, size: int) -> np.ndarray:
+        """
+        The Hamiltonian projected onto the first ``size`` pooled states.
+
+        ``extend`` only ever writes the rows and columns of the states it adds,
+        so an entry whose row *and* column both predate a batch is left alone:
+        the leading size x size corner of the buffer is exactly the block that
+        ``block`` returned when the pool had that many states, and
+        ``pool[:size]`` are the states it belongs to.
+
+        A protocol whose diagonalization is only read as a metric -- SKQD's is,
+        it never feeds back into the pool -- can therefore skip it during the run
+        and recover any earlier subspace afterwards, paying one solve per point
+        it actually wants to plot instead of one per iteration.
+        """
+        return self._block[:size, :size]
+
     def contains(self, state: int) -> bool:
         return bool(self._position[state] >= 0)

@@ -41,6 +41,30 @@ except ImportError:  # pragma: no cover - depends on the installed scipy
 _EXPM_TOL = 2.0 ** -53
 
 
+def fidelity_at_budget(pool_sizes: np.ndarray, fidelities: np.ndarray, budgets) -> np.ndarray:
+    """
+    Fidelity recorded at the last pool size that does not exceed ``budgets``.
+
+    A full run records its fidelity at the pool sizes it happens to pass through
+    -- one per added state for BARK, a random jump per iteration for SKQD -- so
+    the curves of two protocols are sampled on different grids and cannot be
+    averaged point by point. Reading each run as the step function "what did this
+    protocol deliver with a budget of K unique bitstrings" puts every run on a
+    common grid, which is what makes an average over Hamiltonians well defined.
+
+    ``budgets`` may be a scalar or an array. Budgets below the first recorded
+    pool size give 0, and budgets beyond the last one give the final fidelity:
+    a protocol that has terminated cannot improve, so carrying its last value
+    forward is the honest reading rather than a gap in the average.
+    """
+    pool_sizes = np.asarray(pool_sizes)
+    fidelities = np.asarray(fidelities)
+    if pool_sizes.size == 0:
+        return np.zeros_like(np.asarray(budgets, dtype=float))
+    reached = np.searchsorted(pool_sizes, budgets, side="right")
+    return np.where(reached > 0, fidelities[np.maximum(reached - 1, 0)], 0.0)
+
+
 class SKQD:
     def __init__(self, hamiltonian: np.ndarray,
                  eigenvalues: np.ndarray | None = None,
@@ -283,6 +307,106 @@ class SKQD:
         pool_size = self.sweep(initial_state_index, t, n_shots, correct_state,
                                [target_fidelity])[0]
         return pool_size if not np.isfinite(pool_size) else int(pool_size)
+    
+    def full_skqd_run(self, initial_state_index: int, t: float, n_shots: int,
+              correct_state: np.ndarray,
+              max_pool_size: int | None = None,
+              budgets: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Run SKQD until the pool stops growing, recording the whole trajectory.
+
+        Returns ``(pool_sizes, fidelities)``, one entry per iteration that added
+        at least one state.
+
+        ``max_pool_size`` stops the run once the pool has reached that many
+        unique bitstrings, which is what keeps a full run affordable at larger
+        system sizes. The last iteration may overshoot the budget -- it draws
+        ``n_shots`` shots at once and cannot know which of them are new -- so the
+        budget is not enforced exactly here. ``fidelity_at_budget`` resolves that
+        by reading the last pool size at or below the budget, which is also the
+        right accounting: a protocol that jumps from 400 to 900 states really
+        does have only 400 of them when it is given 500.
+
+        ``budgets`` restricts the diagonalizations to the ones a caller that only
+        wants to read the curve at those budgets actually needs, plus the final
+        pool. The sampling loop then runs without diagonalizing at all and the
+        fidelities are recovered afterwards from ``prefix_block``. The numbers
+        are *identical*, not approximated -- and this is the difference between a
+        cheap and an unaffordable study, since a run to pool size K would
+        otherwise pay K / n_shots growing solves and the parameter scan repeats
+        that for every point of its grid.
+        """
+        initial_state_index = int(initial_state_index)
+        n_shots = int(n_shots)
+
+        projection = self.projection
+        projection.reset()
+        projection.extend([initial_state_index])
+
+        state_vector = np.zeros(self.dimension, dtype=complex)
+        state_vector[initial_state_index] = 1.0  # Start with the initial state
+        
+        pool_sizes = []
+        fidelities = []
+
+        while max_pool_size is None or projection.size < max_pool_size:
+            state_vector = np.asarray(self.evolve(state_vector, t)).ravel()
+
+            # Sample n_shots states according to the probability distribution of
+            # the new state. Sampling straight from the cumulative distribution
+            # skips the validation and the internal copies of np.random.choice
+            # while drawing from the same stream.
+            probabilities = np.abs(state_vector) ** 2
+            cumulative = np.cumsum(probabilities)
+            total = cumulative[-1]
+            if not (total > 0.0):
+                break
+            draws = np.random.random_sample(n_shots) * total
+            sampled_indices = np.minimum(np.searchsorted(cumulative, draws, side="right"),
+                                         self.dimension - 1)
+
+            # Add the sampled states to the pool which are not already in the pool
+            fresh = projection.extend(sampled_indices)
+
+            # Check if pool size has changed, if not, we can break the loop
+            if fresh.size == 0:
+                break  # pool stagnated; every remaining target is unreachable
+
+            pool_sizes.append(projection.size)
+
+            if budgets is not None:
+                continue    # diagonalized below, only where it is needed
+
+            # Diagonalize the projected Hamiltonian to find the ground state.
+            _, ground_state_vector = lowest_eigenpair(projection.block)
+
+            # Only the pooled entries of the embedded ground state are non-zero,
+            # so the overlap is an O(k) inner product rather than an O(N) one.
+            fidelity = np.abs(np.vdot(ground_state_vector,
+                                      correct_state[projection.pool])) ** 2
+
+            fidelities.append(fidelity)
+
+        if budgets is None:
+            return np.array(pool_sizes), np.array(fidelities)
+
+        sizes = np.array(pool_sizes)
+        if sizes.size == 0:
+            return sizes, np.empty(0)
+
+        # The pool sizes worth a solve: for every budget the last one that does
+        # not exceed it -- which is what ``fidelity_at_budget`` will read -- plus
+        # the final pool, so the caller can still see where the run ended.
+        reached = np.searchsorted(sizes, budgets, side="right")
+        wanted = np.unique(np.append(sizes[reached[reached > 0] - 1], sizes[-1]))
+
+        for size in wanted:
+            size = int(size)
+            _, ground_state_vector = lowest_eigenpair(projection.prefix_block(size))
+            fidelities.append(np.abs(np.vdot(ground_state_vector,
+                                             correct_state[projection.pool[:size]])) ** 2)
+
+        return wanted, np.array(fidelities)
 
     # ------------------------------------------------------------------ #
     # Parameter search
@@ -314,6 +438,34 @@ class SKQD:
         b = (x2 * x2 * (y0 - y1) + x1 * x1 * (y2 - y0) + x0 * x0 * (y1 - y2)) / denominator
         if a <= 0.0:
             return x1  # concave or flat: no interior minimum
+        return float(np.clip(-b / (2.0 * a), x0, x2))
+    
+    @staticmethod
+    def _parabolic_maximum(values: tuple, best, evaluate) -> float:
+        """
+        Vertex of the parabola through the best grid point and its two neighbours.
+
+        Returns the grid point itself when it sits on the edge of the grid or when
+        the three points are not convex, i.e. when there is no interior maximum to
+        extrapolate to.
+        """
+        values = list(values)
+        position = values.index(best)
+        if position == 0 or position == len(values) - 1:
+            return float(best)
+
+        x0, x1, x2 = (float(values[position - 1]), float(values[position]),
+                      float(values[position + 1]))
+        y0, y1, y2 = (evaluate(values[position - 1]), evaluate(values[position]),
+                      evaluate(values[position + 1]))
+
+        denominator = (x0 - x1) * (x0 - x2) * (x1 - x2)
+        if denominator == 0.0:
+            return x1
+        a = (x2 * (y1 - y0) + x1 * (y0 - y2) + x0 * (y2 - y1)) / denominator
+        b = (x2 * x2 * (y0 - y1) + x1 * x1 * (y2 - y0) + x0 * x0 * (y1 - y2)) / denominator
+        if a >= 0.0:
+            return x1  # concave or flat: no interior maximum
         return float(np.clip(-b / (2.0 * a), x0, x2))
 
     def optimize_many(self, initial_state_index: int, correct_state: np.ndarray,
@@ -407,3 +559,63 @@ class SKQD:
         return self.optimize_many(initial_state_index, correct_state,
                                   [target_fidelity], t_values=t_values,
                                   shot_values=shot_values, n_repeats=n_repeats)[0]
+    
+    def optimize_general(self, initial_state_index: int, correct_state: np.ndarray,
+                        max_pool_size: int,
+                      t_values: tuple = (0.1, 0.25, 0.5, 1.0, 2.0, 4.0),
+                      shot_values: tuple = (10, 25, 50, 100),
+                      n_repeats: int = 3) -> tuple:
+        """
+        Like ``optimize_many``, but for a fixed budget of unique bitstrings:
+        maximize the fidelity reached with a pool of at most ``max_pool_size``
+        states.
+
+        The budget is what has to be held fixed, not the number of applications
+        of U(t). A run of ``n_applications`` iterations consumes roughly
+        ``n_applications * n_shots`` shots, so optimizing at a fixed iteration
+        count lets ``n_shots`` buy extra resources: more shots is strictly more
+        coverage, the optimum pins to the largest entry of ``shot_values``, and
+        the winner has spent several times what the loser did. At a fixed budget
+        the same knob is a real trade-off instead -- few wide iterations sampling
+        a strongly correlated early distribution, against many narrow ones -- and
+        overshooting the budget in one coarse jump is paid for rather than free.
+
+        Returns ``(best_t, best_n_shots)``.
+        """
+        cache = {}
+
+        def objective(t: float, n_shots: int) -> float:
+            """Mean fidelity at the budget over the repeats."""
+            key = (float(t), int(n_shots))
+            if key not in cache:
+                # ``budgets`` leaves one diagonalization per run instead of one
+                # per iteration, which is what makes scanning the grid cheap.
+                cache[key] = float(np.mean([
+                    fidelity_at_budget(*self.full_skqd_run(
+                        initial_state_index, float(t), int(n_shots), correct_state,
+                        max_pool_size=max_pool_size, budgets=[max_pool_size]),
+                        max_pool_size)
+                    for _ in range(n_repeats)
+                ]))
+            return cache[key]
+
+        # Scan the full grid once.
+        scores = {(t, n_shots): objective(t, n_shots)
+                  for t in t_values for n_shots in shot_values}
+
+        best_t, best_shots = max(scores, key=scores.get)
+        best_fidelity = scores[(best_t, best_shots)]
+
+        # Extrapolate along each axis through the grid optimum
+        refined_t = self._parabolic_maximum(t_values, best_t,
+                                            lambda x: scores[(x, best_shots)])
+        refined_shots = self._parabolic_maximum(shot_values, best_shots,
+                                                lambda x: scores[(best_t, x)])
+        refined_shots = max(1, int(round(refined_shots)))
+
+        # Only keep the extrapolated point if it actually beats the grid.
+        if (refined_t, refined_shots) != (best_t, best_shots):
+            if objective(refined_t, refined_shots) > best_fidelity:
+                best_t, best_shots = float(refined_t), refined_shots
+
+        return (float(best_t), int(best_shots))

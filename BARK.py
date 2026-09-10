@@ -64,6 +64,16 @@ class BARK:
         begin, end = self._csr.indptr[int(index)], self._csr.indptr[int(index) + 1]
         return self._csr.indices[begin:end]
 
+    def apply_hamiltonian_with_amplitudes(self, index: int) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Apply the Hamiltonian to the state corresponding to the given index.
+        Return the basis states with non-zero amplitude and their amplitudes.
+        """
+        begin, end = self._csr.indptr[int(index)], self._csr.indptr[int(index) + 1]
+        edges = self._csr.indices[begin:end]
+        amplitudes = self._csr.data[begin:end]
+        return edges, amplitudes
+
     def rank_states(self, last_approximation: np.ndarray, energy: float,
                     new_states: np.ndarray) -> np.ndarray:
         """
@@ -281,6 +291,168 @@ class BARK:
         results = np.empty_like(sorted_results)
         results[order] = sorted_results
         return results
+
+    def full_bark_run(self, correct_state: np.ndarray, initial_state_index: int,
+                      max_pool_size: int | None = None) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Run the BARK protocol until all reachable states are pooled.
+
+        Returns ``(pool_sizes, fidelities)``, one entry per added state, so the
+        run can be read at any budget with ``fidelity_at_budget``.
+        ``max_pool_size`` stops the run early, which is what keeps a full run
+        affordable at larger system sizes; unlike SKQD, BARK adds exactly one
+        state per iteration and therefore lands on the budget exactly.
+        """
+        initial_state_index = int(initial_state_index)
+        projection = self.projection
+        projection.reset()
+        projection.extend([initial_state_index])
+
+        # Re-enable the warm-start route for each run: whether it pays off is a
+        # property of this Hamiltonian and this trajectory, not of the object.
+        self._warm_start_enabled = True
+        self._warm_start_failures = 0
+
+        pool_states = {initial_state_index}
+        last_approximation = np.zeros(self.dimension, dtype=complex)
+        last_approximation[initial_state_index] = 1.0  # Start with the initial state
+        energy = float(self._diagonal[initial_state_index])
+
+        memory = {}          # state -> best (lowest) potential seen so far
+        queue = []           # heap of (potential, state), lazily invalidated
+        last_state = initial_state_index
+        previous_vector = None  # warm start for the next diagonalization
+
+        pool_sizes = []
+        fidelities = []
+
+        while max_pool_size is None or projection.size < max_pool_size:
+            # Remove states that are already in the pool from the new states.
+            candidates = [state for state in self.apply_hamiltonian(last_state)
+                          if state not in pool_states]
+
+            potentials = self.rank_states(last_approximation, energy, candidates)
+
+            # Update memory with new states and their potentials
+            for state, potential in zip(candidates, potentials):
+                state = int(state)
+                potential = float(potential)
+                if state not in memory or potential < memory[state]:
+                    memory[state] = potential
+                    heapq.heappush(queue, (potential, state))
+
+            # Take the state with the lowest potential as potential is a proxy for
+            # energy lowering. The heap replaces a linear scan over a dict that
+            # grows to O(N) entries; stale pushes are discarded on the way out.
+            last_state = None
+            while queue:
+                potential, state = heapq.heappop(queue)
+                if memory.get(state) == potential:
+                    del memory[state]   # avoid re-selection
+                    last_state = state
+                    break
+
+            # No new states were found: every remaining target is unreachable.
+            if last_state is None:
+                break
+
+            pool_states.add(last_state)
+            projection.extend([last_state])
+
+            # Diagonalize the projected Hamiltonian to find the ground state.
+            # The pool grows by one state appended at the end, so the previous ground state is a valid warm start for the enlarged block.
+            energy, ground_state_vector = self.lowest_eigenpair(projection.block, previous_vector)
+            previous_vector = ground_state_vector
+            # The pool only grows, so its previous entries are a prefix of the current ones and this assignment overwrites the entire support -- no need to re-zero a length-N vector every iteration.
+            last_approximation[projection.pool] = ground_state_vector
+            
+            # Calculate fidelity with the correct state. Only the pooled entries of the approximation are non-zero, so this is an O(k) inner product rather than an O(N) one.
+            # Then save the fidelity for each pool size
+            pool_sizes.append(projection.size)
+            fidelities.append(np.abs(np.vdot(ground_state_vector, correct_state[projection.pool])) ** 2)
+
+        return np.array(pool_sizes), np.array(fidelities)
+
+    def simplified_bark_run(self, correct_state: np.ndarray, initial_state_index: int,
+                            max_pool_size: int | None = None) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Run a simplified version of BARK where rank states is simply the amplitude after applying the Hamiltonian to the last state. This is a simplified version of BARK that does not use Johann's method.
+
+        Returns ``(pool_sizes, fidelities)`` like ``full_bark_run``.
+        """
+
+        initial_state_index = int(initial_state_index)
+        projection = self.projection
+        projection.reset()
+        projection.extend([initial_state_index])
+
+        # Re-enable the warm-start route for each run: whether it pays off is a
+        # property of this Hamiltonian and this trajectory, not of the object.
+        self._warm_start_enabled = True
+        self._warm_start_failures = 0
+
+        pool_states = {initial_state_index}
+        last_approximation = np.zeros(self.dimension, dtype=complex)
+        last_approximation[initial_state_index] = 1.0  # Start with the initial state
+        energy = float(self._diagonal[initial_state_index])
+
+        memory = {}          # state -> best (lowest) potential seen so far
+        queue = []           # heap of (potential, state), lazily invalidated
+        last_state = initial_state_index
+        previous_vector = None  # warm start for the next diagonalization
+
+        pool_sizes = []
+        fidelities = []
+
+        while max_pool_size is None or projection.size < max_pool_size:
+            # Remove states that are already in the pool from the new states.
+            # The potential is *minus* the coupling: the selection below keeps
+            # the smallest potential, because for Johann's method that is the
+            # lowest energy estimate. Here a *large* |H[s, s']| is what marks a
+            # promising state, so the sign has to be flipped -- ranking by
+            # |amplitude| directly would pick the weakest-coupled state on the
+            # frontier every time and make this baseline artificially bad.
+            candidates = [(state, -np.abs(amplitude)) for state, amplitude in zip(*self.apply_hamiltonian_with_amplitudes(last_state)) if state not in pool_states]
+
+            # Update memory with new states and their potentials
+            for state, potential in candidates:
+                state = int(state)
+                potential = float(potential)
+                if state not in memory or potential < memory[state]:
+                    memory[state] = potential
+                    heapq.heappush(queue, (potential, state))
+
+            # Take the state with the lowest potential as potential is a proxy for
+            # energy lowering. The heap replaces a linear scan over a dict that
+            # grows to O(N) entries; stale pushes are discarded on the way out.
+            last_state = None
+            while queue:
+                potential, state = heapq.heappop(queue)
+                if memory.get(state) == potential:
+                    del memory[state]   # avoid re-selection
+                    last_state = state
+                    break
+
+            # No new states were found: every remaining target is unreachable.
+            if last_state is None:
+                break
+
+            pool_states.add(last_state)
+            projection.extend([last_state])
+
+            # Diagonalize the projected Hamiltonian to find the ground state.
+            # The pool grows by one state appended at the end, so the previous ground state is a valid warm start for the enlarged block.
+            energy, ground_state_vector = self.lowest_eigenpair(projection.block, previous_vector)
+            previous_vector = ground_state_vector
+            # The pool only grows, so its previous entries are a prefix of the current ones and this assignment overwrites the entire support -- no need to re-zero a length-N vector every iteration.
+            last_approximation[projection.pool] = ground_state_vector
+            
+            # Calculate fidelity with the correct state. Only the pooled entries of the approximation are non-zero, so this is an O(k) inner product rather than an O(N) one.
+            # Then save the fidelity for each pool size
+            pool_sizes.append(projection.size)
+            fidelities.append(np.abs(np.vdot(ground_state_vector, correct_state[projection.pool])) ** 2)
+
+        return np.array(pool_sizes), np.array(fidelities)
 
     def test_run(self, target_fidelity: float, correct_state: np.ndarray,
                  initial_state_index: int):
