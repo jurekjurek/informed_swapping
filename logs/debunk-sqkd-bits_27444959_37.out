@@ -1,0 +1,12 @@
+host=node094 task=37 threads=4
+[job 37/40] 9 cells (3 x n=6, 3 x n=8, 3 x n=10)
+[job 37] 1/9 n=6 mi=1 ham=7 took 0.1s (elapsed 0.1s)
+[job 37] 2/9 n=6 mi=2 ham=7 took 0.3s (elapsed 0.5s)
+[job 37] 3/9 n=6 mi=3 ham=7 took 9.8s (elapsed 10.3s)
+[job 37] 4/9 n=8 mi=1 ham=7 took 0.3s (elapsed 10.7s)
+[job 37] 5/9 n=8 mi=2 ham=7 took 5.6s (elapsed 16.3s)
+[job 37] 6/9 n=8 mi=3 ham=7 took 17.9s (elapsed 34.3s)
+[job 37] 7/9 n=10 mi=1 ham=7 took 3.0s (elapsed 37.4s)
+[job 37] 8/9 n=10 mi=2 ham=7 took 36.6s (elapsed 74.0s)
+[job 37] 9/9 n=10 mi=3 ham=7 took 82.5s (elapsed 156.6s)
+[job 37] wrote 5112 rows to bitstring_shards/shard_00037.csv in 156.7s

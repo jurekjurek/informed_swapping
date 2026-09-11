@@ -1,0 +1,4 @@
+host=node007 task=3 threads=4
+[job 3/40] 1 cells (1 x n=12)
+[job 3] 1/1 n=12 mi=3 ham=3 took 2213.1s (elapsed 2213.1s)
+[job 3] wrote 672 rows to bitstring_shards/shard_00003.csv in 2213.1s

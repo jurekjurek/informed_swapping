@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/erosanow_hpc/informed_swapping/EqualNumberOfBitstrings.py", line 605, in <module>
+    main()
+  File "/home/erosanow_hpc/informed_swapping/EqualNumberOfBitstrings.py", line 571, in main
+    args = build_parser().parse_args(argv)
+  File "/home/erosanow_hpc/informed_swapping/EqualNumberOfBitstrings.py", line 542, in build_parser
+    parser.add_argument("--fidelities", type=float, nargs="+", default=DEFAULT_FIDELITIES)
+NameError: name 'DEFAULT_FIDELITIES' is not defined. Did you mean: 'DEFAULT_NUM_SITES'?

@@ -1,0 +1,8 @@
+merged 40 shards -> equal_bitstrings_results.csv: 71280 rows (71280 expected for a complete run)
+coverage per number of sites:
+  n=  6:   30/30 cells  COMPLETE
+  n=  8:   30/30 cells  COMPLETE
+  n= 10:   30/30 cells  COMPLETE
+  n= 12:   30/30 cells  COMPLETE
+Loaded 71280 rows from equal_bitstrings_results.csv
+Wrote 60 PDF files under equal_bitstrings_plots/
