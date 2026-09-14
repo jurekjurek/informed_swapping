@@ -28,9 +28,11 @@ sample that region.
 The grid is log-spaced and the y-axis is the infidelity 1 - F on a log scale,
 because everything that decides the comparison happens at K / 2^N << 1 and in
 the last digits of the fidelity. Linear axes spend their resolution on the
-regime where all protocols have already won. Curves are never averaged across
-the number of sites: the difficulty grows with the system size, so every
-(Number_of_Sites, Max_Interactions) gets its own figure.
+regime where all protocols have already won. Curves are not only averaged over
+everything: the runs are clustered by system size, maximum number of
+interactions, ground-state density, Hamiltonian density and the overlap of the
+initial state, and by every combination of those five, one folder each. See
+``plot_results``.
 
 The unit of work is a "cell": one ``(hamiltonian_index, num_sites,
 max_interactions)`` combination. A cell builds one Hamiltonian, solves for its
@@ -50,9 +52,25 @@ Usage
     # collect the shards and draw the figures
     python EqualNumberOfBitstrings.py merge --output equal_bitstrings_results.csv
     python EqualNumberOfBitstrings.py plot  --output equal_bitstrings_results.csv
+
+    # fewer figures: only up to two clustering axes at a time, four bins each
+    python EqualNumberOfBitstrings.py plot  --max-combination 2 --num-bins 4
+
+Figures
+-------
+``plot`` writes one folder per way of clustering the runs, and one subfolder per
+cluster inside it, e.g. ``by_N_overlap/N-10_overlap-high/curves_sem.pdf``. Each
+holds the fidelity curves and the ratio against BARK, once with the spread of
+the runs and once with the error of the mean, plus where the protocols stopped
+by themselves. Whenever the ceiling drops off a cliff -- which it does as soon as
+the pool covers the support of the ground state, taking the y-axis down with it
+-- a second copy of each curve stopping in front of that jump is written next to
+it, with a ``_zoom`` suffix. ``plot_index.csv`` lists every cluster with the
+number of runs behind it.
 """
 
 import argparse
+import itertools
 import os
 import sys
 import time
@@ -486,6 +504,31 @@ def add_log_infidelity(curves: pd.DataFrame) -> pd.DataFrame:
     return curves
 
 
+def on_common_grid(group: pd.DataFrame) -> pd.DataFrame:
+    """
+    Read every run of a cluster at every budget fraction the cluster contains.
+
+    Budgets are whole bitstrings and the axis is K / 2^N, so two system sizes
+    share a grid point only by accident. Grouping the recorded rows by
+    Budget_Fraction therefore averages a *different subset of the runs* at every
+    point as soon as a cluster mixes system sizes, which shows up as a zigzag and
+    is not a property of the protocols. Here each run is instead read as the step
+    function it is -- its value at the last budget it recorded that does not
+    exceed the grid point, the same reading ``fidelity_at_budget`` performs when
+    the runs are recorded -- on the union of the cluster's budget fractions.
+
+    A run contributes nothing below its own first budget and is not extrapolated
+    backwards: a fraction of 10^-3 is less than one bitstring of a 2^6
+    dimensional space, and no reading of that run can invent one. Clusters that
+    do fix the system size are untouched, since there the union is exactly the
+    grid every run was already recorded on.
+    """
+    wide = group.pivot_table(index="Budget_Fraction", columns=RUN_KEY + ["Algorithm"],
+                             values="Log_Infidelity").ffill()
+    curves = wide.melt(ignore_index=False, value_name="Log_Infidelity").reset_index()
+    return curves.dropna(subset=["Log_Infidelity"])
+
+
 def aggregate(frame: pd.DataFrame, column: str, error: str) -> pd.DataFrame:
     """
     Mean of ``column`` per (algorithm, budget), with a spread of ``error``.
@@ -553,8 +596,12 @@ def _band_label(error: str) -> str:
 
 def _annotate_counts(ax: plt.Axes, stats: pd.DataFrame) -> None:
     """State how many runs entered each average."""
-    counts = stats.groupby("Algorithm")["count"].max()
-    text = ", ".join(f"{name}: {int(count)}" for name, count in counts.items())
+    counts = stats.groupby("Algorithm")["count"].agg(["min", "max"])
+    # Below their own first budget the runs of the smaller systems are absent,
+    # so a cluster that mixes system sizes has a range rather than one number.
+    text = ", ".join(f"{name}: {int(row['min'])}" if row["min"] == row["max"]
+                     else f"{name}: {int(row['min'])}-{int(row['max'])}"
+                     for name, row in counts.iterrows())
     ax.text(0.0, -0.22, f"runs per point -- {text}", transform=ax.transAxes,
             fontsize=7, color="#52514e", va="top")
 
@@ -656,23 +703,206 @@ def plot_termination(group: pd.DataFrame, title: str, path: Path) -> None:
     save_figure(fig, path)
 
 
-def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT) -> None:
-    """Produce every figure from the merged results."""
+# --------------------------------------------------------------------------- #
+# Clustering the runs
+# --------------------------------------------------------------------------- #
+
+# The axes the runs can be clustered by, in the order the folder names list
+# them. ``binned`` says whether the column is continuous and has to be cut into
+# bins before it can be grouped on.
+FACETS = (
+    # short name  column                  binned  name in the titles
+    ("N",         "Number_of_Sites",      False,  "N"),
+    ("maxint",    "Max_Interactions",     False,  "max. interactions"),
+    ("gsdens",    "Ground_State_Density", True,   "ground-state density"),
+    ("hamdens",   "Hamiltonian_Density",  True,   "Hamiltonian density"),
+    ("overlap",   "Overlap",              True,   "initial overlap"),
+)
+
+DEFAULT_NUM_BINS = 3
+# Below this many runs a cluster is skipped instead of drawn -- see plot_results.
+DEFAULT_MIN_RUNS = 5
+# Decades the ceiling has to lose in one grid step to count as a jump.
+DEFAULT_CEILING_JUMP = 2.0
+
+
+def bin_names(count: int) -> list:
+    """Readable names for ``count`` quantile bins."""
+    if count == 2:
+        return ["low", "high"]
+    if count == 3:
+        return ["low", "mid", "high"]
+    return [f"q{i + 1}" for i in range(count)]
+
+
+def quantile_edges(values: pd.Series, num_bins: int) -> np.ndarray:
+    """
+    Equal-frequency bin edges of ``values``.
+
+    Equal frequency rather than equal width: the densities, and the overlaps far
+    more so, are spread over decades -- the initial states are taken from both
+    ends of the overlap distribution, so that column is bimodal by construction
+    -- and equal-width bins would leave nearly every run in a single one. Repeated
+    values share an edge, which is dropped, so a column with few distinct values
+    comes out with fewer bins rather than with ties split between them.
+    """
+    quantiles = np.linspace(0.0, 1.0, num_bins + 1)
+    return np.unique(np.quantile(values.to_numpy(dtype=float), quantiles))
+
+
+def apply_bins(values: pd.Series, edges: np.ndarray) -> pd.Series:
+    """Name the bin every value falls in."""
+    if edges.size < 3:
+        # A single bin: the column does not vary here, so it clusters nothing.
+        return pd.Series("all", index=values.index)
+    return pd.cut(values, edges, labels=bin_names(edges.size - 1),
+                  include_lowest=True).astype(str)
+
+
+def add_facet_labels(data: pd.DataFrame, num_bins: int, scope: str) -> list:
+    """
+    Add one label column per facet and return their names, in FACETS order.
+
+    The edges come from the runs, not from the rows: a run contributes one row
+    per algorithm and budget and the number of budgets grows with the system
+    size, so cutting on the rows would let the large systems decide where the
+    bins of the small ones lie.
+
+    ``scope="per-N"`` bins within each system size. Both densities and the
+    overlaps shrink with N -- a ground state spread over 5% of a 2^12 dimensional
+    space is a wide one -- so global bins would largely re-sort the runs by N and
+    the density folders would be showing the size dependence again under another
+    name. ``scope="global"`` is the literal reading, for when the absolute value
+    is what matters.
+    """
+    runs = data.drop_duplicates(RUN_KEY)
+    labels = []
+    for name, column, binned, _ in FACETS:
+        label = f"Facet_{name}"
+        if not binned:
+            data[label] = f"{name}-" + data[column].astype(int).astype(str)
+        elif scope == "per-N":
+            data[label] = ""
+            for num_sites, block in data.groupby("Number_of_Sites"):
+                edges = quantile_edges(runs.loc[runs["Number_of_Sites"] == num_sites, column],
+                                       num_bins)
+                data.loc[block.index, label] = f"{name}-" + apply_bins(block[column], edges)
+        else:
+            data[label] = f"{name}-" + apply_bins(data[column],
+                                                  quantile_edges(runs[column], num_bins))
+        labels.append(label)
+    return labels
+
+
+def cluster_title(names: list, key: tuple) -> str:
+    """Human-readable version of a cluster's label tuple."""
+    titles = dict((name, title) for name, _, _, title in FACETS)
+    return ", ".join(f"{titles[name]} = {value.split('-', 1)[1]}"
+                     for name, value in zip(names, key))
+
+
+def ceiling_cutoff(group: pd.DataFrame, min_drop: float):
+    """
+    The budget just before the ceiling falls off a cliff, or None if it does not.
+
+    Once a pool covers the support of the ground state the ceiling's infidelity
+    drops to the numerical floor within one grid step. The y-axis then has to
+    span every decade down to that floor and the region where the protocols
+    actually differ is squeezed into the top of the figure. This finds the first
+    step in which the ceiling loses more than ``min_drop`` decades -- a smooth
+    stretch loses a fraction of one -- and returns the last budget before it,
+    which is where a zoomed figure should stop.
+    """
+    ceiling = group[group["Algorithm"] == "Ceiling"]
+    if ceiling.empty:
+        return None
+    mean = ceiling.groupby("Budget_Fraction")["Log_Infidelity"].mean().sort_index()
+    drops = -mean.diff()
+    jumps = drops.index[drops > min_drop]
+    if not len(jumps):
+        return None
+    before = mean.index[mean.index < jumps[0]]
+    # Cutting down to a couple of points does not make a figure worth drawing.
+    return float(before[-1]) if before.size >= 3 else None
+
+
+def cluster_plots(group: pd.DataFrame, title: str, directory: Path, min_drop: float) -> int:
+    """Every figure of one cluster of runs; returns how many were written."""
+    written = 0
+    curves = on_common_grid(group)
+    cutoff = ceiling_cutoff(curves, min_drop)
+    zoomed = curves[curves["Budget_Fraction"] <= cutoff] if cutoff is not None else None
+    for error in ("std", "sem"):
+        plot_curves(curves, title, directory / f"curves_{error}.pdf", error)
+        plot_ratio(curves, title, directory / f"ratio_{error}.pdf", error)
+        written += 2
+        if zoomed is not None:
+            zoom_title = f"{title} -- up to the jump in the ceiling"
+            plot_curves(zoomed, zoom_title, directory / f"curves_{error}_zoom.pdf", error)
+            plot_ratio(zoomed, zoom_title, directory / f"ratio_{error}_zoom.pdf", error)
+            written += 2
+    plot_termination(group, title, directory / "termination.pdf")
+    return written + 1
+
+
+def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
+                 num_bins: int = DEFAULT_NUM_BINS, min_runs: int = DEFAULT_MIN_RUNS,
+                 bin_scope: str = "per-N", ceiling_jump: float = DEFAULT_CEILING_JUMP,
+                 max_combination=None) -> None:
+    """
+    Every figure, in one folder per way of clustering the runs.
+
+    The runs are cut by five things -- system size, maximum number of
+    interactions, ground-state density, Hamiltonian density and the overlap of
+    the initial state -- and this walks every combination of them, from the plain
+    average over everything (``all/``) through the single axes (``by_gsdens/``)
+    up to all five at once (``by_N_maxint_gsdens_hamdens_overlap/``). Every
+    cluster gets a subfolder holding the same figures, so the path says exactly
+    what is held fixed and nothing has to be read off a file name:
+
+        by_N_overlap/N-10_overlap-high/curves_sem.pdf
+
+    Since the x-axis is K / 2^N and not K, clusters that do not fix N are
+    averages over system sizes, which is a different statement from the panels
+    per (N, max. interactions) -- those live in ``by_N_maxint/``.
+
+    Clusters holding fewer than ``min_runs`` runs are skipped rather than drawn:
+    the deep combinations cut the runs into hundreds of cells, and a mean with a
+    standard error over two of them is a figure that invites conclusions it
+    cannot carry. ``plot_index.csv`` lists everything that was drawn together
+    with the run count behind it.
+    """
     data = add_log_infidelity(pd.read_csv(data_file))
     print(f"Loaded {len(data)} rows from {data_file}")
 
-    written = 0
-    for (num_sites, max_interaction), group in data.groupby(PANEL_KEY):
-        title = f"N = {num_sites}, max. interactions = {max_interaction}"
-        stem = f"N{num_sites}_maxint{max_interaction}"
-        for error in ("std", "sem"):
-            plot_curves(group, title, output_root / f"curves_{stem}_{error}.pdf", error)
-            plot_ratio(group, title, output_root / f"ratio_{stem}_{error}.pdf", error)
-            written += 2
-        plot_termination(group, title, output_root / f"termination_{stem}.pdf")
-        written += 1
+    labels = add_facet_labels(data, num_bins, bin_scope)
+    names = [name for name, *_ in FACETS]
+    depth = len(FACETS) if max_combination is None else max_combination
 
-    print(f"Wrote {written} PDF files under {output_root}/")
+    index, written, skipped = [], 0, 0
+    for size in range(depth + 1):
+        for combination in itertools.combinations(range(len(FACETS)), size):
+            folder = ("by_" + "_".join(names[i] for i in combination)) if combination else "all"
+            groups = (data.groupby([labels[i] for i in combination]) if combination
+                      else [((), data)])
+            for key, group in groups:
+                key = key if isinstance(key, tuple) else (key,)
+                runs = len(group.drop_duplicates(RUN_KEY))
+                if runs < min_runs:
+                    skipped += 1
+                    continue
+                directory = output_root / folder / "_".join(key) if key else output_root / folder
+                title = cluster_title([names[i] for i in combination], key) or "all runs"
+                written += cluster_plots(group, title, directory, ceiling_jump)
+                index.append({"Folder": folder, "Cluster": "_".join(key) or "all",
+                              "Runs": runs, "Path": str(directory)})
+            print(f"{folder}: {len(index)} clusters so far, {written} figures")
+
+    output_root.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(index).to_csv(output_root / "plot_index.csv", index=False)
+    print(f"Wrote {written} PDF files in {len(index)} clusters under {output_root}/ "
+          f"({skipped} clusters skipped for holding fewer than {min_runs} runs)")
+    print(f"index: {output_root / 'plot_index.csv'}")
 
 
 # --------------------------------------------------------------------------- #
@@ -709,6 +939,22 @@ def build_parser():
                              "plot mode: which CSV to read")
     parser.add_argument("--output-root", default=str(OUTPUT_ROOT),
                         help="plot mode: where to write the figures")
+    parser.add_argument("--num-bins", type=int, default=DEFAULT_NUM_BINS,
+                        help="plot mode: quantile bins the continuous axes "
+                             "(the densities and the overlap) are cut into")
+    parser.add_argument("--bin-scope", choices=["per-N", "global"], default="per-N",
+                        help="plot mode: whether those bins are taken within each "
+                             "system size or over the whole study")
+    parser.add_argument("--min-runs", type=int, default=DEFAULT_MIN_RUNS,
+                        help="plot mode: clusters holding fewer runs than this are "
+                             "not drawn")
+    parser.add_argument("--ceiling-jump", type=float, default=DEFAULT_CEILING_JUMP,
+                        help="plot mode: decades the ceiling has to lose in one "
+                             "budget step for the extra figures that stop in front "
+                             "of it to be drawn")
+    parser.add_argument("--max-combination", type=int, default=None,
+                        help="plot mode: cluster by at most this many axes at once "
+                             "(default: all of them)")
     parser.add_argument("--balance", choices=["cost", "stratified"], default="cost",
                         help="how cells are spread over the array; must match "
                              "between plan, run and merge")
@@ -755,7 +1001,10 @@ def main(argv=None):
     elif args.mode == "merge":
         merge_shards(args)
     else:
-        plot_results(args.output, Path(args.output_root))
+        plot_results(args.output, Path(args.output_root), num_bins=args.num_bins,
+                     min_runs=args.min_runs, bin_scope=args.bin_scope,
+                     ceiling_jump=args.ceiling_jump,
+                     max_combination=args.max_combination)
 
 
 if __name__ == "__main__":

@@ -113,7 +113,7 @@ echo "submitted array job $ARRAY_JOB ($ARRAY_SPEC)"
 MERGE_JOB=$(sbatch --parsable \
   --dependency="afterok:${ARRAY_JOB}" \
   --job-name=debunk-sqkd-bits-merge \
-  --time=00:20:00 --mem=8G --cpus-per-task=1 \
+  --time=02:00:00 --mem=8G --cpus-per-task=1 \
   ${PARTITION:+--partition="$PARTITION"} \
   --output="logs/merge_%j.out" --error="logs/merge_%j.err" \
   --wrap="cd '$PWD' && $PYTHON EqualNumberOfBitstrings.py merge ${STUDY_ARGS[*]} --output '$OUTPUT' && $PYTHON EqualNumberOfBitstrings.py plot ${STUDY_ARGS[*]} --output '$OUTPUT' --output-root '$OUTPUT_ROOT'")
