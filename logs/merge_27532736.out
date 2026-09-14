@@ -1,0 +1,41 @@
+merged 40 shards -> equal_bitstrings_results.csv: 71280 rows (71280 expected for a complete run)
+coverage per number of sites:
+  n=  6:   30/30 cells  COMPLETE
+  n=  8:   30/30 cells  COMPLETE
+  n= 10:   30/30 cells  COMPLETE
+  n= 12:   30/30 cells  COMPLETE
+Loaded 71280 rows from equal_bitstrings_results.csv
+all: 1 clusters so far, 9 figures
+by_N: 5 clusters so far, 45 figures
+by_maxint: 8 clusters so far, 72 figures
+by_gsdens: 11 clusters so far, 99 figures
+by_hamdens: 14 clusters so far, 126 figures
+by_overlap: 17 clusters so far, 153 figures
+by_N_maxint: 29 clusters so far, 261 figures
+by_N_gsdens: 41 clusters so far, 369 figures
+by_N_hamdens: 53 clusters so far, 477 figures
+by_N_overlap: 65 clusters so far, 585 figures
+by_maxint_gsdens: 70 clusters so far, 630 figures
+by_maxint_hamdens: 73 clusters so far, 657 figures
+by_maxint_overlap: 82 clusters so far, 738 figures
+by_gsdens_hamdens: 87 clusters so far, 783 figures
+by_gsdens_overlap: 96 clusters so far, 864 figures
+by_hamdens_overlap: 105 clusters so far, 945 figures
+by_N_maxint_gsdens: 125 clusters so far, 1125 figures
+by_N_maxint_hamdens: 137 clusters so far, 1233 figures
+by_N_maxint_overlap: 173 clusters so far, 1557 figures
+by_N_gsdens_hamdens: 193 clusters so far, 1737 figures
+by_N_gsdens_overlap: 228 clusters so far, 2052 figures
+by_N_hamdens_overlap: 264 clusters so far, 2376 figures
+by_maxint_gsdens_hamdens: 269 clusters so far, 2421 figures
+by_maxint_gsdens_overlap: 284 clusters so far, 2556 figures
+by_maxint_hamdens_overlap: 293 clusters so far, 2637 figures
+by_gsdens_hamdens_overlap: 308 clusters so far, 2772 figures
+by_N_maxint_gsdens_hamdens: 328 clusters so far, 2952 figures
+by_N_maxint_gsdens_overlap: 372 clusters so far, 3348 figures
+by_N_maxint_hamdens_overlap: 408 clusters so far, 3672 figures
+by_N_gsdens_hamdens_overlap: 452 clusters so far, 4068 figures
+by_maxint_gsdens_hamdens_overlap: 467 clusters so far, 4203 figures
+by_N_maxint_gsdens_hamdens_overlap: 511 clusters so far, 4599 figures
+Wrote 4599 PDF files in 511 clusters under equal_bitstrings_plots/ (43 clusters skipped for holding fewer than 5 runs)
+index: equal_bitstrings_plots/plot_index.csv
