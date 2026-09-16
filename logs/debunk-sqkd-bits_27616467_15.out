@@ -1,0 +1,2 @@
+host=node019 task=15 threads=4
+[job 15] bitstring_shards/shard_00015.csv exists, nothing to do (pass --overwrite to force a re-run)
