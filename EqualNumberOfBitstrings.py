@@ -65,8 +65,12 @@ the runs and once with the error of the mean, plus where the protocols stopped
 by themselves. Whenever the ceiling drops off a cliff -- which it does as soon as
 the pool covers the support of the ground state, taking the y-axis down with it
 -- a second copy of each curve stopping in front of that jump is written next to
-it, with a ``_zoom`` suffix. ``plot_index.csv`` lists every cluster with the
-number of runs behind it.
+it, with a ``_zoom`` suffix. Next to those, ``distribution_overlap.pdf`` and
+its counterparts for the two densities turn the bin names back into numbers:
+the histogram of the quantity over all runs, the quantile cuts as labelled
+vertical lines, and the band the folder keeps highlighted in the bars.
+``plot_index.csv`` lists every cluster with the number of runs behind it, and
+``bin_edges.csv`` every cut as a number.
 """
 
 import argparse
@@ -74,7 +78,7 @@ import itertools
 import os
 import sys
 import time
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from pathlib import Path
 
 import matplotlib
@@ -99,12 +103,19 @@ DEFAULT_MAX_INTERACTIONS = [1, 2]
 # fidelity-against-K curve instead of on a fourth axis.
 DEFAULT_B_MAX = 1.0
 
-# Initial states per Hamiltonian, taken from both ends of the overlap
-# distribution as in ClusterStudy.run_cell -- so this many largest and this many
-# smallest. They are kept apart in the plots rather than averaged over: picking
-# the extremes makes the sample bimodal by construction, and the mean of a
-# bimodal mixture describes neither mode.
+# Initial states per Hamiltonian, drawn uniformly at random -- without
+# replacement -- from every basis state the ground state has non-zero overlap
+# with. Unlike ClusterStudy.run_cell, which takes both ends of the overlap
+# distribution, this samples the distribution itself, so an average over the
+# initial states is an average over a typical starting point instead of over a
+# mixture of two tails.
 DEFAULT_NUM_INITIAL_STATES = 3
+
+# What counts as non-zero overlap, as a probability. The zeros that matter are
+# the exact ones of the symmetry sectors; an eigensolver leaves those at about
+# 1e-16 in the amplitude, i.e. 1e-32 here, so anything well below the smallest
+# physically meaningful weight and well above that separates the two.
+OVERLAP_FLOOR = 1e-12
 
 # Repeats of the SKQD trajectory per run. BARK is deterministic and needs none.
 DEFAULT_N_REPEATS = 3
@@ -223,9 +234,15 @@ def expected_rows(cell: Cell, args) -> int:
     half way. It depends on the grid, so a partial written under a different
     grid, a different number of initial states or a different cap fails the check
     and is redone rather than mixed in.
+
+    A ground state supported on fewer than ``num_initial_states`` basis states
+    contributes fewer rows than this and would be re-run on every resume. That
+    takes a ground state of two or three components at the default, which none of
+    these disordered Hamiltonians produce; it is not worth solving for the
+    support of every cell here just to predict the count exactly.
     """
     budgets = budget_grid(2 ** cell.num_sites, args.grid_points, args.max_fraction)
-    return 2 * args.num_initial_states * len(ALGORITHMS) * budgets.size
+    return args.num_initial_states * len(ALGORITHMS) * budgets.size
 
 
 def run_cell(cell: Cell, args) -> list:
@@ -276,9 +293,22 @@ def run_cell(cell: Cell, args) -> list:
     skqd_protocol = SKQD(hamiltonian, eigenvalues=all_eigenvalues,
                          eigenvectors=all_eigenvectors)
 
-    largest_indices = np.argsort(probabilities)[-args.num_initial_states:]
-    smallest_indices = np.argsort(probabilities)[:args.num_initial_states]
-    indices_to_test = np.concatenate((largest_indices, smallest_indices))
+    # Initial states: a uniform sample, without replacement, from the basis
+    # states the ground state actually has weight on. A state of exactly zero
+    # overlap is not a starting point at all -- BARK has nothing to rank from it
+    # and SKQD's first shot is uncorrelated with the target -- and the symmetry
+    # sectors of these Hamiltonians make a large part of the basis exactly that.
+    # Drawing uniformly from the rest makes the overlap column a sample of the
+    # true overlap distribution of the Hamiltonian, so the plots can be read as
+    # statements about a typical starting point; the earlier extremes-only choice
+    # sampled two tails that no run would ever draw by itself.
+    # ``rng`` is separate from the global RNG so that changing this selection
+    # leaves SKQD's shots, which come from the global one, exactly as they were.
+    rng = np.random.default_rng(seed)
+    non_zero_indices = np.flatnonzero(probabilities > OVERLAP_FLOOR)
+    indices_to_test = rng.choice(non_zero_indices,
+                                 size=min(args.num_initial_states, non_zero_indices.size),
+                                 replace=False)
 
     rows = []
     for initial_state_index in indices_to_test:
@@ -740,9 +770,9 @@ def quantile_edges(values: pd.Series, num_bins: int) -> np.ndarray:
     Equal-frequency bin edges of ``values``.
 
     Equal frequency rather than equal width: the densities, and the overlaps far
-    more so, are spread over decades -- the initial states are taken from both
-    ends of the overlap distribution, so that column is bimodal by construction
-    -- and equal-width bins would leave nearly every run in a single one. Repeated
+    more so, are spread over decades -- the initial states are sampled from the
+    overlap distribution of the ground state, which is itself heavy-tailed --
+    and equal-width bins would leave nearly every run in a single one. Repeated
     values share an edge, which is dropped, so a column with few distinct values
     comes out with fewer bins rather than with ties split between them.
     """
@@ -759,9 +789,15 @@ def apply_bins(values: pd.Series, edges: np.ndarray) -> pd.Series:
                   include_lowest=True).astype(str)
 
 
-def add_facet_labels(data: pd.DataFrame, num_bins: int, scope: str) -> list:
+def add_facet_labels(data: pd.DataFrame, runs: pd.DataFrame, num_bins: int,
+                     scope: str) -> tuple:
     """
-    Add one label column per facet and return their names, in FACETS order.
+    Add one label column per facet; return their names and the edges cut on.
+
+    The edges come back keyed by ``(short name, number of sites)`` -- with
+    ``None`` in place of the number of sites under ``scope="global"``, where one
+    cut covers the whole study -- so the figures can say in numbers what a
+    folder called ``overlap-low`` actually holds. See plot_bin_histogram.
 
     The edges come from the runs, not from the rows: a run contributes one row
     per algorithm and budget and the number of budgets grows with the system
@@ -775,8 +811,7 @@ def add_facet_labels(data: pd.DataFrame, num_bins: int, scope: str) -> list:
     name. ``scope="global"`` is the literal reading, for when the absolute value
     is what matters.
     """
-    runs = data.drop_duplicates(RUN_KEY)
-    labels = []
+    labels, edges = [], {}
     for name, column, binned, _ in FACETS:
         label = f"Facet_{name}"
         if not binned:
@@ -784,14 +819,308 @@ def add_facet_labels(data: pd.DataFrame, num_bins: int, scope: str) -> list:
         elif scope == "per-N":
             data[label] = ""
             for num_sites, block in data.groupby("Number_of_Sites"):
-                edges = quantile_edges(runs.loc[runs["Number_of_Sites"] == num_sites, column],
-                                       num_bins)
-                data.loc[block.index, label] = f"{name}-" + apply_bins(block[column], edges)
+                cut = quantile_edges(runs.loc[runs["Number_of_Sites"] == num_sites, column],
+                                     num_bins)
+                edges[(name, int(num_sites))] = cut
+                data.loc[block.index, label] = f"{name}-" + apply_bins(block[column], cut)
         else:
-            data[label] = f"{name}-" + apply_bins(data[column],
-                                                  quantile_edges(runs[column], num_bins))
+            cut = quantile_edges(runs[column], num_bins)
+            edges[(name, None)] = cut
+            data[label] = f"{name}-" + apply_bins(data[column], cut)
         labels.append(label)
-    return labels
+    return labels, edges
+
+
+# --------------------------------------------------------------------------- #
+# What the bins mean in numbers
+# --------------------------------------------------------------------------- #
+
+# Neutral bars for every run, one categorical slot for the band a cluster keeps
+# and the grey ink of the ceiling for the cuts: a histogram carries one series,
+# so the accent is free to mark the selection instead of an identity.
+HIST_COLOUR = "#d6d5d0"
+HIST_SELECTED_COLOUR = "#2a78d6"
+CUT_COLOUR = "#52514e"
+
+HIST_NUM_BINS = 24
+# Ratio of largest to smallest value above which the axis is drawn logarithmic.
+HIST_LOG_SPAN = 50.0
+# Decades a logarithmic axis is allowed to span. The overlap of a basis state
+# that lies in another symmetry sector is zero up to round-off -- 1e-280 and
+# exact zeros both occur -- and an axis reaching down there would squeeze the
+# runs that have any overlap at all into its last inch. Everything further down
+# than this goes into one bar outside the axis instead, which is the honest
+# reading anyway: below the floor the values are numerically indistinguishable
+# from zero and only their count means anything.
+HIST_MAX_DECADES = 12.0
+
+
+# One histogram's geometry: the bin edges, whether the axis is logarithmic,
+# the value under which everything is drawn off the scale, the limits (fixed
+# rather than autoscaled, so the panels of one figure agree and a label can be
+# placed in axes coordinates), and whether anything is off the scale at all.
+Layout = namedtuple("Layout", "bins log floor xlim underflow")
+
+
+def format_cut(value: float) -> str:
+    """A bin edge as a number that can be carried over into the text."""
+    return f"{value:.2e}" if 0.0 < abs(value) < 1e-2 else f"{value:.3g}"
+
+
+def histogram_layout(values: np.ndarray) -> Layout:
+    """
+    Bins and axis for a distribution of run properties.
+
+    The overlaps and the densities run over decades, so equal-width bins on a
+    linear axis would pile nearly every run into the first one -- the same
+    reason quantile_edges cuts on equal frequency. Anything spanning less than
+    HIST_LOG_SPAN is left linear, where the eye reads the shape more easily, and
+    nothing is off the scale there: a linear axis holds zeros without trouble.
+
+    On a logarithmic axis everything more than HIST_MAX_DECADES below the
+    largest value is taken out of the bins and drawn in one bar off the scale
+    instead, and the axis then starts at the smallest value that survives rather
+    than at that threshold, so the decades between the negligible tail and the
+    bulk of the runs do not take up most of the figure.
+    """
+    positive = values[values > 0.0]
+    high = float(values.max()) if values.size else 0.0
+    if positive.size and high > 0.0 and high / float(positive.min()) >= HIST_LOG_SPAN:
+        kept = positive[positive >= high * 10.0 ** -HIST_MAX_DECADES]
+        floor = float(kept.min()) if kept.size else high * 10.0 ** -HIST_MAX_DECADES
+        bins = np.geomspace(floor, high, HIST_NUM_BINS + 1)
+        underflow = bool((values < floor).any())
+        ratio = bins[1] / bins[0]
+        left = bins[0] / ratio ** 3 if underflow else bins[0] / np.sqrt(ratio)
+        return Layout(bins, True, floor, (left, bins[-1] * np.sqrt(ratio)), underflow)
+
+    low = float(values.min()) if values.size else 0.0
+    if not high > low:
+        # A single distinct value: a narrow window, so the one bar is visible.
+        margin = abs(low) * 0.05 or 1.0
+        bins = np.linspace(low - margin, high + margin, 4)
+    else:
+        bins = np.linspace(low, high, HIST_NUM_BINS + 1)
+    pad = 0.04 * (bins[-1] - bins[0])
+    return Layout(bins, False, -np.inf, (bins[0] - pad, bins[-1] + pad), False)
+
+
+def underflow_bar(layout: Layout) -> tuple:
+    """Left edge, width and centre of the bar holding what is off the scale."""
+    ratio = layout.bins[1] / layout.bins[0]
+    # A bin width clear of the first bin, so the bar reads as being off the
+    # scale rather than as the start of it.
+    left, right = layout.bins[0] / ratio ** 2, layout.bins[0] / ratio
+    return left, right - left, float(np.sqrt(left * right))
+
+
+def layout_fraction(layout: Layout, position: float) -> float:
+    """Where ``position`` sits across the axes, as a fraction of their width."""
+    low, high = layout.xlim
+    fraction = ((np.log10(position / low) / np.log10(high / low)) if layout.log
+                else (position - low) / (high - low))
+    return float(min(max(fraction, 0.0), 1.0))
+
+
+def place_label(ax: plt.Axes, fraction: float, height: float, text: str,
+                colour: str, size: float) -> None:
+    """
+    Write ``text`` at ``fraction`` of the axes, kept inside them where it would
+    otherwise hang over the edge -- the outermost band of a cut often ends at
+    the last bin, and a tie can leave it one bin wide.
+    """
+    align = "left" if fraction < 0.06 else "right" if fraction > 0.94 else "center"
+    ax.text(fraction, height, text, transform=ax.transAxes, ha=align,
+            va="bottom" if height > 1.0 else "top", fontsize=size, color=colour)
+
+
+def draw_bin_panel(ax: plt.Axes, values: pd.Series, held, edges: np.ndarray,
+                   selected, layout: Layout) -> None:
+    """
+    One distribution with the cuts that named its bins written on top.
+
+    ``held`` are the runs of the folder the figure is written into, drawn over
+    the others. For a folder cut on this axis alone that is exactly the band
+    between two cuts; for one cut on several axes it is the part of the band
+    that survived the other cuts, which is what the folder actually averages.
+    """
+    array = values.to_numpy(dtype=float)
+    names = bin_names(edges.size - 1) if edges.size >= 3 else ["all"]
+    labels = apply_bins(values, edges)
+    chosen = (np.empty(0) if held is None else held.to_numpy(dtype=float))
+    inside = array >= layout.floor
+    chosen_inside = chosen >= layout.floor
+
+    ax.hist(array[inside], bins=layout.bins, color=HIST_COLOUR, label="all runs")
+    if chosen_inside.any():
+        ax.hist(chosen[chosen_inside], bins=layout.bins, color=HIST_SELECTED_COLOUR,
+                label="runs in this folder")
+
+    # Everything under the floor in one bar left of the axis. A cut down there
+    # is drawn inside that bar, since its own place is not on the scale.
+    under = None
+    if layout.underflow:
+        left, width, under = underflow_bar(layout)
+        ax.bar(left, int((~inside).sum()), width=width, align="edge", color=HIST_COLOUR)
+        if (~chosen_inside).any():
+            ax.bar(left, int((~chosen_inside).sum()), width=width, align="edge",
+                   color=HIST_SELECTED_COLOUR)
+
+    if layout.log:
+        ax.set_xscale("log")
+    # Fixed limits, so every panel of the figure shows the same window and the
+    # labels below can be placed as a fraction of it.
+    ax.set_xlim(*layout.xlim)
+
+    # The cuts, with their value spelled out -- the whole point of the figure.
+    # Two cuts under the floor share the one bar, and so share one label.
+    drawn = defaultdict(list)
+    for edge in edges[1:-1]:
+        position = under if under is not None and edge < layout.floor else edge
+        drawn[position].append(format_cut(edge))
+    for position, texts in drawn.items():
+        ax.axvline(position, color=CUT_COLOUR, linestyle="--", linewidth=1.2, zorder=3)
+        place_label(ax, layout_fraction(layout, position), 1.02, " / ".join(texts),
+                    CUT_COLOUR, 7.0)
+
+    # Which band is which, and how many runs ended up in it. A band reaching
+    # under the floor is labelled over the part of it that is on the scale, or
+    # over the off-scale bar if none of it is. Ties in a column with few
+    # distinct values can leave a band a bin wide, so a label that would land on
+    # its neighbour is dropped a line instead.
+    counts = labels.value_counts()
+    height, previous = 0.95, None
+    for name, low, high in zip(names, edges[:-1], edges[1:]):
+        if not layout.log:
+            position = 0.5 * (low + high)
+        elif high <= layout.floor:
+            position = under if under is not None else layout.bins[0]
+        else:
+            position = float(np.sqrt(max(low, layout.bins[0])
+                                     * min(high, layout.bins[-1])))
+        fraction = layout_fraction(layout, position)
+        if previous is not None and abs(fraction - previous) < 0.14:
+            height = 0.76 if height == 0.95 else 0.95
+        # The band holds this many runs; the folder, whose runs are the bars
+        # drawn over them, can hold fewer once the other cuts have had their say.
+        text = f"{name}\n{int(counts.get(name, 0))} runs"
+        if name == selected and chosen.size and chosen.size != counts.get(name, 0):
+            text += f", {chosen.size} here"
+        place_label(ax, fraction, height, text,
+                    HIST_SELECTED_COLOUR if name == selected else CUT_COLOUR, 7.5)
+        previous = fraction
+
+    ax.margins(y=0.35)
+    ax.grid(True, axis="y", **GRID_KWARGS)
+    ax.set_axisbelow(True)
+    for spine in ("top", "right"):
+        ax.spines[spine].set_visible(False)
+
+
+def name_underflow_bar(ax: plt.Axes, layout: Layout, values: np.ndarray) -> None:
+    """Label the off-scale bar where its tick label would be."""
+    ticks = [tick for tick in ax.get_xticks()
+             if layout.bins[0] <= tick <= layout.bins[-1]]
+    zeros = "0 or\n" if (values == 0.0).any() else ""
+    ax.set_xticks(ticks + [underflow_bar(layout)[2]],
+                  labels=[f"$10^{{{int(round(np.log10(tick)))}}}$" for tick in ticks]
+                         + [f"{zeros}$<${format_cut(layout.floor)}"])
+    ax.set_xlim(*layout.xlim)
+
+
+def plot_bin_histogram(runs: pd.DataFrame, cluster_runs: pd.DataFrame, column: str,
+                       axis_title: str, edges: dict, sites: list, selected,
+                       title: str, path: Path) -> None:
+    """
+    The distribution a cut was taken from, with the cut drawn as a line.
+
+    ``low``, ``mid`` and ``high`` in a folder name say where a run sits relative
+    to the others and nothing about the value itself. This puts the numbers back:
+    the histogram of every run the cut was taken over, a vertical line at each
+    edge labelled with its value, and the runs this folder holds drawn over the
+    rest, so the name, the number and the runs behind it are in one figure.
+
+    Under ``bin_scope="per-N"`` every system size has its own cut, so there is
+    one panel per size the folder holds. The bins are taken from all of them at
+    once and the axis is shared, so the shift of the whole distribution with N
+    is visible next to the cuts that follow it.
+    """
+    def per_site(frame):
+        return dict((site, frame[column] if site is None
+                     else frame.loc[frame["Number_of_Sites"] == site, column])
+                    for site in sites)
+
+    values, held = per_site(runs), per_site(cluster_runs)
+    pooled = pd.concat(values.values()).to_numpy(dtype=float)
+    layout = histogram_layout(pooled)
+    # A folder holding every run it would highlight -- ``all/``, ``by_N/`` --
+    # has nothing to pick out of its own distribution.
+    if sum(len(held[site]) for site in sites) == pooled.size:
+        held = dict((site, None) for site in sites)
+
+    fig, axes = plt.subplots(len(sites), 1, sharex=True, squeeze=False,
+                             figsize=(5.5, 1.1 + 1.9 * len(sites)))
+    for ax, site in zip(axes[:, 0], sites):
+        draw_bin_panel(ax, values[site], held[site], edges[site], selected, layout)
+        ax.set_ylabel("runs" if site is None else f"runs (N = {site})")
+    axes[-1, 0].set_xlabel(axis_title)
+    if layout.underflow:
+        name_underflow_bar(axes[-1, 0], layout, pooled)
+
+    fig.suptitle(f"{axis_title} over all runs, and the cuts behind the bins"
+                 f"\n{title}", fontsize=10)
+    fig.tight_layout()
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    if len(handles) > 1:
+        fig.legend(handles, labels, frameon=False, fontsize=8, ncol=len(handles),
+                   loc="lower center", bbox_to_anchor=(0.5, -0.02))
+    save_figure(fig, path)
+
+
+def cluster_histograms(group: pd.DataFrame, names: list, key: tuple,
+                       runs: pd.DataFrame, edges: dict, title: str,
+                       directory: Path, scope: str) -> int:
+    """
+    The distributions behind one cluster's bins; returns how many were written.
+
+    Drawn for the continuous axes the cluster is actually cut on, so the folder
+    holding ``overlap-low`` also holds the histogram that says what low means.
+    A cluster cut on none of them -- ``all/``, ``by_N/``, ``by_maxint/`` -- gets
+    all three instead: it holds every run at that size, which is exactly the
+    distribution the other folders are carved out of.
+    """
+    selected = dict(zip(names, (value.split("-", 1)[1] for value in key)))
+    binned = [(name, column, axis_title) for name, column, is_binned, axis_title
+              in FACETS if is_binned]
+    targets = [facet for facet in binned if facet[0] in selected] or binned
+
+    sites = ([None] if scope == "global"
+             else sorted(int(site) for site in group["Number_of_Sites"].unique()))
+    cluster_runs = group.drop_duplicates(RUN_KEY)
+    for name, column, axis_title in targets:
+        plot_bin_histogram(runs, cluster_runs, column, axis_title,
+                           dict((site, edges[(name, site)]) for site in sites),
+                           sites, selected.get(name), title,
+                           directory / f"distribution_{name}.pdf")
+    return len(targets)
+
+
+def bin_edge_table(runs: pd.DataFrame, edges: dict) -> pd.DataFrame:
+    """Every cut as a row, so the bins can also be read off a table."""
+    columns = dict((name, column) for name, column, *_ in FACETS)
+    rows = []
+    for (name, site), cut in sorted(edges.items(), key=lambda item: (item[0][0],
+                                                                    item[0][1] or 0)):
+        values = (runs[columns[name]] if site is None
+                  else runs.loc[runs["Number_of_Sites"] == site, columns[name]])
+        labels = apply_bins(values, cut)
+        names = bin_names(cut.size - 1) if cut.size >= 3 else ["all"]
+        for bin_name, low, high in zip(names, cut[:-1], cut[1:]):
+            rows.append({"Axis": name, "Column": columns[name],
+                         "Number_of_Sites": "all" if site is None else site,
+                         "Bin": bin_name, "Lower": low, "Upper": high,
+                         "Runs": int((labels == bin_name).sum())})
+    return pd.DataFrame(rows)
 
 
 def cluster_title(names: list, key: tuple) -> str:
@@ -871,11 +1200,20 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
     standard error over two of them is a figure that invites conclusions it
     cannot carry. ``plot_index.csv`` lists everything that was drawn together
     with the run count behind it.
+
+    Since ``overlap-low`` says only where a run sits among the others, every
+    cluster also gets ``distribution_<axis>.pdf`` for the continuous axes it is
+    cut on: the histogram of that quantity over all runs, with the quantile cuts
+    as labelled vertical lines and the band this folder keeps picked out of the
+    bars. The same numbers are tabulated once in ``bin_edges.csv``.
     """
     data = add_log_infidelity(pd.read_csv(data_file))
     print(f"Loaded {len(data)} rows from {data_file}")
 
-    labels = add_facet_labels(data, num_bins, bin_scope)
+    # One row per run, which is what the cuts are taken on and what the
+    # histograms of them show -- a run contributes many rows to ``data``.
+    runs_frame = data.drop_duplicates(RUN_KEY).copy()
+    labels, edges = add_facet_labels(data, runs_frame, num_bins, bin_scope)
     names = [name for name, *_ in FACETS]
     depth = len(FACETS) if max_combination is None else max_combination
 
@@ -894,15 +1232,20 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
                 directory = output_root / folder / "_".join(key) if key else output_root / folder
                 title = cluster_title([names[i] for i in combination], key) or "all runs"
                 written += cluster_plots(group, title, directory, ceiling_jump)
+                written += cluster_histograms(group, [names[i] for i in combination],
+                                              key, runs_frame, edges, title,
+                                              directory, bin_scope)
                 index.append({"Folder": folder, "Cluster": "_".join(key) or "all",
                               "Runs": runs, "Path": str(directory)})
             print(f"{folder}: {len(index)} clusters so far, {written} figures")
 
     output_root.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(index).to_csv(output_root / "plot_index.csv", index=False)
+    bin_edge_table(runs_frame, edges).to_csv(output_root / "bin_edges.csv", index=False)
     print(f"Wrote {written} PDF files in {len(index)} clusters under {output_root}/ "
           f"({skipped} clusters skipped for holding fewer than {min_runs} runs)")
     print(f"index: {output_root / 'plot_index.csv'}")
+    print(f"bins:  {output_root / 'bin_edges.csv'}")
 
 
 # --------------------------------------------------------------------------- #
@@ -921,8 +1264,8 @@ def build_parser():
     parser.add_argument("--b-max", type=float, default=DEFAULT_B_MAX,
                         help="field strength of the Hamiltonians")
     parser.add_argument("--num-initial-states", type=int, default=DEFAULT_NUM_INITIAL_STATES,
-                        help="initial states per Hamiltonian from each end of the "
-                             "overlap distribution")
+                        help="initial states per Hamiltonian, drawn uniformly at "
+                             "random from the basis states of non-zero overlap")
     parser.add_argument("--n-repeats", type=int, default=DEFAULT_N_REPEATS,
                         help="repeats of the SKQD trajectory per run")
     parser.add_argument("--grid-points", type=int, default=DEFAULT_GRID_POINTS,

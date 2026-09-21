@@ -1,0 +1,62 @@
+=== planned split ===
+240 cells over 40 jobs (142560 rows total, balance=cost)
+
+ Job  Cells  n=6  n=8  n=10  n=12      Load
+   0      1    0    0     0     1 7130316.8
+   1      1    0    0     0     1 7130316.8
+   2      1    0    0     0     1 7130316.8
+   3      1    0    0     0     1 7130316.8
+   4      1    0    0     0     1 7130316.8
+   5      1    0    0     0     1 7130316.8
+   6      1    0    0     0     1 7130316.8
+   7      1    0    0     0     1 7130316.8
+   8      1    0    0     0     1 7130316.8
+   9      1    0    0     0     1 7130316.8
+  10      1    0    0     0     1 7130316.8
+  11      1    0    0     0     1 7130316.8
+  12      1    0    0     0     1 7130316.8
+  13      1    0    0     0     1 7130316.8
+  14      1    0    0     0     1 7130316.8
+  15      2    0    0     0     2 7549747.2
+  16      2    0    0     0     2 7549747.2
+  17      2    0    0     0     2 7549747.2
+  18      2    0    0     0     2 7549747.2
+  19      2    0    0     0     2 7549747.2
+  20      2    0    0     0     2 7549747.2
+  21      2    0    0     0     2 7549747.2
+  22      2    0    0     0     2 7549747.2
+  23      2    0    0     0     2 7549747.2
+  24      2    0    0     0     2 7549747.2
+  25     13    0    0    12     1 5885132.8
+  26     13    0    0    12     1 5885132.8
+  27     13    0    0    12     1 5885132.8
+  28     13    0    0    12     1 5885132.8
+  29     13    0    0    12     1 5885132.8
+  30      2    0    0     0     2 7549747.2
+  31      2    0    0     0     2 7549747.2
+  32      2    0    0     0     2 7549747.2
+  33      2    0    0     0     2 7549747.2
+  34      2    0    0     0     2 7549747.2
+  35     26   12   12     0     2 5875431.2
+  36     26   12   12     0     2 5875431.2
+  37     26   12   12     0     2 5875431.2
+  38     26   12   12     0     2 5875431.2
+  39     26   12   12     0     2 5875431.2
+
+cells per job: min 1, max 26 (spread 25)
+estimated load: min 5875431.2, max 7549747.2 (heaviest job is 1.28x the lightest)
+
+sbatch --array=0-39 submit_bitstrings.sh
+
+submitted array job 27616467 (0-39)
+submitted merge job 27616468 (runs after the array succeeds)
+
+watch:   squeue -j 27616467,27616468
+logs:    logs/
+result:  equal_bitstrings_results.csv
+figures: equal_bitstrings_plots/
+
+If some tasks time out, raise TIME (or lower MAX_FRACTION) and re-run
+./submit_bitstrings.sh -- finished shards in bitstring_shards are skipped, and a
+task that died mid-shard resumes from its .partial file, so only the
+missing cells are redone.

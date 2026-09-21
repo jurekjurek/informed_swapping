@@ -27,11 +27,11 @@ set -euo pipefail
 module load Python/3.10.4-GCCcore-11.3.0 && source /home/erosanow_hpc/informed_swapping/.SKQD/bin/activate
 
 # ----------------------------- configuration -------------------------------
-NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-10}
+NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-15}
 NUM_SITES=${NUM_SITES:-"6 8 10 12"}
-MAX_INTERACTIONS=${MAX_INTERACTIONS:-"1 2 3"}
+MAX_INTERACTIONS=${MAX_INTERACTIONS:-"1 2 3 4"}
 B_MAX=${B_MAX:-1.0}
-NUM_INITIAL_STATES=${NUM_INITIAL_STATES:-3}   # from each end of the overlap distribution
+NUM_INITIAL_STATES=${NUM_INITIAL_STATES:-6}   # from each end of the overlap distribution
 N_REPEATS=${N_REPEATS:-3}                     # SKQD trajectories per run
 GRID_POINTS=${GRID_POINTS:-30}                # budgets at which the curves are read
 MAX_FRACTION=${MAX_FRACTION:-0.5}             # largest budget, as a fraction of 2^N
