@@ -2,9 +2,9 @@
 Distributed version of SystematicStudy.py for a SLURM job array.
 
 The unit of work is a "cell": one ``(hamiltonian_index, num_sites,
-max_interactions, penalty_strength)`` combination. A cell builds one
-Hamiltonian, solves for its ground state, and then runs both protocols for every
-fidelity and every starting state.
+max_interactions)`` combination. A cell builds one Hamiltonian, solves for its
+ground state, and then runs both protocols for every fidelity and every starting
+state.
 
 Load balancing is done by cost model. Cost per cell grows steeply with
 ``num_sites`` -- and, as the first production run showed, by a further factor of
@@ -54,7 +54,6 @@ from SKQD import SKQD
 DEFAULT_NUM_SITES = [6, 8, 10, 12, 14]
 DEFAULT_MAX_INTERACTIONS = [1, 2]
 DEFAULT_FIDELITIES = [0.8, 0.85, 0.9]
-DEFAULT_PENALTY_STRENGTHS = [0.0, 1.0, 2.0, 5.0, 10.0]
 
 # Hilbert-space dimension up to which the full dense eigendecomposition is
 # computed once per cell and handed to SKQD. 4096 states (12 sites) needs a
@@ -63,13 +62,13 @@ DEFAULT_PENALTY_STRENGTHS = [0.0, 1.0, 2.0, 5.0, 10.0]
 # mat-vecs plus norm estimation to two dense mat-vecs.
 DEFAULT_DENSE_LIMIT = 4096
 
-COLUMNS = ["Hamiltonian_Index", "Number_of_Sites", "Max_Interactions", "Fidelity", "Penalty_Strength",
+COLUMNS = ["Hamiltonian_Index", "Number_of_Sites", "Max_Interactions", "Fidelity",
            "Ground_State_Density", "Hamiltonian_Density", "Overlap",
            "BARK_Pool_Size", "SKQD_Pool_Size", "Seed"]
 
-CELL_KEY = ["Hamiltonian_Index", "Number_of_Sites", "Max_Interactions", "Penalty_Strength"]
+CELL_KEY = ["Hamiltonian_Index", "Number_of_Sites", "Max_Interactions"]
 
-Cell = namedtuple("Cell", ["hamiltonian_index", "num_sites", "max_interactions", "penalty_strength"])
+Cell = namedtuple("Cell", ["hamiltonian_index", "num_sites", "max_interactions"])
 
 
 # --------------------------------------------------------------------------- #
@@ -84,24 +83,17 @@ def cell_seed(cell: Cell) -> int:
     ``hash()`` would give different Hamiltonians in different jobs for the same
     cell. With this, any job -- or a re-run after a preemption -- reproduces
     exactly the same Hamiltonian.
-
-    ``penalty_strength`` is deliberately *not* part of the key. The penalty is a
-    deterministic addition on top of an otherwise identical Hamiltonian, so the
-    whole point of the sweep is that every penalty strength sees the same
-    disorder realisation. Folding it in would resample the couplings and fields
-    per penalty value and mix the penalty's effect with disorder noise.
     """
     key = f"{cell.hamiltonian_index}|{cell.num_sites}|{cell.max_interactions}".encode()
     return int.from_bytes(hashlib.sha256(key).digest()[:4], "little")
 
 
-def enumerate_cells(num_hamiltonians, num_sites, max_interactions, penalty_strengths):
+def enumerate_cells(num_hamiltonians, num_sites, max_interactions):
     """All cells of the study, in a fixed order independent of how they are split."""
-    return [Cell(hamiltonian_index, n_sites, max_interaction, penalty_strength)
+    return [Cell(hamiltonian_index, n_sites, max_interaction)
             for hamiltonian_index in range(num_hamiltonians)
             for n_sites in num_sites
-            for max_interaction in max_interactions
-            for penalty_strength in penalty_strengths]
+            for max_interaction in max_interactions]
 
 
 def estimate_cost(cell: Cell) -> float:
@@ -221,7 +213,7 @@ def solve_ground_state(hamiltonian, dense_limit: int):
 
 
 def run_cell(cell: Cell, fidelities, sparse: bool = True,
-             dense_limit: int = DEFAULT_DENSE_LIMIT, n_target: int | None = None) -> list:
+             dense_limit: int = DEFAULT_DENSE_LIMIT) -> list:
     """
     Run one cell and return its rows as a list of dicts.
 
@@ -233,29 +225,18 @@ def run_cell(cell: Cell, fidelities, sparse: bool = True,
     The Hamiltonian, the eigendecomposition and both protocol objects are built
     once for the whole cell. They used to be rebuilt inside the fidelity/initial
     state loop, which threw away every per-t cache 50 times over.
-
-    ``n_target=None`` (the default, and what the study runs with) means half
-    filling. It must not stay ``None``: ``make_random_spin_hamiltonian`` only
-    adds the particle-number penalty when ``N_target is not None``, so an unset
-    target would silently drop the penalty term from every cell and turn the
-    whole penalty axis into re-labelled copies of the same physics.
     """
     seed = cell_seed(cell)
     # SKQD draws its shots through the global RNG, so seed that as well.
     np.random.seed(seed)
 
-    if n_target is None:
-        n_target = cell.num_sites // 2
-
     hamiltonian = make_random_spin_hamiltonian(
         num_sites=cell.num_sites,
         max_interactions=cell.max_interactions,
-        J_components=("x", "y"),
+        J_components=("z"),
         B_components=("z"),
-        B_max = cell.penalty_strength,
+        B_max = 10,
         seed=seed,
-        N_target=n_target,
-        penalty_strength=0,
     )[0].to_matrix(sparse=sparse)
 
     ground_state, all_eigenvalues, all_eigenvectors = solve_ground_state(
@@ -319,7 +300,6 @@ def run_cell(cell: Cell, fidelities, sparse: bool = True,
                 "Number_of_Sites": cell.num_sites,
                 "Max_Interactions": cell.max_interactions,
                 "Fidelity": fidelity,
-                "Penalty_Strength": cell.penalty_strength,
                 "Ground_State_Density": ground_state_density,
                 "Hamiltonian_Density": hamiltonian_density,
                 "Overlap": overlap,
@@ -334,23 +314,14 @@ def shard_path(shard_dir, job_index):
     return os.path.join(shard_dir, f"shard_{job_index:05d}.csv")
 
 
-def load_partial(path, fidelities, cells):
+def load_partial(path, fidelities):
     """
     Rows already written by an earlier, interrupted run of this job.
 
-    A cell counts as finished only if the partial holds a full set of rows for
-    it *and* it is still part of the study, i.e. it appears in ``cells`` (the
-    cells assigned to this job under the current settings). Anything else is
-    dropped, and the partial is discarded outright when it was written for a
-    different set of fidelities.
-
-    Without the ``cells`` check a re-submission with a changed grid would
-    silently mix two studies into one shard: a cell computed at a penalty
-    strength that has since been taken out of the sweep would be copied
-    straight into the final shard and merged as if it belonged there. Checking
-    membership rather than comparing the requested penalty strengths against
-    those present is what makes a genuine resume still work -- a job killed
-    part-way through has only some of its penalty strengths on disk.
+    A cell is only treated as finished if the partial holds a full set of rows
+    for it, and the partial is discarded outright if it was written for a
+    different set of fidelities -- otherwise a re-submission with changed
+    settings would silently mix two studies into one shard.
 
     Returns ``(rows, finished_cell_keys)``.
     """
@@ -375,19 +346,7 @@ def load_partial(path, fidelities, cells):
 
     rows_per_cell = len(expected) * 10
     counts = frame.groupby(CELL_KEY).size()
-    complete = {key for key, count in counts.items() if count == rows_per_cell}
-
-    # CELL_KEY order, normalised so the numpy scalars coming out of groupby
-    # compare equal to the plain Python values carried by a Cell.
-    wanted = {(cell.hamiltonian_index, cell.num_sites, cell.max_interactions,
-               float(cell.penalty_strength)) for cell in cells}
-    finished = {key for key in complete
-                if (int(key[0]), int(key[1]), int(key[2]), float(key[3])) in wanted}
-
-    dropped = len(complete) - len(finished)
-    if dropped:
-        print(f"  ignoring {dropped} finished cell(s) in {path}: they are not "
-              f"part of this job under the current settings", flush=True)
+    finished = {key for key, count in counts.items() if count == rows_per_cell}
     if not finished:
         return [], set()
 
@@ -397,7 +356,7 @@ def load_partial(path, fidelities, cells):
 
 def run_job(args):
     """Run every cell assigned to this job and write one shard."""
-    cells = enumerate_cells(args.num_hamiltonians, args.num_sites, args.max_interactions, args.penalty_strengths)
+    cells = enumerate_cells(args.num_hamiltonians, args.num_sites, args.max_interactions)
     mine = assign_cells(cells, args.num_jobs, args.job_index, args.balance)
 
     os.makedirs(args.shard_dir, exist_ok=True)
@@ -416,27 +375,25 @@ def run_job(args):
 
     rows, finished = [], set()
     if args.resume and not args.overwrite:
-        rows, finished = load_partial(destination + ".partial", args.fidelities, mine)
+        rows, finished = load_partial(destination + ".partial", args.fidelities)
         if finished:
             print(f"[job {args.job_index}] resuming: {len(finished)} of {len(mine)} "
                   f"cells already in {destination}.partial", flush=True)
 
     started = time.time()
     for position, cell in enumerate(mine, start=1):
-        if (cell.hamiltonian_index, cell.num_sites, cell.max_interactions, cell.penalty_strength) in finished:
+        if (cell.hamiltonian_index, cell.num_sites, cell.max_interactions) in finished:
             print(f"[job {args.job_index}] {position}/{len(mine)} "
                   f"n={cell.num_sites} mi={cell.max_interactions} "
-                  f"ham={cell.hamiltonian_index} ps={cell.penalty_strength} "
-                  f"already done, skipping", flush=True)
+                  f"ham={cell.hamiltonian_index} already done, skipping", flush=True)
             continue
 
         cell_started = time.time()
         rows.extend(run_cell(cell, args.fidelities, sparse=args.sparse,
-                             dense_limit=args.dense_limit, n_target=args.n_target))
+                             dense_limit=args.dense_limit))
         print(f"[job {args.job_index}] {position}/{len(mine)} "
               f"n={cell.num_sites} mi={cell.max_interactions} "
-              f"ham={cell.hamiltonian_index} ps={cell.penalty_strength} "
-              f"took {time.time() - cell_started:.1f}s "
+              f"ham={cell.hamiltonian_index} took {time.time() - cell_started:.1f}s "
               f"(elapsed {time.time() - started:.1f}s)", flush=True)
 
         # Write after every cell so a timeout or preemption keeps the finished work.
@@ -451,7 +408,7 @@ def run_job(args):
 
 def merge_shards(args):
     """Concatenate the shards into one CSV and report anything missing."""
-    cells = enumerate_cells(args.num_hamiltonians, args.num_sites, args.max_interactions, args.penalty_strengths)
+    cells = enumerate_cells(args.num_hamiltonians, args.num_sites, args.max_interactions)
     jobs = assign_all_cells(cells, args.num_jobs, args.balance)
 
     frames, partials, missing = [], [], []
@@ -465,8 +422,7 @@ def merge_shards(args):
         # even though the job as a whole never got to write its shard.
         rows, finished = ([], set())
         if args.include_partial:
-            rows, finished = load_partial(path + ".partial", args.fidelities,
-                                          jobs[job_index])
+            rows, finished = load_partial(path + ".partial", args.fidelities)
         if rows:
             frames.append(pd.DataFrame(rows, columns=COLUMNS))
             partials.append(job_index)
@@ -518,10 +474,6 @@ def build_parser():
                         help="number of random Hamiltonians per (num_sites, max_interactions)")
     parser.add_argument("--num-sites", type=int, nargs="+", default=DEFAULT_NUM_SITES)
     parser.add_argument("--max-interactions", type=int, nargs="+", default=DEFAULT_MAX_INTERACTIONS)
-    parser.add_argument("--n-target", type=int, default=None,
-                        help="target excitation number for the penalty term; "
-                             "default is half filling (num_sites // 2)")
-    parser.add_argument("--penalty-strengths", type=float, nargs="+", default=DEFAULT_PENALTY_STRENGTHS)
     parser.add_argument("--fidelities", type=float, nargs="+", default=DEFAULT_FIDELITIES)
     parser.add_argument("--num-jobs", type=int, default=20,
                         help="size of the SLURM array")
@@ -560,7 +512,7 @@ def main(argv=None):
         args.job_index = int(env)
 
     if args.mode == "plan":
-        cells = enumerate_cells(args.num_hamiltonians, args.num_sites, args.max_interactions, args.penalty_strengths)
+        cells = enumerate_cells(args.num_hamiltonians, args.num_sites, args.max_interactions)
         plan = describe_plan(cells, args.num_jobs, args.balance)
         print(f"{len(cells)} cells over {args.num_jobs} jobs "
               f"({len(cells) * len(args.fidelities) * 10} rows total, "

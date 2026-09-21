@@ -29,8 +29,8 @@ module load Python/3.10.4-GCCcore-11.3.0 && source /home/erosanow_hpc/informed_s
 # ----------------------------- configuration -------------------------------
 NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-15}
 NUM_SITES=${NUM_SITES:-"6 8 10 12"}
-MAX_INTERACTIONS=${MAX_INTERACTIONS:-"1 2 3 4"}
-B_MAX=${B_MAX:-1.0}
+DIMENSIONS=${DIMENSIONS:-"1 2"}               # 1 = chain, 2 = open rectangle
+DELTAS=${DELTAS:-"0 0.5 1 10 100"}            # XXZ anisotropies
 NUM_INITIAL_STATES=${NUM_INITIAL_STATES:-6}   # from each end of the overlap distribution
 N_REPEATS=${N_REPEATS:-3}                     # SKQD trajectories per run
 GRID_POINTS=${GRID_POINTS:-30}                # budgets at which the curves are read
@@ -51,7 +51,7 @@ DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
                                          # full eigendecomposition; 0 disables
 SHARD_DIR=${SHARD_DIR:-bitstring_shards}
 OUTPUT=${OUTPUT:-equal_bitstrings_results.csv}
-OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots}
+OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg}
 PYTHON=${PYTHON:-python}
 EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 # ---------------------------------------------------------------------------
@@ -59,8 +59,8 @@ EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 STUDY_ARGS=(
   --num-hamiltonians "$NUM_HAMILTONIANS"
   --num-sites $NUM_SITES
-  --max-interactions $MAX_INTERACTIONS
-  --b-max "$B_MAX"
+  --dimensions $DIMENSIONS
+  --deltas $DELTAS
   --num-initial-states "$NUM_INITIAL_STATES"
   --n-repeats "$N_REPEATS"
   --grid-points "$GRID_POINTS"

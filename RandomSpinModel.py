@@ -351,9 +351,7 @@ def make_heisenberg_hamiltonian(
     J: float = 1.0,
     delta: float = 1.0,
     h: tuple[float, float, float] = (0.0, 0.0, 0.0),
-    spin: float = 0.5,
-    N_target: int | None = None,
-    penalty_strength: float = 0.0,
+    spin: float = 0.5
 ):
     """
     Build the uniform XXZ-Heisenberg Hamiltonian on a 1D or 2D lattice.
@@ -384,8 +382,6 @@ def make_heisenberg_hamiltonian(
         spin: spin length scaling ``S^alpha = spin * sigma^alpha``. Default
             0.5 gives physical spin-1/2 operators; 1.0 uses bare Pauli
             operators (the convention of Eq. (1) in the paper).
-        N_target: target number of excitations (for the penalty term).
-        penalty_strength: strength of the penalty enforcing ``N_target``.
 
     Returns:
         H: SparsePauliOp for the Hamiltonian.
@@ -425,14 +421,6 @@ def make_heisenberg_hamiltonian(
         for i in range(num_sites):
             sparse_terms.append((pauli, [i], coeff))
 
-    # Particle Number Penalty
-    if N_target is not None and penalty_strength != 0.0:
-        sparse_terms.extend(
-            _particle_number_penalty_terms(
-                num_sites, N_target, penalty_strength
-            )
-        )
-
     if sparse_terms:
         H = SparsePauliOp.from_sparse_list(
             sparse_terms, num_qubits=num_sites
@@ -465,8 +453,6 @@ def make_heisenberg_hamiltonian(
         "J_matrices": J_matrices,
         "spin": spin,
         "num_pauli_terms": len(H.paulis),
-        "N_target": N_target,
-        "penalty_strength": penalty_strength,
     }
 
     return H, info
