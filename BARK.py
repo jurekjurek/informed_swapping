@@ -361,7 +361,9 @@ class BARK:
             alpha, beta = float(alpha[0]), float(beta[0])
 
             # Calculate Johann's approximation as alpha * current_approximation + beta * new_state. This is the same as the eigenvector of the projected Hamiltonian, but cheaper to compute and sufficient for ranking.
-            johanns_approximation = alpha * johanns_approximation + beta * last_state
+            new_state = np.zeros(self.dimension, dtype=complex)
+            new_state[last_state] = 1.0
+            johanns_approximation = alpha * johanns_approximation + beta * new_state
 
             pool_states.add(last_state)
             projection.extend([last_state])
