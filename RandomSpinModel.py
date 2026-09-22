@@ -243,3 +243,36 @@ def make_random_spin_hamiltonian(
     }
 
     return H, info
+
+def make_random_heisenberg_hamiltonian(
+    num_sites: int,
+    J_max: float = 1.0,
+    B_max: float = 1.0,
+    delta: float = 1.0,
+    coupling_distribution: str = "uniform",
+    field_distribution: str = "uniform",
+    spin: float = 0.5,
+    seed: int | None = None,    
+):
+    """
+    Build a random 2D Heisenberg Hamiltonian with controllable disorder.
+
+        H = J sum_{<i,j>} ( S^x_i S^x_j + S^y_i S^y_j + delta * S^z_i S^z_j )
+            - sum_i sum_alpha B^alpha_i S^alpha_i
+
+    Args:
+        num_sites: number of spins (qubits).
+        J_max: maximal amplitude of the sampled couplings.
+        B_max: maximal amplitude of the sampled fields.
+        delta: strength of the anisotropic term.
+        coupling_distribution: how ``J`` is drawn -- "uniform", "normal", or
+            "bimodal" (see ``_sample_amplitude``).
+        field_distribution: how ``B`` is drawn, same options.
+        spin: spin length scaling ``S^alpha = spin * sigma^alpha``. Default 0.5
+            gives physical spin-1/2 operators; 1.0 uses bare Pauli operators.
+        seed: seed for the NumPy random generator.
+    Returns:
+        H: SparsePauliOp for the Hamiltonian.
+        info: dict with the sampled couplings, fields, interaction graph, and
+            metadata.
+    """
