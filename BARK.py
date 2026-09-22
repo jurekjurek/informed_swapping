@@ -75,32 +75,29 @@ class BARK:
         return edges, amplitudes
 
     def rank_states(self, last_approximation: np.ndarray, energy: float,
-                    new_states: np.ndarray) -> np.ndarray:
+                    new_states: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Johann's method, evaluated for every candidate at once.
 
-        Rate a basis state by the energy the estimator would reach if it were
-        added to the current approximation, i.e. the lower eigenvalue of the 2x2
-        problem in span{v_i, psi_{i+1}}. Assumes v_i . psi_{i+1} = 0. Lower is
-        better.
-
-        The scalar formulation materialized a dense length-N column vector per
-        candidate and took a full-length inner product with it. Only the
-        non-zeros of that column contribute, and every candidate's column is a
-        row of H, so the whole batch is one sparse mat-vec against the current
-        approximation.
+        Returns (energies, alphas, betas): the energy the estimator would reach
+        if the candidate were added, and the normalized coefficients of
+        v_{i+1} = alpha * v_i + beta * psi_{i+1}. Lower energy is better.
+        Assumes v_i . psi_{i+1} = 0.
         """
         states = np.asarray(new_states, dtype=np.int64)
         if states.size == 0:
-            return np.empty(0, dtype=float)
+            return (np.empty(0, dtype=float),) * 3
 
-        # phi_s is column s of H, i.e. conj(row s). The scalar version computed
-        # vdot(v, phi_s) = conj(row_s . v); only |overlap|^2 is used below, so
-        # the conjugation is irrelevant and dropped.
+        # phi_s . v_i, one sparse mat-vec for the whole batch.
         overlaps = self._csr[states] @ last_approximation
         diagonal = self._diagonal[states]
         gamma = np.sqrt((energy - diagonal) ** 2 + 4.0 * np.abs(overlaps) ** 2)
-        return 0.5 * (energy + diagonal - gamma)
+
+        alpha = energy - diagonal - gamma
+        beta = 2.0 * overlaps
+        norm = np.sqrt(np.abs(alpha) ** 2 + np.abs(beta) ** 2)
+
+        return 0.5 * (energy + diagonal - gamma), alpha / norm, beta / norm
 
     def johanns_method(self, last_approximation: np.ndarray, energy: float, index: int) -> float:
         """Single-candidate form of ``rank_states``, kept for direct callers."""
@@ -316,6 +313,10 @@ class BARK:
         pool_states = {initial_state_index}
         last_approximation = np.zeros(self.dimension, dtype=complex)
         last_approximation[initial_state_index] = 1.0  # Start with the initial state
+
+        johanns_approximation = np.zeros(self.dimension, dtype=complex)
+        johanns_approximation[initial_state_index] = 1.0  # Start with the initial state
+
         energy = float(self._diagonal[initial_state_index])
 
         memory = {}          # state -> best (lowest) potential seen so far
@@ -331,7 +332,7 @@ class BARK:
             candidates = [state for state in self.apply_hamiltonian(last_state)
                           if state not in pool_states]
 
-            potentials = self.rank_states(last_approximation, energy, candidates)
+            potentials, alphas, betas = self.rank_states(johanns_approximation, energy, candidates)
 
             # Update memory with new states and their potentials
             for state, potential in zip(candidates, potentials):
@@ -355,6 +356,12 @@ class BARK:
             # No new states were found: every remaining target is unreachable.
             if last_state is None:
                 break
+
+            new_energy, alpha, beta = self.rank_states(johanns_approximation, energy, [last_state])
+            alpha, beta = float(alpha[0]), float(beta[0])
+
+            # Calculate Johann's approximation as alpha * current_approximation + beta * new_state. This is the same as the eigenvector of the projected Hamiltonian, but cheaper to compute and sufficient for ranking.
+            johanns_approximation = alpha * johanns_approximation + beta * last_state
 
             pool_states.add(last_state)
             projection.extend([last_state])

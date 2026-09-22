@@ -29,13 +29,13 @@ The grid is log-spaced and the y-axis is the infidelity 1 - F on a log scale,
 because everything that decides the comparison happens at K / 2^N << 1 and in
 the last digits of the fidelity. Linear axes spend their resolution on the
 regime where all protocols have already won. Curves are not only averaged over
-everything: the runs are clustered by system size, maximum number of
-interactions, ground-state density, Hamiltonian density and the overlap of the
-initial state, and by every combination of those five, one folder each. See
+everything: the runs are clustered by system size, lattice dimension,
+anisotropy, coupling, field, ground-state density, Hamiltonian density and the
+overlap of the initial state, and by every combination of those, one folder each. See
 ``plot_results``.
 
-The unit of work is a "cell": one ``(hamiltonian_index, num_sites,
-max_interactions)`` combination. A cell builds one Hamiltonian, solves for its
+The unit of work is a "cell": one ``(hamiltonian_index, num_sites, dimensions,
+delta, J, Bx, By, Bz)`` combination. A cell builds one Hamiltonian, solves for its
 ground state, and then runs all three protocols from every starting state.
 Distribution, resuming and merging all work exactly as in ClusterStudy.py and
 reuse its machinery -- only the cost model differs, since these runs grow a pool
@@ -60,7 +60,7 @@ Figures
 -------
 ``plot`` writes one folder per way of clustering the runs, and one subfolder per
 cluster inside it, e.g. ``by_N_overlap/N-10_overlap-high/curves_sem.pdf``. Each
-holds the fidelity curves and the ratio against BARK, once with the spread of
+holds the fidelity curves and the ratio against SKQD, once with the spread of
 the runs and once with the error of the mean, plus where the protocols stopped
 by themselves. Whenever the ceiling drops off a cliff -- which it does as soon as
 the pool covers the support of the ground state, taking the y-axis down with it
@@ -74,6 +74,7 @@ vertical lines, and the band the folder keeps highlighted in the bars.
 """
 
 import argparse
+import hashlib
 import itertools
 import os
 import sys
@@ -88,20 +89,31 @@ import numpy as np
 import pandas as pd
 
 import ClusterStudy
-from RandomSpinModel import make_random_spin_hamiltonian
+from RandomSpinModel import make_heisenberg_hamiltonian
 from BARK import BARK
 from SKQD import SKQD, fidelity_at_budget
-from ClusterStudy import (DEFAULT_DENSE_LIMIT, Cell, assign_all_cells, assign_cells,
-                          cell_seed, describe_plan, enumerate_cells, shard_path,
-                          solve_ground_state)
+from ClusterStudy import (DEFAULT_DENSE_LIMIT, assign_all_cells, assign_cells,
+                          describe_plan, shard_path, solve_ground_state)
 
 DEFAULT_NUM_SITES = [6, 8, 10, 12]
-DEFAULT_MAX_INTERACTIONS = [1, 2]
+DEFAULT_DIMENSIONS = [1, 2]
+DEFAULT_DELTAS = [0.0, 0.5, 1.0, 10.0, 100.0]
 
-# Field strength of the Hamiltonians. A single value rather than the sweep of
-# ClusterStudy.py: this study spends its budget on resolving the whole
-# fidelity-against-K curve instead of on a fourth axis.
-DEFAULT_B_MAX = 1.0
+# Seed of the draw of J and B_z. These are sampled rather than swept, and they
+# have to be sampled *once* for the whole study: plan, run and merge each
+# enumerate the cells in their own process, so drawing them from the global RNG
+# would hand every one of the three a different set of Hamiltonians -- a split
+# that is printed but not executed, a resume that never recognises its own
+# rows, and a coverage report on cells that were never asked for.
+DEFAULT_COUPLING_SEED = 20250921
+
+# Decimals the drawn couplings are rounded to. They are part of the cell key, so
+# they have to survive a round trip through a CSV: ``to_csv`` writes floats at
+# about 16 significant digits, which drops the last bit of a full double and
+# leaves a resumed job -- and merge's coverage report -- unable to recognise the
+# rows it wrote itself. Six decimals round-trip exactly and are far finer than
+# anything the study resolves.
+COUPLING_DECIMALS = 6
 
 # Initial states per Hamiltonian, drawn uniformly at random -- without
 # replacement -- from every basis state the ground state has non-zero overlap
@@ -109,7 +121,7 @@ DEFAULT_B_MAX = 1.0
 # distribution, this samples the distribution itself, so an average over the
 # initial states is an average over a typical starting point instead of over a
 # mixture of two tails.
-DEFAULT_NUM_INITIAL_STATES = 3
+DEFAULT_NUM_INITIAL_STATES = 6
 
 # What counts as non-zero overlap, as a probability. The zeros that matter are
 # the exact ones of the symmetry sectors; an eigensolver leaves those at about
@@ -127,15 +139,15 @@ DEFAULT_N_REPEATS = 3
 DEFAULT_GRID_POINTS = 30
 DEFAULT_MAX_FRACTION = 0.5
 
-COLUMNS = ["Hamiltonian_Index", "Number_of_Sites", "Max_Interactions",
+COLUMNS = ["Hamiltonian_Index", "Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz",
            "Ground_State_Density", "Hamiltonian_Density", "Overlap",
            "Initial_State_Index", "Algorithm", "Budget", "Budget_Fraction", "Fidelity",
            "Final_Pool_Size", "Final_Pool_Fraction", "Terminated_Early", "Seed"]
 
-CELL_KEY = ["Hamiltonian_Index", "Number_of_Sites", "Max_Interactions"]
+CELL_KEY = ["Hamiltonian_Index", "Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz"]
 # What identifies one curve: one protocol on one initial state of one Hamiltonian.
 RUN_KEY = CELL_KEY + ["Initial_State_Index"]
-PANEL_KEY = ["Number_of_Sites", "Max_Interactions"]
+PANEL_KEY = ["Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz"]
 
 # Categorical slots of the validated default palette, plus grey for the ceiling.
 ALGORITHMS = (
@@ -145,19 +157,44 @@ ALGORITHMS = (
     ("SKQD",              "#eb6834", "s",    "--"),
     ("Ceiling",           "#52514e", None,   ":"),
 )
-REFERENCE = "BARK"          # denominator of the ratio plots
+REFERENCE = "SKQD"          # denominator of the ratio plots
 
 GRID_KWARGS = dict(color="#c9c8c3", linewidth=0.6, alpha=0.7)
 # Fidelities of exactly 1 do occur once the pool spans the support of the ground
 # state, and log(0) is not plottable, so the infidelity is floored.
 INFIDELITY_FLOOR = 1e-16
 
-OUTPUT_ROOT = Path("equal_bitstrings_plots")
+OUTPUT_ROOT = Path("equal_bitstrings_plots_heisenberg")
 
 
 # --------------------------------------------------------------------------- #
 # Work definition and distribution
 # --------------------------------------------------------------------------- #
+
+# ClusterStudy's Cell -- and with it its cell_seed -- names a cell by its
+# maximum number of interactions, which a uniform XXZ Hamiltonian does not have.
+# Both are redefined here rather than changed there, so the fixed-target study
+# keeps running unchanged; everything else imported from it only ever reads
+# ``num_sites`` off a cell, or hands it to the cost model patched in below.
+Cell = namedtuple("Cell", ["hamiltonian_index", "num_sites", "dimensions", "delta",
+                           "J", "Bx", "By", "Bz"])
+
+
+def cell_seed(cell: Cell) -> int:
+    """
+    Deterministic 32-bit seed derived from the cell's identity.
+
+    SHA-256 rather than ``hash()``, as in ClusterStudy.cell_seed: Python salts
+    string hashing per process, so ``hash()`` would give different initial
+    states in different jobs for the same cell.
+
+    The couplings go into the key through ``repr``, which writes a float
+    back exactly. They are drawn from a continuous distribution, so a key that
+    rounded them further would hand two different Hamiltonians the same seed.
+    """
+    key = "|".join(repr(field) for field in cell).encode()
+    return int.from_bytes(hashlib.sha256(key).digest()[:4], "little")
+
 
 def estimate_cost(cell: Cell) -> float:
     """
@@ -176,8 +213,10 @@ def estimate_cost(cell: Cell) -> float:
     other study.
     """
     dimension = 2.0 ** cell.num_sites
-    bonds = max(1, min(cell.max_interactions, max(cell.num_sites - 1, 1)))
-    return dimension ** 3.5 * (1.0 + 0.8 * (bonds - 1))
+    # Nearest neighbours only, so the bond count follows from the geometry: a
+    # chain has just under one bond per site, the open rectangle just under two.
+    bonds_per_site = 1.0 if cell.dimensions == 1 else 2.0
+    return dimension ** 3.5 * (1.0 + 0.8 * (bonds_per_site - 1))
 
 
 # ClusterStudy's splitter weights cells with ClusterStudy's cost model, and it
@@ -187,17 +226,48 @@ def estimate_cost(cell: Cell) -> float:
 # in the same process, so nothing else is affected.
 ClusterStudy.estimate_cost = estimate_cost
 
+def enumerate_cells(num_hamiltonians, num_sites, dimensions, deltas,
+                    coupling_seed=DEFAULT_COUPLING_SEED):
+    """All cells of the study, in a fixed order independent of how they are split."""
+
+    # Sample J and Bz uniformly in [-1, 1] for num_hamiltonian times. Through
+    # generators of their own rather than the global RNG: the draw has to come
+    # out the same in plan, run and merge (see DEFAULT_COUPLING_SEED), and the
+    # global one is also what SKQD shoots with, so seeding it here would move
+    # every trajectory of the study as well.
+    #
+    # One generator per Hamiltonian index rather than one vector draw, so that
+    # a Hamiltonian's couplings depend on its index alone. Drawing the whole
+    # vector at once would give Hamiltonian 0 different couplings as soon as
+    # ``num_hamiltonians`` changes, i.e. raising it to extend a study would
+    # quietly turn every shard already on disk into a shard of another study.
+    couplings = [np.round(np.random.default_rng([coupling_seed, index]).uniform(-1, 1, 2),
+                          COUPLING_DECIMALS)
+                 for index in range(num_hamiltonians)]
+
+    # Everything is stored as a float, including the two field components that
+    # are always zero, so that a cell compares equal to the row it wrote once
+    # that row has been through a CSV -- which is what the resume check and the
+    # coverage report of merge are.
+    return [Cell(hamiltonian_index, n_sites, dim, float(delta),
+                 float(J), 0.0, 0.0, float(Bz))
+            for hamiltonian_index, (J, Bz) in enumerate(couplings)
+            for n_sites in num_sites
+            for dim in dimensions
+            for delta in deltas
+            ]
+
 
 def study_cells(args) -> list:
     """
     All cells of the study, in a fixed order independent of how they are split.
 
-    ``enumerate_cells`` carries a penalty axis; passing the single field strength
-    as that axis keeps ``Cell`` -- and therefore ``cell_seed`` -- identical to
-    the fixed-target study, so both studies see the same disorder realisations.
+    ``enumerate_cells`` draws J and B_z itself, from a fixed seed rather than
+    from the CLI, so that plan, run and merge all see the same Hamiltonians
+    without the couplings having to be passed around as arguments.
     """
     return enumerate_cells(args.num_hamiltonians, args.num_sites,
-                           args.max_interactions, [args.b_max])
+                           args.dimensions, args.deltas)
 
 
 # --------------------------------------------------------------------------- #
@@ -226,23 +296,32 @@ def with_initial_point(pool_sizes: np.ndarray, fidelities: np.ndarray,
     return (np.concatenate(([1], pool_sizes)), np.concatenate(([overlap], fidelities)))
 
 
-def expected_rows(cell: Cell, args) -> int:
+def rows_per_initial_state(cell: Cell, args) -> int:
     """
-    How many rows a finished cell contributes.
+    How many rows one initial state of a cell contributes.
 
-    Used to tell a complete cell in a ``.partial`` from one that was interrupted
-    half way. It depends on the grid, so a partial written under a different
-    grid, a different number of initial states or a different cap fails the check
-    and is redone rather than mixed in.
-
-    A ground state supported on fewer than ``num_initial_states`` basis states
-    contributes fewer rows than this and would be re-run on every resume. That
-    takes a ground state of two or three components at the default, which none of
-    these disordered Hamiltonians produce; it is not worth solving for the
-    support of every cell here just to predict the count exactly.
+    This, rather than the total, is what a ``.partial`` is checked against: it
+    depends on the grid, so a partial written under a different grid or a
+    different cap fails the check and is redone rather than mixed in, while a
+    cell that simply had fewer initial states to draw still passes. See
+    ``load_partial``.
     """
     budgets = budget_grid(2 ** cell.num_sites, args.grid_points, args.max_fraction)
-    return args.num_initial_states * len(ALGORITHMS) * budgets.size
+    return len(ALGORITHMS) * budgets.size
+
+
+def expected_rows(cell: Cell, args) -> int:
+    """
+    How many rows a finished cell contributes at most.
+
+    A ground state supported on fewer than ``num_initial_states`` basis states
+    contributes fewer. The Ising-like anisotropies of this family, and every
+    coupling the field dominates, give a ground state of one or two components,
+    so this is an upper bound on the row count and not the row count itself; it
+    is used to say how large a complete run would be, never to decide whether a
+    cell is finished.
+    """
+    return args.num_initial_states * rows_per_initial_state(cell, args)
 
 
 def run_cell(cell: Cell, args) -> list:
@@ -261,15 +340,13 @@ def run_cell(cell: Cell, args) -> list:
     # SKQD draws its shots through the global RNG, so seed that as well.
     np.random.seed(seed)
 
-    hamiltonian = make_random_spin_hamiltonian(
+    hamiltonian = make_heisenberg_hamiltonian(
         num_sites=cell.num_sites,
-        max_interactions=cell.max_interactions,
-        J_components=("x", "y"),
-        B_components=("z"),
-        B_max=cell.penalty_strength,
-        seed=seed,
-        N_target=cell.num_sites // 2,
-        penalty_strength=0,
+        dimension=cell.dimensions,
+        delta=cell.delta,
+        J=cell.J,
+        h = (cell.Bx, cell.By, cell.Bz),
+        spin = 1
     )[0].to_matrix(sparse=True)
 
     ground_state, all_eigenvalues, all_eigenvectors = solve_ground_state(
@@ -353,7 +430,12 @@ def run_cell(cell: Cell, args) -> list:
                 rows.append({
                     "Hamiltonian_Index": cell.hamiltonian_index,
                     "Number_of_Sites": cell.num_sites,
-                    "Max_Interactions": cell.max_interactions,
+                    "Dimensions": cell.dimensions,
+                    "Delta": cell.delta,
+                    "J": cell.J,
+                    "Bx": cell.Bx,
+                    "By": cell.By,
+                    "Bz": cell.Bz,
                     "Ground_State_Density": ground_state_density,
                     "Hamiltonian_Density": hamiltonian_density,
                     "Overlap": overlap,
@@ -401,10 +483,24 @@ def load_partial(path, cells, args):
         return [], set()
 
     counts = frame.groupby(CELL_KEY).size()
-    wanted = {(cell.hamiltonian_index, cell.num_sites, cell.max_interactions):
-              expected_rows(cell, args) for cell in cells}
-    finished = {key for key, count in counts.items()
-                if count == wanted.get((int(key[0]), int(key[1]), int(key[2])))}
+    wanted = {(cell.hamiltonian_index, cell.num_sites, cell.dimensions, cell.delta,
+               cell.J, cell.Bx, cell.By, cell.Bz): rows_per_initial_state(cell, args)
+              for cell in cells}
+
+    # A cell is written in one piece -- run_cell hands back all of its rows at
+    # once and the partial is rewritten after every cell -- so a cell holding
+    # fewer rows than a full set is not an interrupted one, it is a cell whose
+    # ground state lived on fewer basis states than ``num_initial_states``.
+    # Matching on the block one initial state writes therefore still rejects a
+    # partial written under a different grid, which is the point of the check,
+    # without re-running every near-product Hamiltonian on every resume.
+    finished = set()
+    for key, count in counts.items():
+        block = wanted.get((int(key[0]), int(key[1]), int(key[2]),
+                            float(key[3]), float(key[4]), float(key[5]),
+                            float(key[6]), float(key[7])))
+        if block and count % block == 0 and count <= block * args.num_initial_states:
+            finished.add(key)
 
     dropped = len(counts) - len(finished)
     if dropped:
@@ -445,9 +541,10 @@ def run_job(args):
 
     started = time.time()
     for position, cell in enumerate(mine, start=1):
-        label = (f"n={cell.num_sites} mi={cell.max_interactions} "
+        label = (f"n={cell.num_sites} dimensions={cell.dimensions} delta={cell.delta} J={cell.J} "
+                 f"Bx={cell.Bx} By={cell.By} Bz={cell.Bz} "
                  f"ham={cell.hamiltonian_index}")
-        if (cell.hamiltonian_index, cell.num_sites, cell.max_interactions) in finished:
+        if (cell.hamiltonian_index, cell.num_sites, cell.dimensions, cell.delta, cell.J, cell.Bx, cell.By, cell.Bz) in finished:
             print(f"[job {args.job_index}] {position}/{len(mine)} {label} "
                   f"already done, skipping", flush=True)
             continue
@@ -514,7 +611,7 @@ def merge_shards(args):
     for num_sites in sorted(args.num_sites):
         wanted = [c for c in cells if c.num_sites == num_sites]
         done = sum(1 for c in wanted
-                   if (c.hamiltonian_index, c.num_sites, c.max_interactions) in have)
+                   if (c.hamiltonian_index, c.num_sites, c.dimensions, c.delta, c.J, c.Bx, c.By, c.Bz) in have)
         print(f"  n={num_sites:>3}: {done:>4}/{len(wanted)} cells"
               f"{'  COMPLETE' if done == len(wanted) else ''}")
 
@@ -743,7 +840,10 @@ def plot_termination(group: pd.DataFrame, title: str, path: Path) -> None:
 FACETS = (
     # short name  column                  binned  name in the titles
     ("N",         "Number_of_Sites",      False,  "N"),
-    ("maxint",    "Max_Interactions",     False,  "max. interactions"),
+    ("dim",       "Dimensions",           False,  "lattice dimension"),
+    ("delta",     "Delta",                False,  "anisotropy delta"),
+    ("J",         "J",                    True,   "coupling J"),
+    ("Bz",        "Bz",                   True,   "field B_z"),
     ("gsdens",    "Ground_State_Density", True,   "ground-state density"),
     ("hamdens",   "Hamiltonian_Density",  True,   "Hamiltonian density"),
     ("overlap",   "Overlap",              True,   "initial overlap"),
@@ -815,7 +915,10 @@ def add_facet_labels(data: pd.DataFrame, runs: pd.DataFrame, num_bins: int,
     for name, column, binned, _ in FACETS:
         label = f"Facet_{name}"
         if not binned:
-            data[label] = f"{name}-" + data[column].astype(int).astype(str)
+            # ``%g`` rather than ``astype(int)``: the anisotropies are not all
+            # integers, and truncating them would put delta = 0.5 and delta = 0
+            # into the same folder while still calling it delta-0.
+            data[label] = f"{name}-" + data[column].astype(float).map("{:g}".format)
         elif scope == "per-N":
             data[label] = ""
             for num_sites, block in data.groupby("Number_of_Sites"):
@@ -1085,8 +1188,8 @@ def cluster_histograms(group: pd.DataFrame, names: list, key: tuple,
 
     Drawn for the continuous axes the cluster is actually cut on, so the folder
     holding ``overlap-low`` also holds the histogram that says what low means.
-    A cluster cut on none of them -- ``all/``, ``by_N/``, ``by_maxint/`` -- gets
-    all three instead: it holds every run at that size, which is exactly the
+    A cluster cut on none of them -- ``all/``, ``by_N/``, ``by_dim/`` -- gets
+    all of them instead: it holds every run at that size, which is exactly the
     distribution the other folders are carved out of.
     """
     selected = dict(zip(names, (value.split("-", 1)[1] for value in key)))
@@ -1181,11 +1284,11 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
     """
     Every figure, in one folder per way of clustering the runs.
 
-    The runs are cut by five things -- system size, maximum number of
-    interactions, ground-state density, Hamiltonian density and the overlap of
-    the initial state -- and this walks every combination of them, from the plain
-    average over everything (``all/``) through the single axes (``by_gsdens/``)
-    up to all five at once (``by_N_maxint_gsdens_hamdens_overlap/``). Every
+    The runs are cut by the axes of FACETS -- system size, lattice dimension,
+    anisotropy, coupling, field, ground-state density, Hamiltonian density and
+    the overlap of the initial state -- and this walks every combination of them,
+    from the plain average over everything (``all/``) through the single axes
+    (``by_gsdens/``) up to all of them at once. Every
     cluster gets a subfolder holding the same figures, so the path says exactly
     what is held fixed and nothing has to be read off a file name:
 
@@ -1193,7 +1296,7 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
 
     Since the x-axis is K / 2^N and not K, clusters that do not fix N are
     averages over system sizes, which is a different statement from the panels
-    per (N, max. interactions) -- those live in ``by_N_maxint/``.
+    per (N, lattice dimension) -- those live in ``by_N_dim/``.
 
     Clusters holding fewer than ``min_runs`` runs are skipped rather than drawn:
     the deep combinations cut the runs into hundreds of cells, and a mean with a
@@ -1257,12 +1360,14 @@ def build_parser():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("mode", choices=["plan", "run", "merge", "plot"])
     parser.add_argument("--num-hamiltonians", type=int, default=20,
-                        help="number of random Hamiltonians per (num_sites, max_interactions)")
+                        help="number of (J, B_z) draws; each one is run at every "
+                             "(num_sites, dimension, delta)")
     parser.add_argument("--num-sites", type=int, nargs="+", default=DEFAULT_NUM_SITES)
-    parser.add_argument("--max-interactions", type=int, nargs="+",
-                        default=DEFAULT_MAX_INTERACTIONS)
-    parser.add_argument("--b-max", type=float, default=DEFAULT_B_MAX,
-                        help="field strength of the Hamiltonians")
+    parser.add_argument("--dimensions", type=int, nargs="+", default=DEFAULT_DIMENSIONS,
+                        help="lattice dimensions: 1 for a chain, 2 for the "
+                             "most-square open rectangle")
+    parser.add_argument("--deltas", type=float, nargs="+", default=DEFAULT_DELTAS,
+                        help="anisotropies of the XXZ Hamiltonians")
     parser.add_argument("--num-initial-states", type=int, default=DEFAULT_NUM_INITIAL_STATES,
                         help="initial states per Hamiltonian, drawn uniformly at "
                              "random from the basis states of non-zero overlap")
@@ -1276,7 +1381,7 @@ def build_parser():
                         help="size of the SLURM array")
     parser.add_argument("--job-index", type=int, default=None,
                         help="this task's index; defaults to $SLURM_ARRAY_TASK_ID")
-    parser.add_argument("--shard-dir", default="bitstring_shards")
+    parser.add_argument("--shard-dir", default="bitstring_shards_heisenberg")
     parser.add_argument("--output", default="equal_bitstrings_results.csv",
                         help="merge mode: where to write the combined CSV; "
                              "plot mode: which CSV to read")
