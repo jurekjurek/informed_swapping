@@ -49,8 +49,8 @@ THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
 BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
 DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
                                          # full eigendecomposition; 0 disables
-SHARD_DIR=${SHARD_DIR:-bitstring_shards}
-OUTPUT=${OUTPUT:-equal_bitstrings_results.csv}
+SHARD_DIR=${SHARD_DIR:-bitstring_shards_heisenberg}
+OUTPUT=${OUTPUT:-equal_bitstrings_heisenberg_results.csv}
 OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg}
 PYTHON=${PYTHON:-python}
 EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
