@@ -1,0 +1,7 @@
+host=node044 task=23 threads=4
+[job 23/40] 4 cells (4 x n=12)
+[job 23] 1/4 n=12 dimensions=1 delta=10.0 J=-0.958446 Bx=0.0 By=0.0 Bz=-0.004125 ham=6 took 22.1s (elapsed 22.1s)
+[job 23] 2/4 n=12 dimensions=1 delta=10.0 J=0.618667 Bx=0.0 By=0.0 Bz=-0.813737 ham=14 took 176.8s (elapsed 199.0s)
+[job 23] 3/4 n=12 dimensions=2 delta=10.0 J=0.139088 Bx=0.0 By=0.0 Bz=-0.127075 ham=4 took 215.7s (elapsed 414.6s)
+[job 23] 4/4 n=12 dimensions=2 delta=10.0 J=-0.504785 Bx=0.0 By=0.0 Bz=-0.800446 ham=12 took 20.5s (elapsed 435.2s)
+[job 23] wrote 1568 rows to bitstring_shards_heisenberg/shard_00023.csv in 435.2s
