@@ -318,6 +318,9 @@ class BARK:
         johanns_approximation[initial_state_index] = 1.0  # Start with the initial state
 
         energy = float(self._diagonal[initial_state_index])
+        # Energy of Johann's approximation, which is what the ranking uses; the
+        # ED energy below is only a metric.
+        new_energy = energy
 
         memory = {}          # state -> best (lowest) potential seen so far
         queue = []           # heap of (potential, state), lazily invalidated
@@ -332,7 +335,7 @@ class BARK:
             candidates = [state for state in self.apply_hamiltonian(last_state)
                           if state not in pool_states]
 
-            potentials, alphas, betas = self.rank_states(johanns_approximation, energy, candidates)
+            potentials, alphas, betas = self.rank_states(johanns_approximation, new_energy, candidates)
 
             # Update memory with new states and their potentials
             for state, potential in zip(candidates, potentials):
@@ -357,7 +360,7 @@ class BARK:
             if last_state is None:
                 break
 
-            new_energy, alpha, beta = self.rank_states(johanns_approximation, energy, [last_state])
+            new_energy, alpha, beta = self.rank_states(johanns_approximation, new_energy, [last_state])
             alpha, beta = float(alpha[0]), float(beta[0])
 
             # Calculate Johann's approximation as alpha * current_approximation + beta * new_state. This is the same as the eigenvector of the projected Hamiltonian, but cheaper to compute and sufficient for ranking.

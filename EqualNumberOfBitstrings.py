@@ -61,7 +61,8 @@ Figures
 ``plot`` writes one folder per way of clustering the runs, and one subfolder per
 cluster inside it, e.g. ``by_N_overlap/N-10_overlap-high/curves_sem.pdf``. Each
 holds the fidelity curves and the ratio against SKQD, once with the spread of
-the runs and once with the error of the mean, plus where the protocols stopped
+the runs, once with the error of the mean and once as the median with its
+interquartile range (``_median``), plus where the protocols stopped
 by themselves. Whenever the ceiling drops off a cliff -- which it does as soon as
 the pool covers the support of the ground state, taking the y-axis down with it
 -- a second copy of each curve stopping in front of that jump is written next to
@@ -87,6 +88,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.sparse.linalg import eigsh
 
 import ClusterStudy
 from RandomSpinModel import make_heisenberg_hamiltonian
@@ -140,9 +142,10 @@ DEFAULT_GRID_POINTS = 30
 DEFAULT_MAX_FRACTION = 0.5
 
 COLUMNS = ["Hamiltonian_Index", "Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz",
-           "Ground_State_Density", "Hamiltonian_Density", "Overlap",
+           "Ground_State_Density", "Hamiltonian_Density", "Gap", "Overlap",
            "Initial_State_Index", "Algorithm", "Budget", "Budget_Fraction", "Fidelity",
-           "Final_Pool_Size", "Final_Pool_Fraction", "Terminated_Early", "Seed"]
+           "Final_Pool_Size", "Final_Pool_Fraction", "Terminated_Early", "T", "N_Shots",
+           "Seed"]
 
 CELL_KEY = ["Hamiltonian_Index", "Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz"]
 # What identifies one curve: one protocol on one initial state of one Hamiltonian.
@@ -163,6 +166,16 @@ GRID_KWARGS = dict(color="#c9c8c3", linewidth=0.6, alpha=0.7)
 # Fidelities of exactly 1 do occur once the pool spans the support of the ground
 # state, and log(0) is not plottable, so the infidelity is floored.
 INFIDELITY_FLOOR = 1e-16
+
+# A ground state whose largest component carries at least this much weight is
+# a single basis state, see ``drop_trivial_ground_states``.
+TRIVIAL_GROUND_STATE = 1.0 - 1e-10
+
+# Cells whose gap E_1 - E_0 lies below this are dropped from the plots, see
+# ``drop_small_gaps``. The gaps of the study do not separate cleanly into two
+# groups, so this is a choice: it removes the quasi-degenerate Neel pairs of
+# the large anisotropies and little else.
+MIN_GAP = 1e-4
 
 OUTPUT_ROOT = Path("equal_bitstrings_plots_heisenberg")
 
@@ -357,6 +370,14 @@ def run_cell(cell: Cell, args) -> list:
     ground_state_density = np.count_nonzero(np.abs(ground_state) > 1e-3) / dimension
     hamiltonian_density = hamiltonian.nnz / dimension ** 2
 
+    # Gap above the ground state, so that the plots can drop the cells where the
+    # ground state is (quasi-)degenerate and its fidelity is ill-defined.
+    if all_eigenvalues is not None:
+        gap = float(all_eigenvalues[1] - all_eigenvalues[0])
+    else:
+        lowest = np.sort(eigsh(hamiltonian, k=2, which="SA")[0])
+        gap = float(lowest[1] - lowest[0])
+
     budgets = budget_grid(dimension, args.grid_points, args.max_fraction)
     max_pool_size = int(budgets[-1])
 
@@ -402,15 +423,17 @@ def run_cell(cell: Cell, args) -> list:
             results[name] = (fidelity_at_budget(pool_sizes, fidelities, budgets),
                              final_pool_size)
 
-        # (t, n_shots) are tuned for the largest budget of the grid, once per
-        # run, and then held fixed along the whole curve. Re-optimizing at every
-        # budget would draw an envelope over hyperparameters that no single SKQD
-        # run realizes. The evaluation repeats below draw fresh shots -- the
+        # (t, n_shots) are tuned once per run, for the mean infidelity along the
+        # whole budget grid, and then held fixed along the whole curve. Tuning
+        # for the largest budget alone chose on a point where every setting has
+        # already exhausted the symmetry sector. Re-optimizing at every budget
+        # would draw an envelope over hyperparameters that no single SKQD run
+        # realizes. The evaluation repeats below draw fresh shots -- the
         # optimizer's own repeats have already advanced the global RNG -- so the
         # reported curve is not the noise the optimum was selected on.
         t, n_shots = skqd_protocol.optimize_general(
             initial_state_index, ground_state, max_pool_size=max_pool_size,
-            n_repeats=args.n_repeats)
+            n_repeats=args.n_repeats, budgets=budgets)
         runs = [skqd_protocol.full_skqd_run(initial_state_index, t, n_shots,
                                             ground_state, max_pool_size=max_pool_size,
                                             budgets=budgets)
@@ -438,6 +461,7 @@ def run_cell(cell: Cell, args) -> list:
                     "Bz": cell.Bz,
                     "Ground_State_Density": ground_state_density,
                     "Hamiltonian_Density": hamiltonian_density,
+                    "Gap": gap,
                     "Overlap": overlap,
                     "Initial_State_Index": int(initial_state_index),
                     "Algorithm": name,
@@ -449,6 +473,9 @@ def run_cell(cell: Cell, args) -> list:
                     # A run that used up the budget was cut off by us, not by
                     # itself; only a shorter one ran out of states to add.
                     "Terminated_Early": final_pool_size < max_pool_size,
+                    # SKQD's tuned hyperparameters; the other curves have none.
+                    "T": t if name == "SKQD" else np.nan,
+                    "N_Shots": n_shots if name == "SKQD" else np.nan,
                     "Seed": seed,
                 })
     return rows
@@ -624,6 +651,44 @@ def merge_shards(args):
 # Aggregation
 # --------------------------------------------------------------------------- #
 
+def drop_trivial_ground_states(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove every cell whose ground state is a single basis state.
+
+    There the only initial state of non-zero overlap is the ground state itself,
+    so every protocol has F = 1 with one bitstring and the cell compares nothing.
+    These are the ferromagnetic cells with delta >= 1 and the ones whose field
+    saturates the magnetization. The ceiling at a budget of one bitstring is the
+    weight of the largest component, so it identifies them exactly.
+    """
+    ceiling = data[(data["Algorithm"] == "Ceiling") & (data["Budget"] == 1)]
+    trivial = ceiling.loc[ceiling["Fidelity"] >= TRIVIAL_GROUND_STATE, CELL_KEY].drop_duplicates()
+    keep = ~data.set_index(CELL_KEY).index.isin(trivial.set_index(CELL_KEY).index)
+    print(f"Dropped {len(trivial)} of {len(data.drop_duplicates(CELL_KEY))} cells "
+          f"with a trivial ground state")
+    return data[keep].copy()
+
+
+def drop_small_gaps(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove every cell whose ground state is (quasi-)degenerate.
+
+    At large anisotropies the two Neel-like states are split only by high-order
+    tunnelling. The fidelity with one eigenvector is then ill-defined: a pool
+    holding one of the two Neel sectors has an essentially exact energy, but a
+    fidelity near 1/2. Results written before the ``Gap`` column existed are
+    left untouched.
+    """
+    if "Gap" not in data.columns:
+        print("No Gap column in the data, skipping the gap filter")
+        return data
+    cells = data.drop_duplicates(CELL_KEY)
+    small = cells.loc[cells["Gap"] < MIN_GAP, CELL_KEY]
+    keep = ~data.set_index(CELL_KEY).index.isin(small.set_index(CELL_KEY).index)
+    print(f"Dropped {len(small)} of {len(cells)} cells with a gap below {MIN_GAP:g}")
+    return data[keep].copy()
+
+
 def add_log_infidelity(curves: pd.DataFrame) -> pd.DataFrame:
     """Add log10(1 - F), which is what the averages are taken in."""
     infidelity = np.clip(1.0 - curves["Fidelity"], INFIDELITY_FLOOR, 1.0)
@@ -669,12 +734,26 @@ def aggregate(frame: pd.DataFrame, column: str, error: str) -> pd.DataFrame:
     from Hamiltonian to Hamiltonian. ``error="sem"`` is the uncertainty of the
     plotted mean itself, which is the one to read when asking whether two curves
     are actually distinguishable.
+
+    ``error="median"`` replaces the mean by the median and the band by the
+    interquartile range. Runs that reach F = 1 to machine precision all sit at
+    INFIDELITY_FLOOR, an arbitrary constant that the mean depends on strongly
+    and the median does not. The median is still stored in the ``mean`` column,
+    so the plotting code reads every kind of average the same way.
     """
-    stats = frame.groupby(["Algorithm", "Budget_Fraction"])[column].agg(
-        ["mean", "std", "count"]).reset_index()
+    groups = frame.groupby(["Algorithm", "Budget_Fraction"])[column]
+    if error == "median":
+        stats = groups.agg(["median", "count"]).reset_index().rename(columns={"median": "mean"})
+        stats["lower"] = groups.quantile(0.25).to_numpy()
+        stats["upper"] = groups.quantile(0.75).to_numpy()
+        return stats
+
+    stats = groups.agg(["mean", "std", "count"]).reset_index()
     # A single sample has no spread rather than an undefined one.
     stats["std"] = stats["std"].fillna(0.0)
-    stats["spread"] = stats["std"] if error == "std" else stats["std"] / np.sqrt(stats["count"])
+    spread = stats["std"] if error == "std" else stats["std"] / np.sqrt(stats["count"])
+    stats["lower"] = stats["mean"] - spread
+    stats["upper"] = stats["mean"] + spread
     return stats
 
 
@@ -718,6 +797,8 @@ def style_axes(ax: plt.Axes, title: str, xlabel: str, ylabel: str) -> None:
 
 
 def _band_label(error: str) -> str:
+    if error == "median":
+        return "interquartile range, line: median"
     return "standard deviation" if error == "std" else "standard error"
 
 
@@ -743,12 +824,11 @@ def plot_curves(group: pd.DataFrame, title: str, path: Path, error: str) -> None
         if rows.empty:
             continue
         mean = rows["mean"].to_numpy()
-        spread = rows["spread"].to_numpy()
         ax.plot(rows["Budget_Fraction"], 10.0 ** mean, marker=marker, markersize=5,
                 linewidth=2, linestyle=linestyle, color=colour,
                 markeredgecolor="white", markeredgewidth=0.8, label=name)
-        ax.fill_between(rows["Budget_Fraction"], 10.0 ** (mean - spread),
-                        10.0 ** (mean + spread), color=colour, alpha=0.12, linewidth=0)
+        ax.fill_between(rows["Budget_Fraction"], 10.0 ** rows["lower"].to_numpy(),
+                        10.0 ** rows["upper"].to_numpy(), color=colour, alpha=0.12, linewidth=0)
 
     style_axes(ax, f"{title}\n(band: {_band_label(error)})",
                "Number of bitstrings K / Hilbert space dimension", "Infidelity 1 - F")
@@ -766,12 +846,11 @@ def plot_ratio(group: pd.DataFrame, title: str, path: Path, error: str) -> None:
         if rows.empty or name == REFERENCE:
             continue
         mean = rows["mean"].to_numpy()
-        spread = rows["spread"].to_numpy()
         ax.plot(rows["Budget_Fraction"], 10.0 ** mean, marker=marker, markersize=5,
                 linewidth=2, linestyle=linestyle, color=colour,
                 markeredgecolor="white", markeredgewidth=0.8, label=name)
-        ax.fill_between(rows["Budget_Fraction"], 10.0 ** (mean - spread),
-                        10.0 ** (mean + spread), color=colour, alpha=0.12, linewidth=0)
+        ax.fill_between(rows["Budget_Fraction"], 10.0 ** rows["lower"].to_numpy(),
+                        10.0 ** rows["upper"].to_numpy(), color=colour, alpha=0.12, linewidth=0)
 
     ax.axhline(1.0, color=dict((n, c) for n, c, *_ in ALGORITHMS)[REFERENCE],
                linewidth=2, label=REFERENCE)
@@ -1264,7 +1343,7 @@ def cluster_plots(group: pd.DataFrame, title: str, directory: Path, min_drop: fl
     curves = on_common_grid(group)
     cutoff = ceiling_cutoff(curves, min_drop)
     zoomed = curves[curves["Budget_Fraction"] <= cutoff] if cutoff is not None else None
-    for error in ("std", "sem"):
+    for error in ("std", "sem", "median"):
         plot_curves(curves, title, directory / f"curves_{error}.pdf", error)
         plot_ratio(curves, title, directory / f"ratio_{error}.pdf", error)
         written += 2
@@ -1312,6 +1391,8 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
     """
     data = add_log_infidelity(pd.read_csv(data_file))
     print(f"Loaded {len(data)} rows from {data_file}")
+    data = drop_trivial_ground_states(data)
+    data = drop_small_gaps(data)
 
     # One row per run, which is what the cuts are taken on and what the
     # histograms of them show -- a run contributes many rows to ``data``.

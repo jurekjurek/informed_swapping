@@ -251,6 +251,7 @@ class SKQD:
         covered_mass = float(correct_probabilities[initial_state_index])
 
         next_target = 0
+        patience = 0
         while next_target < sorted_targets.size:
             state_vector = np.asarray(self.evolve(state_vector, t)).ravel()
 
@@ -269,8 +270,14 @@ class SKQD:
 
             # Add the sampled states to the pool which are not already in the pool
             fresh = projection.extend(sampled_indices)
+            # Same patience as in ``full_skqd_run``
             if fresh.size == 0:
-                break  # pool stagnated; every remaining target is unreachable
+                patience += 1
+                if patience > 5:
+                    break  # pool stagnated; every remaining target is unreachable
+                continue    # nothing new, the fidelity cannot have changed
+            else:
+                patience = 0
 
             covered_mass += float(correct_probabilities[fresh].sum())
             # The slack absorbs the rounding drift of the running sum, so the
@@ -349,6 +356,8 @@ class SKQD:
         pool_sizes = []
         fidelities = []
 
+        patience = 0
+
         while max_pool_size is None or projection.size < max_pool_size:
             state_vector = np.asarray(self.evolve(state_vector, t)).ravel()
 
@@ -370,7 +379,12 @@ class SKQD:
 
             # Check if pool size has changed, if not, we can break the loop
             if fresh.size == 0:
-                break  # pool stagnated; every remaining target is unreachable
+                patience += 1
+                if patience > 5:
+                    break  # pool stagnated; every remaining target is unreachable
+                continue    # nothing new to record, keep evolving
+            else:
+                patience = 0
 
             pool_sizes.append(projection.size)
 
@@ -562,13 +576,21 @@ class SKQD:
     
     def optimize_general(self, initial_state_index: int, correct_state: np.ndarray,
                         max_pool_size: int,
-                      t_values: tuple = (0.1, 0.25, 0.5, 1.0, 2.0, 4.0),
-                      shot_values: tuple = (10, 25, 50, 100),
-                      n_repeats: int = 3) -> tuple:
+                      t_values: tuple = (0.02, 0.05, 0.15, 0.5, 1.5, 4.0, 10.0),
+                      shot_values: tuple = (10, 30, 100, 300, 1000),
+                      n_repeats: int = 3,
+                      budgets: np.ndarray | None = None) -> tuple:
         """
         Like ``optimize_many``, but for a fixed budget of unique bitstrings:
-        maximize the fidelity reached with a pool of at most ``max_pool_size``
-        states.
+        minimize the mean infidelity along the whole trajectory, read at
+        ``budgets`` (all at most ``max_pool_size``). One pair (t, n_shots) is
+        chosen for the whole curve, not one per budget. Without ``budgets`` only
+        ``max_pool_size`` itself is read, i.e. the fidelity at the largest budget
+        is maximized, as before.
+
+        The infidelity is averaged linearly, not in its logarithm: once a run has
+        covered the whole symmetry sector its infidelity drops to round-off, and
+        in the logarithm those few budgets would outweigh all the others.
 
         The budget is what has to be held fixed, not the number of applications
         of U(t). A run of ``n_applications`` iterations consumes roughly
@@ -582,19 +604,21 @@ class SKQD:
 
         Returns ``(best_t, best_n_shots)``.
         """
+        if budgets is None:
+            budgets = [max_pool_size]
         cache = {}
 
         def objective(t: float, n_shots: int) -> float:
-            """Mean fidelity at the budget over the repeats."""
+            """Mean infidelity over the budgets and the repeats."""
             key = (float(t), int(n_shots))
             if key not in cache:
-                # ``budgets`` leaves one diagonalization per run instead of one
+                # ``budgets`` leaves one diagonalization per budget instead of one
                 # per iteration, which is what makes scanning the grid cheap.
                 cache[key] = float(np.mean([
-                    fidelity_at_budget(*self.full_skqd_run(
+                    1.0 - fidelity_at_budget(*self.full_skqd_run(
                         initial_state_index, float(t), int(n_shots), correct_state,
-                        max_pool_size=max_pool_size, budgets=[max_pool_size]),
-                        max_pool_size)
+                        max_pool_size=max_pool_size, budgets=budgets),
+                        budgets)
                     for _ in range(n_repeats)
                 ]))
             return cache[key]
@@ -603,19 +627,19 @@ class SKQD:
         scores = {(t, n_shots): objective(t, n_shots)
                   for t in t_values for n_shots in shot_values}
 
-        best_t, best_shots = max(scores, key=scores.get)
-        best_fidelity = scores[(best_t, best_shots)]
+        best_t, best_shots = min(scores, key=scores.get)
+        best_infidelity = scores[(best_t, best_shots)]
 
         # Extrapolate along each axis through the grid optimum
-        refined_t = self._parabolic_maximum(t_values, best_t,
+        refined_t = self._parabolic_minimum(t_values, best_t,
                                             lambda x: scores[(x, best_shots)])
-        refined_shots = self._parabolic_maximum(shot_values, best_shots,
+        refined_shots = self._parabolic_minimum(shot_values, best_shots,
                                                 lambda x: scores[(best_t, x)])
         refined_shots = max(1, int(round(refined_shots)))
 
         # Only keep the extrapolated point if it actually beats the grid.
         if (refined_t, refined_shots) != (best_t, best_shots):
-            if objective(refined_t, refined_shots) > best_fidelity:
+            if objective(refined_t, refined_shots) < best_infidelity:
                 best_t, best_shots = float(refined_t), refined_shots
 
         return (float(best_t), int(best_shots))
