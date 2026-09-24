@@ -1,0 +1,6 @@
+merged 40 shards -> equal_bitstrings_heisenberg_results.csv: 228400 rows (356400 expected for a complete run)
+coverage per number of sites:
+  n=  6:  150/150 cells  COMPLETE
+  n=  8:  150/150 cells  COMPLETE
+  n= 10:  150/150 cells  COMPLETE
+  n= 12:  150/150 cells  COMPLETE
