@@ -1,0 +1,5 @@
+[job 36/60] 3 cells (3 x n=12)
+[job 36] 1/3 n=12 dimensions=1 delta=0.5 J=0.139088 Bx=0.0 By=0.0 Bz=-0.127075 ham=4 took 1772.7s (elapsed 1772.7s)
+[job 36] 2/3 n=12 dimensions=1 delta=0.5 J=-0.640511 Bx=0.0 By=0.0 Bz=0.767532 ham=13 took 120.8s (elapsed 1893.5s)
+[job 36] 3/3 n=12 dimensions=2 delta=0.5 J=-0.603824 Bx=0.0 By=0.0 Bz=-0.287176 ham=7 took 547.3s (elapsed 2440.8s)
+[job 36] wrote 1456 rows to bitstring_shards_heisenberg_v2/shard_00036.csv in 2440.9s

@@ -14,9 +14,40 @@ In every iteration, the Hamiltonian is projected onto the pool and diagonalized 
 import numpy as np
 from scipy.linalg import expm
 from scipy.sparse import issparse
+from scipy.sparse.csgraph import connected_components
 from scipy.sparse.linalg import expm as sparse_expm, expm_multiply
 
 from Subspace import GrowingProjection, lowest_eigenpair
+
+# Why a run stopped, stored in ``SKQD.termination`` after every run.
+#
+# The first three are exact: past them, no further sample can change what the
+# run reports. Only the last is a choice, and it is the safety net that keeps a
+# single run from blocking a whole study. It is needed: a run whose ground state
+# sits on bitstrings the time evolution reaches with a probability of 1e-20 per
+# shot -- the Neel states at large anisotropy -- keeps finding a new state every
+# few hundred iterations and would otherwise never end.
+#
+# What it replaces is a patience of six iterations without a new state. That
+# counted iterations rather than evolution time, so at small t -- which the
+# parameter scan favours -- it stopped after a fraction of a time unit, short of
+# the sector, and the curve showed a plateau no SKQD run actually has.
+BUDGET = "budget"                   # the pool reached the caller's budget
+SECTOR = "sector"                   # every state reachable from the initial state is pooled
+CONVERGED = "converged"             # the projected ground state is the true one to round-off
+MAX_ITERATIONS = "max_iterations"   # safety cap on the applications of U(t) was hit
+
+# Cap on the applications of U(t) in one run, i.e. on the Krylov dimension.
+# Runs that converge need a few hundred; see ``full_skqd_run``.
+DEFAULT_MAX_ITERATIONS = 10_000
+
+# Infidelity below which a run counts as converged and stops. Close to the
+# round-off of the fidelity itself, so stopping there loses nothing a plot shows.
+CONVERGED_INFIDELITY = 1e-14
+
+# The states of this many consecutive iterations are computed in one matrix
+# product when the eigendecomposition is known, see ``_trajectory``.
+TRAJECTORY_BLOCK = 64
 
 # ``expm_multiply`` recomputes the whole Al-Mohy & Higham setup on every call:
 # the trace, the shifted operator, the exact 1-norm and -- because ||tH||_1 is
@@ -92,6 +123,23 @@ class SKQD:
         self._phase_cache = {}
         self._generator_cache = {}
         self._expm_plan_cache = {}
+
+        # Connected components of the graph of H: the bitstrings any time
+        # evolution from a given initial state can ever reach. A run that has
+        # pooled its whole component can stop, exactly as BARK stops when its
+        # frontier is empty. Every member is reachable in practice too -- for the
+        # Heisenberg family every one has non-zero time-averaged probability --
+        # but some only at 1e-20 per shot, which is what MAX_ITERATIONS is for.
+        _, self._component = connected_components(self._csr, directed=False)
+        self._component_size = np.bincount(self._component)
+
+        # Why the last run stopped and after how many applications of U(t).
+        self.termination = None
+        self.iterations = 0
+
+    def sector_size(self, initial_state_index: int) -> int:
+        """Number of bitstrings reachable from ``initial_state_index``, itself included."""
+        return int(self._component_size[self._component[int(initial_state_index)]])
 
     # ------------------------------------------------------------------ #
     # Time evolution
@@ -187,6 +235,55 @@ class SKQD:
 
         return self.apply_unitary(state, self.compute_unitary(key))
 
+    def _trajectory(self, initial_state_index: int, t: float):
+        """
+        Yield the shot distributions |U(t)^k |b_0>|^2 for k = 1, 2, ...
+
+        The same distributions as evolving a state vector step by step, but with
+        the eigendecomposition the k-th state is V exp(-i E k t) V^dagger |b_0>
+        directly, so ``TRAJECTORY_BLOCK`` consecutive steps are one matrix-matrix
+        product instead of twice as many matrix-vector products -- about fifty
+        times cheaper per step at N = 12, which is what makes a generous
+        ``max_iterations`` affordable. Computing each phase from k rather than
+        multiplying them up also keeps the phases free of accumulated round-off.
+        Without the eigendecomposition the state is evolved step by step.
+        """
+        initial_state_index = int(initial_state_index)
+
+        if self.eigenvalues is not None and self.eigenvectors is not None:
+            coefficients = self._eigenvectors_h[:, initial_state_index]
+            first = 1
+            while True:
+                steps = np.arange(first, first + TRAJECTORY_BLOCK, dtype=float)
+                amplitudes = self.eigenvectors @ (
+                    coefficients[:, None] * np.exp(-1j * np.outer(self.eigenvalues, steps * t)))
+                probabilities = amplitudes.real ** 2 + amplitudes.imag ** 2
+                for column in range(TRAJECTORY_BLOCK):
+                    yield probabilities[:, column]
+                first += TRAJECTORY_BLOCK
+
+        state = np.zeros(self.dimension, dtype=complex)
+        state[initial_state_index] = 1.0
+        while True:
+            state = np.asarray(self.evolve(state, t)).ravel()
+            yield np.abs(state) ** 2
+
+    def _draw(self, probabilities: np.ndarray, n_shots: int):
+        """
+        ``n_shots`` basis states drawn from ``probabilities``, or None if it is zero.
+
+        Sampling straight from the cumulative distribution skips the validation
+        and the internal copies of np.random.choice while drawing from the same
+        stream.
+        """
+        cumulative = np.cumsum(probabilities)
+        total = cumulative[-1]
+        if not (total > 0.0):
+            return None
+        draws = np.random.random_sample(n_shots) * total
+        return np.minimum(np.searchsorted(cumulative, draws, side="right"),
+                          self.dimension - 1)
+
     def project_hamiltonian(self, pool) -> np.ndarray:
         """
         Project the Hamiltonian onto the subspace spanned by the states in the pool.
@@ -203,7 +300,8 @@ class SKQD:
 
     def sweep(self, initial_state_index: int, t: float, n_shots: int,
               correct_state: np.ndarray, target_fidelities,
-              correct_probabilities: np.ndarray | None = None) -> np.ndarray:
+              correct_probabilities: np.ndarray | None = None,
+              max_iterations: int = DEFAULT_MAX_ITERATIONS) -> np.ndarray:
         """
         Pool size at which each of ``target_fidelities`` is first reached.
 
@@ -215,8 +313,9 @@ class SKQD:
         the protocol separately per target used to produce.
 
         Returns one pool size per entry of ``target_fidelities``, in the order
-        given, with ``np.inf`` for any target not reached before the pool stopped
-        growing.
+        given, with ``np.inf`` for any target not reached before the run stopped:
+        with its whole sector pooled, or after ``max_iterations`` applications of
+        U(t). ``self.termination`` says which.
         """
         targets = np.atleast_1d(np.asarray(target_fidelities, dtype=float))
         order = np.argsort(targets, kind="stable")
@@ -234,9 +333,8 @@ class SKQD:
         projection = self.projection
         projection.reset()
         projection.extend([initial_state_index])
-
-        state_vector = np.zeros(self.dimension, dtype=complex)
-        state_vector[initial_state_index] = 1.0  # Start with the initial state
+        sector_size = self.sector_size(initial_state_index)
+        trajectory = self._trajectory(initial_state_index, t)
 
         # Probability mass of the true ground state that the pool already covers.
         # For *any* unit vector v supported on the pool, |<g|v>|^2 is bounded by
@@ -251,33 +349,28 @@ class SKQD:
         covered_mass = float(correct_probabilities[initial_state_index])
 
         next_target = 0
-        patience = 0
+        self.termination = None
+        self.iterations = 0
         while next_target < sorted_targets.size:
-            state_vector = np.asarray(self.evolve(state_vector, t)).ravel()
+            # Same stopping rules as ``full_skqd_run``.
+            if projection.size >= sector_size:
+                self.termination = SECTOR
+                break   # nothing left to sample; every remaining target is unreachable
+            if self.iterations >= max_iterations:
+                self.termination = MAX_ITERATIONS
+                break
 
             # Sample n_shots states according to the probability distribution of
-            # the new state. Sampling straight from the cumulative distribution
-            # skips the validation and the internal copies of np.random.choice
-            # while drawing from the same stream.
-            probabilities = np.abs(state_vector) ** 2
-            cumulative = np.cumsum(probabilities)
-            total = cumulative[-1]
-            if not (total > 0.0):
+            # the next evolved state.
+            self.iterations += 1
+            sampled_indices = self._draw(next(trajectory), n_shots)
+            if sampled_indices is None:
                 break
-            draws = np.random.random_sample(n_shots) * total
-            sampled_indices = np.minimum(np.searchsorted(cumulative, draws, side="right"),
-                                         self.dimension - 1)
 
             # Add the sampled states to the pool which are not already in the pool
             fresh = projection.extend(sampled_indices)
-            # Same patience as in ``full_skqd_run``
             if fresh.size == 0:
-                patience += 1
-                if patience > 5:
-                    break  # pool stagnated; every remaining target is unreachable
                 continue    # nothing new, the fidelity cannot have changed
-            else:
-                patience = 0
 
             covered_mass += float(correct_probabilities[fresh].sum())
             # The slack absorbs the rounding drift of the running sum, so the
@@ -318,12 +411,24 @@ class SKQD:
     def full_skqd_run(self, initial_state_index: int, t: float, n_shots: int,
               correct_state: np.ndarray,
               max_pool_size: int | None = None,
-              budgets: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+              budgets: np.ndarray | None = None,
+              max_iterations: int = DEFAULT_MAX_ITERATIONS) -> tuple[np.ndarray, np.ndarray]:
         """
-        Run SKQD until the pool stops growing, recording the whole trajectory.
+        Run SKQD until it cannot improve any more, recording the whole trajectory.
 
         Returns ``(pool_sizes, fidelities)``, one entry per iteration that added
-        at least one state.
+        at least one state. Why the run stopped is left in ``self.termination``
+        and the number of applications of U(t) in ``self.iterations``:
+
+        * ``BUDGET``: the pool reached ``max_pool_size``;
+        * ``SECTOR``: every bitstring reachable from the initial state is pooled,
+          so no shot can ever add another -- BARK's own stopping point;
+        * ``CONVERGED``: the infidelity is at most ``CONVERGED_INFIDELITY``;
+        * ``MAX_ITERATIONS``: the safety cap. Only this one cuts a run short of
+          what more shots could still give, so it is the one to report.
+
+        None of them looks at whether the last few iterations found anything,
+        which is what lets a run at small t keep going for as long as it needs.
 
         ``max_pool_size`` stops the run once the pool has reached that many
         unique bitstrings, which is what keeps a full run affordable at larger
@@ -345,61 +450,80 @@ class SKQD:
         """
         initial_state_index = int(initial_state_index)
         n_shots = int(n_shots)
+        max_iterations = int(max_iterations)
 
         projection = self.projection
         projection.reset()
         projection.extend([initial_state_index])
+        sector_size = self.sector_size(initial_state_index)
+        trajectory = self._trajectory(initial_state_index, t)
 
-        state_vector = np.zeros(self.dimension, dtype=complex)
-        state_vector[initial_state_index] = 1.0  # Start with the initial state
-        
+        # Ground-state probability outside the pool, kept per state and summed
+        # afresh rather than as a running total, so that it can be compared with
+        # values far below the round-off of a sum of order one. The infidelity
+        # can never be smaller than it (see ``sweep``), so the convergence test
+        # only diagonalizes once it has fallen to CONVERGED_INFIDELITY, and after
+        # a failed test only once it has fallen another decade.
+        uncovered = np.abs(correct_state) ** 2
+        uncovered[initial_state_index] = 0.0
+        next_check = CONVERGED_INFIDELITY
+
         pool_sizes = []
         fidelities = []
+        self.termination = None
+        self.iterations = 0
 
-        patience = 0
-
-        while max_pool_size is None or projection.size < max_pool_size:
-            state_vector = np.asarray(self.evolve(state_vector, t)).ravel()
+        while True:
+            if max_pool_size is not None and projection.size >= max_pool_size:
+                self.termination = BUDGET
+                break
+            if projection.size >= sector_size:
+                self.termination = SECTOR
+                break
+            if self.iterations >= max_iterations:
+                self.termination = MAX_ITERATIONS
+                break
 
             # Sample n_shots states according to the probability distribution of
-            # the new state. Sampling straight from the cumulative distribution
-            # skips the validation and the internal copies of np.random.choice
-            # while drawing from the same stream.
-            probabilities = np.abs(state_vector) ** 2
-            cumulative = np.cumsum(probabilities)
-            total = cumulative[-1]
-            if not (total > 0.0):
+            # the next evolved state.
+            self.iterations += 1
+            sampled_indices = self._draw(next(trajectory), n_shots)
+            if sampled_indices is None:
                 break
-            draws = np.random.random_sample(n_shots) * total
-            sampled_indices = np.minimum(np.searchsorted(cumulative, draws, side="right"),
-                                         self.dimension - 1)
 
             # Add the sampled states to the pool which are not already in the pool
             fresh = projection.extend(sampled_indices)
-
-            # Check if pool size has changed, if not, we can break the loop
             if fresh.size == 0:
-                patience += 1
-                if patience > 5:
-                    break  # pool stagnated; every remaining target is unreachable
                 continue    # nothing new to record, keep evolving
-            else:
-                patience = 0
 
             pool_sizes.append(projection.size)
+            uncovered[fresh] = 0.0
 
-            if budgets is not None:
-                continue    # diagonalized below, only where it is needed
+            if budgets is None:
+                # Diagonalize the projected Hamiltonian to find the ground state.
+                _, ground_state_vector = lowest_eigenpair(projection.block)
 
-            # Diagonalize the projected Hamiltonian to find the ground state.
-            _, ground_state_vector = lowest_eigenpair(projection.block)
+                # Only the pooled entries of the embedded ground state are non-zero,
+                # so the overlap is an O(k) inner product rather than an O(N) one.
+                fidelity = np.abs(np.vdot(ground_state_vector,
+                                          correct_state[projection.pool])) ** 2
+                fidelities.append(fidelity)
+                if 1.0 - fidelity <= CONVERGED_INFIDELITY:
+                    self.termination = CONVERGED
+                    break
+                continue
 
-            # Only the pooled entries of the embedded ground state are non-zero,
-            # so the overlap is an O(k) inner product rather than an O(N) one.
-            fidelity = np.abs(np.vdot(ground_state_vector,
-                                      correct_state[projection.pool])) ** 2
-
-            fidelities.append(fidelity)
+            # Otherwise diagonalized below, only where it is needed -- apart from
+            # the rare convergence test.
+            uncovered_mass = uncovered.sum()
+            if uncovered_mass <= next_check:
+                _, ground_state_vector = lowest_eigenpair(projection.block)
+                fidelity = np.abs(np.vdot(ground_state_vector,
+                                          correct_state[projection.pool])) ** 2
+                if 1.0 - fidelity <= CONVERGED_INFIDELITY:
+                    self.termination = CONVERGED
+                    break
+                next_check = uncovered_mass / 10.0
 
         if budgets is None:
             return np.array(pool_sizes), np.array(fidelities)
@@ -487,7 +611,8 @@ class SKQD:
                       t_values: tuple = (0.1, 0.25, 0.5, 1.0, 2.0, 4.0),
                       shot_values: tuple = (10, 25, 50, 100),
                       n_repeats: int = 3,
-                      correct_probabilities: np.ndarray | None = None) -> list:
+                      correct_probabilities: np.ndarray | None = None,
+                      max_iterations: int = DEFAULT_MAX_ITERATIONS) -> list:
         """
         Optimize (t, n_shots) for every target fidelity in one grid scan.
 
@@ -526,7 +651,8 @@ class SKQD:
                 runs = np.stack([
                     self.sweep(initial_state_index, float(t), int(n_shots),
                                correct_state, targets,
-                               correct_probabilities=correct_probabilities)
+                               correct_probabilities=correct_probabilities,
+                               max_iterations=max_iterations)
                     for _ in range(n_repeats)
                 ])
                 runs = np.where(np.isfinite(runs), runs, penalty)
@@ -564,7 +690,8 @@ class SKQD:
                  target_fidelity: float,
                  t_values: tuple = (0.1, 0.25, 0.5, 1.0, 2.0, 4.0),
                  shot_values: tuple = (10, 25, 50, 100),
-                 n_repeats: int = 3):
+                 n_repeats: int = 3,
+                 max_iterations: int = DEFAULT_MAX_ITERATIONS):
         """
         Single-fidelity form of ``optimize_many``.
 
@@ -572,14 +699,16 @@ class SKQD:
         """
         return self.optimize_many(initial_state_index, correct_state,
                                   [target_fidelity], t_values=t_values,
-                                  shot_values=shot_values, n_repeats=n_repeats)[0]
+                                  shot_values=shot_values, n_repeats=n_repeats,
+                                  max_iterations=max_iterations)[0]
     
     def optimize_general(self, initial_state_index: int, correct_state: np.ndarray,
                         max_pool_size: int,
                       t_values: tuple = (0.02, 0.05, 0.15, 0.5, 1.5, 4.0, 10.0),
                       shot_values: tuple = (10, 30, 100, 300, 1000),
                       n_repeats: int = 3,
-                      budgets: np.ndarray | None = None) -> tuple:
+                      budgets: np.ndarray | None = None,
+                      max_iterations: int = DEFAULT_MAX_ITERATIONS) -> tuple:
         """
         Like ``optimize_many``, but for a fixed budget of unique bitstrings:
         minimize the mean infidelity along the whole trajectory, read at
@@ -617,7 +746,8 @@ class SKQD:
                 cache[key] = float(np.mean([
                     1.0 - fidelity_at_budget(*self.full_skqd_run(
                         initial_state_index, float(t), int(n_shots), correct_state,
-                        max_pool_size=max_pool_size, budgets=budgets),
+                        max_pool_size=max_pool_size, budgets=budgets,
+                        max_iterations=max_iterations),
                         budgets)
                     for _ in range(n_repeats)
                 ]))

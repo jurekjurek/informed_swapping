@@ -31,6 +31,7 @@ NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-15}
 NUM_SITES=${NUM_SITES:-"6 8 10 12"}
 DIMENSIONS=${DIMENSIONS:-"1 2"}               # 1 = chain, 2 = open rectangle
 DELTAS=${DELTAS:-"0 0.5 1 10 100"}            # XXZ anisotropies
+DISTANCES=${DISTANCES:-"1 2 3"}               # largest bond distances; 1 = nearest neighbours
 NUM_INITIAL_STATES=${NUM_INITIAL_STATES:-6}   # from each end of the overlap distribution
 N_REPEATS=${N_REPEATS:-3}                     # SKQD trajectories per run
 GRID_POINTS=${GRID_POINTS:-30}                # budgets at which the curves are read
@@ -61,6 +62,7 @@ STUDY_ARGS=(
   --num-sites $NUM_SITES
   --dimensions $DIMENSIONS
   --deltas $DELTAS
+  --distances $DISTANCES
   --num-initial-states "$NUM_INITIAL_STATES"
   --n-repeats "$N_REPEATS"
   --grid-points "$GRID_POINTS"

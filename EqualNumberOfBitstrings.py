@@ -35,7 +35,8 @@ overlap of the initial state, and by every combination of those, one folder each
 ``plot_results``.
 
 The unit of work is a "cell": one ``(hamiltonian_index, num_sites, dimensions,
-delta, J, Bx, By, Bz)`` combination. A cell builds one Hamiltonian, solves for its
+delta, J, Bx, By, Bz, max_distance)`` combination, where J holds one coupling per
+bond distance up to ``max_distance``. A cell builds one Hamiltonian, solves for its
 ground state, and then runs all three protocols from every starting state.
 Distribution, resuming and merging all work exactly as in ClusterStudy.py and
 reuse its machinery -- only the cost model differs, since these runs grow a pool
@@ -93,13 +94,16 @@ from scipy.sparse.linalg import eigsh
 import ClusterStudy
 from RandomSpinModel import make_heisenberg_hamiltonian
 from BARK import BARK
-from SKQD import SKQD, fidelity_at_budget
+from SKQD import BUDGET, DEFAULT_MAX_ITERATIONS, SECTOR, SKQD, fidelity_at_budget
 from ClusterStudy import (DEFAULT_DENSE_LIMIT, assign_all_cells, assign_cells,
                           describe_plan, shard_path, solve_ground_state)
 
 DEFAULT_NUM_SITES = [6, 8, 10, 12]
 DEFAULT_DIMENSIONS = [1, 2]
 DEFAULT_DELTAS = [0.0, 0.5, 1.0, 10.0, 100.0]
+# Largest bond distance of the Hamiltonian, see make_heisenberg_hamiltonian.
+# [1] is the nearest-neighbour study.
+DEFAULT_DISTANCES = [1]
 
 # Seed of the draw of J and B_z. These are sampled rather than swept, and they
 # have to be sampled *once* for the whole study: plan, run and merge each
@@ -142,15 +146,19 @@ DEFAULT_GRID_POINTS = 30
 DEFAULT_MAX_FRACTION = 0.5
 
 COLUMNS = ["Hamiltonian_Index", "Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz",
-           "Ground_State_Density", "Hamiltonian_Density", "Gap", "Overlap",
+           "Max_Distance", "J_Per_Distance", "Ground_State_Density", "Hamiltonian_Density", "Gap", "Overlap",
            "Initial_State_Index", "Algorithm", "Budget", "Budget_Fraction", "Fidelity",
-           "Final_Pool_Size", "Final_Pool_Fraction", "Terminated_Early", "T", "N_Shots",
-           "Seed"]
+           "Final_Pool_Size", "Final_Pool_Fraction", "Terminated_Early", "Termination",
+           "T", "N_Shots", "N_Applications", "Seed"]
 
-CELL_KEY = ["Hamiltonian_Index", "Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz"]
+# "J" is the nearest-neighbour coupling; the couplings of the longer bonds are
+# fixed by the Hamiltonian index and the maximal distance, and are written out in
+# "J_Per_Distance", joined by ";".
+CELL_KEY = ["Hamiltonian_Index", "Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz",
+            "Max_Distance"]
 # What identifies one curve: one protocol on one initial state of one Hamiltonian.
 RUN_KEY = CELL_KEY + ["Initial_State_Index"]
-PANEL_KEY = ["Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz"]
+PANEL_KEY = ["Number_of_Sites", "Dimensions", "Delta", "J", "Bx", "By", "Bz", "Max_Distance"]
 
 # Categorical slots of the validated default palette, plus grey for the ceiling.
 ALGORITHMS = (
@@ -189,8 +197,15 @@ OUTPUT_ROOT = Path("equal_bitstrings_plots_heisenberg")
 # Both are redefined here rather than changed there, so the fixed-target study
 # keeps running unchanged; everything else imported from it only ever reads
 # ``num_sites`` off a cell, or hands it to the cost model patched in below.
+# ``J`` is a tuple of one coupling per bond distance, ``(J_1, ..., J_max_distance)``.
 Cell = namedtuple("Cell", ["hamiltonian_index", "num_sites", "dimensions", "delta",
-                           "J", "Bx", "By", "Bz"])
+                           "J", "Bx", "By", "Bz", "max_distance"])
+
+
+def cell_key(cell: Cell) -> tuple:
+    """The cell's values of CELL_KEY, i.e. how it is found among the CSV rows."""
+    return (cell.hamiltonian_index, cell.num_sites, cell.dimensions, cell.delta,
+            cell.J[0], cell.Bx, cell.By, cell.Bz, cell.max_distance)
 
 
 def cell_seed(cell: Cell) -> int:
@@ -204,8 +219,15 @@ def cell_seed(cell: Cell) -> int:
     The couplings go into the key through ``repr``, which writes a float
     back exactly. They are drawn from a continuous distribution, so a key that
     rounded them further would hand two different Hamiltonians the same seed.
+
+    A nearest-neighbour cell is keyed as it was before the longer bonds existed
+    -- J a bare float, no max_distance -- so that it keeps its seed, and with it
+    its initial states and SKQD shots.
     """
-    key = "|".join(repr(field) for field in cell).encode()
+    fields = list(cell)
+    if cell.max_distance == 1:
+        fields = [*cell[:4], cell.J[0], *cell[5:8]]
+    key = "|".join(repr(field) for field in fields).encode()
     return int.from_bytes(hashlib.sha256(key).digest()[:4], "little")
 
 
@@ -226,9 +248,10 @@ def estimate_cost(cell: Cell) -> float:
     other study.
     """
     dimension = 2.0 ** cell.num_sites
-    # Nearest neighbours only, so the bond count follows from the geometry: a
-    # chain has just under one bond per site, the open rectangle just under two.
-    bonds_per_site = 1.0 if cell.dimensions == 1 else 2.0
+    # The bond count follows from the geometry: per distance d, a chain has just
+    # under one bond per site, the open rectangle just under 2d.
+    D = cell.max_distance
+    bonds_per_site = float(D) if cell.dimensions == 1 else float(D * (D + 1))
     return dimension ** 3.5 * (1.0 + 0.8 * (bonds_per_site - 1))
 
 
@@ -240,7 +263,7 @@ def estimate_cost(cell: Cell) -> float:
 ClusterStudy.estimate_cost = estimate_cost
 
 def enumerate_cells(num_hamiltonians, num_sites, dimensions, deltas,
-                    coupling_seed=DEFAULT_COUPLING_SEED):
+                    distances=DEFAULT_DISTANCES, coupling_seed=DEFAULT_COUPLING_SEED):
     """All cells of the study, in a fixed order independent of how they are split."""
 
     # Sample J and Bz uniformly in [-1, 1] for num_hamiltonian times. Through
@@ -254,20 +277,29 @@ def enumerate_cells(num_hamiltonians, num_sites, dimensions, deltas,
     # vector at once would give Hamiltonian 0 different couplings as soon as
     # ``num_hamiltonians`` changes, i.e. raising it to extend a study would
     # quietly turn every shard already on disk into a shard of another study.
-    couplings = [np.round(np.random.default_rng([coupling_seed, index]).uniform(-1, 1, 2),
-                          COUPLING_DECIMALS)
-                 for index in range(num_hamiltonians)]
+    #
+    # J_1 and B_z are drawn first and the couplings of the longer bonds after
+    # them, so that J_1 and B_z -- and J_d of every distance -- do not depend on
+    # which distances are asked for.
+    couplings = []
+    for index in range(num_hamiltonians):
+        rng = np.random.default_rng([coupling_seed, index])
+        J_1, Bz = np.round(rng.uniform(-1, 1, 2), COUPLING_DECIMALS)
+        J_far = np.round(rng.uniform(-1, 1, max(distances) - 1), COUPLING_DECIMALS)
+        couplings.append((J_1, Bz, J_far))
 
     # Everything is stored as a float, including the two field components that
     # are always zero, so that a cell compares equal to the row it wrote once
     # that row has been through a CSV -- which is what the resume check and the
     # coverage report of merge are.
     return [Cell(hamiltonian_index, n_sites, dim, float(delta),
-                 float(J), 0.0, 0.0, float(Bz))
-            for hamiltonian_index, (J, Bz) in enumerate(couplings)
+                 (float(J_1),) + tuple(float(J) for J in J_far[:distance - 1]),
+                 0.0, 0.0, float(Bz), int(distance))
+            for hamiltonian_index, (J_1, Bz, J_far) in enumerate(couplings)
             for n_sites in num_sites
             for dim in dimensions
             for delta in deltas
+            for distance in distances
             ]
 
 
@@ -280,7 +312,7 @@ def study_cells(args) -> list:
     without the couplings having to be passed around as arguments.
     """
     return enumerate_cells(args.num_hamiltonians, args.num_sites,
-                           args.dimensions, args.deltas)
+                           args.dimensions, args.deltas, args.distances)
 
 
 # --------------------------------------------------------------------------- #
@@ -357,9 +389,10 @@ def run_cell(cell: Cell, args) -> list:
         num_sites=cell.num_sites,
         dimension=cell.dimensions,
         delta=cell.delta,
-        J=cell.J,
+        J=list(cell.J),
         h = (cell.Bx, cell.By, cell.Bz),
-        spin = 1
+        spin = 1,
+        max_distance=cell.max_distance
     )[0].to_matrix(sparse=True)
 
     ground_state, all_eigenvalues, all_eigenvectors = solve_ground_state(
@@ -413,6 +446,9 @@ def run_cell(cell: Cell, args) -> list:
         overlap = float(probabilities[initial_state_index])
         # name -> (fidelity per budget, mean final pool size)
         results = {}
+        # name -> why the run stopped; for SKQD one entry per repeat, joined by
+        # ";", so that runs cut off by the iteration cap can be found and reported.
+        terminations = {"Ceiling": ""}
 
         for name, run in (("BARK", bark_protocol.full_bark_run),
                           ("Simplified BARK", bark_protocol.simplified_bark_run)):
@@ -422,6 +458,7 @@ def run_cell(cell: Cell, args) -> list:
             pool_sizes, fidelities = with_initial_point(pool_sizes, fidelities, overlap)
             results[name] = (fidelity_at_budget(pool_sizes, fidelities, budgets),
                              final_pool_size)
+            terminations[name] = BUDGET if final_pool_size >= max_pool_size else SECTOR
 
         # (t, n_shots) are tuned once per run, for the mean infidelity along the
         # whole budget grid, and then held fixed along the whole curve. Tuning
@@ -433,11 +470,19 @@ def run_cell(cell: Cell, args) -> list:
         # reported curve is not the noise the optimum was selected on.
         t, n_shots = skqd_protocol.optimize_general(
             initial_state_index, ground_state, max_pool_size=max_pool_size,
-            n_repeats=args.n_repeats, budgets=budgets)
-        runs = [skqd_protocol.full_skqd_run(initial_state_index, t, n_shots,
-                                            ground_state, max_pool_size=max_pool_size,
-                                            budgets=budgets)
-                for _ in range(args.n_repeats)]
+            n_repeats=args.n_repeats, budgets=budgets,
+            max_iterations=args.skqd_max_iterations)
+        # Applications of U(t) in each repeat, joined like the terminations.
+        runs, skqd_terminations, applications = [], [], []
+        for _ in range(args.n_repeats):
+            runs.append(skqd_protocol.full_skqd_run(initial_state_index, t, n_shots,
+                                                    ground_state, max_pool_size=max_pool_size,
+                                                    budgets=budgets,
+                                                    max_iterations=args.skqd_max_iterations))
+            skqd_terminations.append(skqd_protocol.termination)
+            applications.append(str(skqd_protocol.iterations))
+        terminations["SKQD"] = ";".join(skqd_terminations)
+        skqd_applications = ";".join(applications)
         results["SKQD"] = (
             np.mean([fidelity_at_budget(*with_initial_point(pool_sizes, fidelities, overlap),
                                         budgets)
@@ -455,10 +500,12 @@ def run_cell(cell: Cell, args) -> list:
                     "Number_of_Sites": cell.num_sites,
                     "Dimensions": cell.dimensions,
                     "Delta": cell.delta,
-                    "J": cell.J,
+                    "J": cell.J[0],
                     "Bx": cell.Bx,
                     "By": cell.By,
                     "Bz": cell.Bz,
+                    "Max_Distance": cell.max_distance,
+                    "J_Per_Distance": ";".join(str(J) for J in cell.J),
                     "Ground_State_Density": ground_state_density,
                     "Hamiltonian_Density": hamiltonian_density,
                     "Gap": gap,
@@ -473,9 +520,11 @@ def run_cell(cell: Cell, args) -> list:
                     # A run that used up the budget was cut off by us, not by
                     # itself; only a shorter one ran out of states to add.
                     "Terminated_Early": final_pool_size < max_pool_size,
+                    "Termination": terminations[name],
                     # SKQD's tuned hyperparameters; the other curves have none.
                     "T": t if name == "SKQD" else np.nan,
                     "N_Shots": n_shots if name == "SKQD" else np.nan,
+                    "N_Applications": skqd_applications if name == "SKQD" else "",
                     "Seed": seed,
                 })
     return rows
@@ -510,9 +559,7 @@ def load_partial(path, cells, args):
         return [], set()
 
     counts = frame.groupby(CELL_KEY).size()
-    wanted = {(cell.hamiltonian_index, cell.num_sites, cell.dimensions, cell.delta,
-               cell.J, cell.Bx, cell.By, cell.Bz): rows_per_initial_state(cell, args)
-              for cell in cells}
+    wanted = {cell_key(cell): rows_per_initial_state(cell, args) for cell in cells}
 
     # A cell is written in one piece -- run_cell hands back all of its rows at
     # once and the partial is rewritten after every cell -- so a cell holding
@@ -525,7 +572,7 @@ def load_partial(path, cells, args):
     for key, count in counts.items():
         block = wanted.get((int(key[0]), int(key[1]), int(key[2]),
                             float(key[3]), float(key[4]), float(key[5]),
-                            float(key[6]), float(key[7])))
+                            float(key[6]), float(key[7]), int(key[8])))
         if block and count % block == 0 and count <= block * args.num_initial_states:
             finished.add(key)
 
@@ -569,9 +616,9 @@ def run_job(args):
     started = time.time()
     for position, cell in enumerate(mine, start=1):
         label = (f"n={cell.num_sites} dimensions={cell.dimensions} delta={cell.delta} J={cell.J} "
-                 f"Bx={cell.Bx} By={cell.By} Bz={cell.Bz} "
+                 f"Bx={cell.Bx} By={cell.By} Bz={cell.Bz} max_distance={cell.max_distance} "
                  f"ham={cell.hamiltonian_index}")
-        if (cell.hamiltonian_index, cell.num_sites, cell.dimensions, cell.delta, cell.J, cell.Bx, cell.By, cell.Bz) in finished:
+        if cell_key(cell) in finished:
             print(f"[job {args.job_index}] {position}/{len(mine)} {label} "
                   f"already done, skipping", flush=True)
             continue
@@ -638,7 +685,7 @@ def merge_shards(args):
     for num_sites in sorted(args.num_sites):
         wanted = [c for c in cells if c.num_sites == num_sites]
         done = sum(1 for c in wanted
-                   if (c.hamiltonian_index, c.num_sites, c.dimensions, c.delta, c.J, c.Bx, c.By, c.Bz) in have)
+                   if cell_key(c) in have)
         print(f"  n={num_sites:>3}: {done:>4}/{len(wanted)} cells"
               f"{'  COMPLETE' if done == len(wanted) else ''}")
 
@@ -867,7 +914,8 @@ def plot_termination(group: pd.DataFrame, title: str, path: Path) -> None:
 
     A run that reached the budget was cut off by the study, so only the early
     terminators are averaged here -- BARK when the states reachable from the
-    initial state are exhausted, SKQD when an iteration draws nothing new. The
+    initial state are exhausted, SKQD when it has pooled them as well, has
+    converged, or has hit its iteration cap (see the Termination column). The
     share of runs that got there at all is printed on top of each bar, because a
     mean over a handful of runs says little on its own.
     """
@@ -1391,6 +1439,9 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
     """
     data = add_log_infidelity(pd.read_csv(data_file))
     print(f"Loaded {len(data)} rows from {data_file}")
+    # Results written before the longer bonds existed are nearest-neighbour ones.
+    if "Max_Distance" not in data.columns:
+        data["Max_Distance"] = 1
     data = drop_trivial_ground_states(data)
     data = drop_small_gaps(data)
 
@@ -1442,13 +1493,16 @@ def build_parser():
     parser.add_argument("mode", choices=["plan", "run", "merge", "plot"])
     parser.add_argument("--num-hamiltonians", type=int, default=20,
                         help="number of (J, B_z) draws; each one is run at every "
-                             "(num_sites, dimension, delta)")
+                             "(num_sites, dimension, delta, max_distance)")
     parser.add_argument("--num-sites", type=int, nargs="+", default=DEFAULT_NUM_SITES)
     parser.add_argument("--dimensions", type=int, nargs="+", default=DEFAULT_DIMENSIONS,
                         help="lattice dimensions: 1 for a chain, 2 for the "
                              "most-square open rectangle")
     parser.add_argument("--deltas", type=float, nargs="+", default=DEFAULT_DELTAS,
                         help="anisotropies of the XXZ Hamiltonians")
+    parser.add_argument("--distances", type=int, nargs="+", default=DEFAULT_DISTANCES,
+                        help="largest bond distances of the Hamiltonians, one study "
+                             "each; 1 is nearest neighbours only")
     parser.add_argument("--num-initial-states", type=int, default=DEFAULT_NUM_INITIAL_STATES,
                         help="initial states per Hamiltonian, drawn uniformly at "
                              "random from the basis states of non-zero overlap")
@@ -1458,6 +1512,10 @@ def build_parser():
                         help="log-spaced budgets at which the curves are read")
     parser.add_argument("--max-fraction", type=float, default=DEFAULT_MAX_FRACTION,
                         help="largest budget, as a fraction of the Hilbert space")
+    parser.add_argument("--skqd-max-iterations", type=int, default=DEFAULT_MAX_ITERATIONS,
+                        help="safety cap on the applications of U(t) in one SKQD run; "
+                             "runs that hit it are marked max_iterations in the "
+                             "Termination column")
     parser.add_argument("--num-jobs", type=int, default=20,
                         help="size of the SLURM array")
     parser.add_argument("--job-index", type=int, default=None,

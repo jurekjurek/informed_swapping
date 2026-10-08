@@ -22,6 +22,7 @@ default (set ``spin=1.0`` to work directly with Pauli operators).
 """
 
 import math
+import warnings
 
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp
@@ -280,24 +281,29 @@ def most_square_rectangle(num_sites: int):
     return 1, num_sites  # unreachable, kept for clarity
 
 
-def lattice_edges(num_sites: int, dimension: int):
+def lattice_edges(num_sites: int, dimension: int, distance: int = 1):
     """
-    Nearest-neighbour bonds with open boundary conditions.
+    Bonds between sites ``distance`` lattice steps apart, with open boundary
+    conditions. ``distance=1`` gives the nearest-neighbour bonds.
 
-    ``dimension=1`` gives a linear chain ``0-1-2-...-(N-1)``.
+    ``dimension=1`` gives a linear chain ``0-1-2-...-(N-1)``, with bonds
+    ``(i, i + distance)``.
     ``dimension=2`` gives the most-square open rectangle from
     ``most_square_rectangle``, with row-major site labelling
-    ``i = row * cols + col`` and bonds along both axes.
+    ``i = row * cols + col``. The distance is the Manhattan distance
+    ``|d_row| + |d_col|``, so ``distance=2`` holds the bonds two steps along
+    either axis and the diagonal ones, one step along each.
 
     Args:
         num_sites: number of spins.
         dimension: 1 for a chain, 2 for a square lattice.
+        distance: lattice distance of the bonds.
 
     Returns:
         edges: sorted list of ``(i, j)`` tuples with ``i < j``.
     """
     if dimension == 1:
-        return [(i, i + 1) for i in range(num_sites - 1)]
+        return [(i, i + distance) for i in range(num_sites - distance)]
 
     if dimension == 2:
         rows, cols = most_square_rectangle(num_sites)
@@ -305,10 +311,14 @@ def lattice_edges(num_sites: int, dimension: int):
         for r in range(rows):
             for c in range(cols):
                 site = r * cols + c
-                if c + 1 < cols:                      # horizontal bond
-                    edges.append((site, site + 1))
-                if r + 1 < rows:                      # vertical bond
-                    edges.append((site, site + cols))
+                # Only steps towards larger site labels, so that every bond is
+                # counted once: down the rows, or to the right within a row.
+                for dr in range(distance + 1):
+                    for dc in {distance - dr, dr - distance}:
+                        if dr == 0 and dc < 0:
+                            continue
+                        if r + dr < rows and 0 <= c + dc < cols:
+                            edges.append((site, site + dr * cols + dc))
         edges.sort()
         return edges
 
@@ -348,15 +358,16 @@ def _particle_number_penalty_terms(
 def make_heisenberg_hamiltonian(
     num_sites: int,
     dimension: int = 1,
-    J: float = 1.0,
+    J: float | list[float] = 1.0,
     delta: float = 1.0,
     h: tuple[float, float, float] = (0.0, 0.0, 0.0),
-    spin: float = 0.5
+    spin: float = 0.5,
+    max_distance: int = 1
 ):
     """
     Build the uniform XXZ-Heisenberg Hamiltonian on a 1D or 2D lattice.
 
-        H = J sum_<i,j> ( S^x_i S^x_j + S^y_i S^y_j + delta * S^z_i S^z_j )
+        H = sum_d J_d sum_<i,j>_d ( S^x_i S^x_j + S^y_i S^y_j + delta * S^z_i S^z_j )
             - sum_i ( h^x S^x_i + h^y S^y_i + h^z S^z_i )
 
     Note the sign convention: this follows Eq. (1) of the reference paper, so
@@ -365,15 +376,19 @@ def make_heisenberg_hamiltonian(
     differs from ``make_random_spin_hamiltonian``, where both terms carry a
     minus sign; flip the sign of ``J`` if you need the other convention.
 
-    The sum runs over nearest-neighbour bonds only, with open boundary
-    conditions in both geometries.
+    ``<i,j>_d`` runs over the bonds of lattice distance ``d`` (see
+    ``lattice_edges``), for ``d = 1, ..., max_distance``, with open boundary
+    conditions in both geometries. ``max_distance = 1`` keeps the
+    nearest-neighbour bonds only.
 
     Args:
         num_sites: number of spins (qubits).
         dimension: 1 for a linear chain, 2 for the most-square open rectangle
             (see ``most_square_rectangle``) with four-nearest-neighbour
             connectivity.
-        J: exchange coupling, identical on every bond.
+        J: exchange couplings ``[J_1, ..., J_max_distance]``, one per bond
+            distance and identical on every bond of that distance. A single
+            float is read as ``[J]``.
         delta: anisotropy parameter. ``delta = 1`` is the isotropic XXX model,
             ``delta != 1`` the anisotropic XXZ model (``delta >> 1`` is
             Ising-like, ``delta < 1`` easy-plane).
@@ -382,6 +397,7 @@ def make_heisenberg_hamiltonian(
         spin: spin length scaling ``S^alpha = spin * sigma^alpha``. Default
             0.5 gives physical spin-1/2 operators; 1.0 uses bare Pauli
             operators (the convention of Eq. (1) in the paper).
+        max_distance: largest lattice distance that is coupled.
 
     Returns:
         H: SparsePauliOp for the Hamiltonian.
@@ -397,20 +413,41 @@ def make_heisenberg_hamiltonian(
             f"got {len(h)} component(s)."
         )
 
-    edges = lattice_edges(num_sites, dimension)
+    J = [float(J)] if np.isscalar(J) else [float(x) for x in J]
+    if len(J) != max_distance:
+        raise ValueError(
+            "J must hold one coupling per distance, i.e. max_distance = "
+            f"{max_distance} of them; got {len(J)}."
+        )
+
     shape = (1, num_sites) if dimension == 1 else most_square_rectangle(num_sites)
+    # Largest distance two sites of the lattice can have; beyond it there are
+    # no bonds left and the extra couplings do nothing.
+    largest_distance = shape[0] + shape[1] - 2
+    if max_distance > largest_distance:
+        warnings.warn(
+            f"max_distance = {max_distance} exceeds the largest distance "
+            f"{largest_distance} on the {shape[0]} x {shape[1]} lattice; the "
+            "couplings beyond it have no bonds."
+        )
+
+    # edges_per_distance[d - 1] holds the bonds of distance d.
+    edges_per_distance = [lattice_edges(num_sites, dimension, d)
+                          for d in range(1, max_distance + 1)]
+    edges = sorted(edge for d_edges in edges_per_distance for edge in d_edges)
 
     sparse_terms: list[tuple[str, list[int], float]] = []
 
-    # Coupling terms: +J S^alpha_i S^alpha_j, with delta on the zz component.
-    bond_couplings = {"x": J, "y": J, "z": J * delta}
-    for alpha, coupling in bond_couplings.items():
-        coeff = coupling * spin * spin
-        if coeff == 0.0:
-            continue
-        pauli = _PAULI[alpha]
-        for i, j in edges:
-            sparse_terms.append((pauli + pauli, [i, j], coeff))
+    # Coupling terms: +J_d S^alpha_i S^alpha_j, with delta on the zz component.
+    for J_d, d_edges in zip(J, edges_per_distance):
+        bond_couplings = {"x": J_d, "y": J_d, "z": J_d * delta}
+        for alpha, coupling in bond_couplings.items():
+            coeff = coupling * spin * spin
+            if coeff == 0.0:
+                continue
+            pauli = _PAULI[alpha]
+            for i, j in d_edges:
+                sparse_terms.append((pauli + pauli, [i, j], coeff))
 
     # Field terms: -h^alpha S^alpha_i.
     for alpha, field in zip(("x", "y", "z"), h):
@@ -435,10 +472,12 @@ def make_heisenberg_hamiltonian(
 
     # Dense coupling matrices, for compatibility with the random-model info.
     J_matrices = {a: np.zeros((num_sites, num_sites)) for a in ("x", "y", "z")}
-    for alpha, coupling in bond_couplings.items():
-        for i, j in edges:
-            J_matrices[alpha][i, j] = coupling
-            J_matrices[alpha][j, i] = coupling
+    for J_d, d_edges in zip(J, edges_per_distance):
+        bond_couplings = {"x": J_d, "y": J_d, "z": J_d * delta}
+        for alpha, coupling in bond_couplings.items():
+            for i, j in d_edges:
+                J_matrices[alpha][i, j] = coupling
+                J_matrices[alpha][j, i] = coupling
 
     info = {
         "num_sites": num_sites,
@@ -448,6 +487,7 @@ def make_heisenberg_hamiltonian(
         "degrees": degrees,
         "max_degree": int(degrees.max()) if num_sites else 0,
         "J": J,
+        "max_distance": max_distance,
         "delta": delta,
         "h": h,
         "J_matrices": J_matrices,

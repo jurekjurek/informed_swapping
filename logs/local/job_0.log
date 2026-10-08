@@ -1,0 +1,4 @@
+[job 0/60] 2 cells (2 x n=12)
+[job 0] 1/2 n=12 dimensions=2 delta=0.0 J=-0.81358 Bx=0.0 By=0.0 Bz=0.120636 ham=0 took 1684.2s (elapsed 1684.2s)
+[job 0] 2/2 n=12 dimensions=2 delta=0.0 J=-0.504785 Bx=0.0 By=0.0 Bz=-0.800446 ham=12 took 349.4s (elapsed 2033.7s)
+[job 0] wrote 1344 rows to bitstring_shards_heisenberg_v2/shard_00000.csv in 2033.8s
