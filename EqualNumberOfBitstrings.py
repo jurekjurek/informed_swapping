@@ -263,8 +263,16 @@ def estimate_cost(cell: Cell) -> float:
 ClusterStudy.estimate_cost = estimate_cost
 
 def enumerate_cells(num_hamiltonians, num_sites, dimensions, deltas,
-                    distances=DEFAULT_DISTANCES, coupling_seed=DEFAULT_COUPLING_SEED):
-    """All cells of the study, in a fixed order independent of how they are split."""
+                    distances=DEFAULT_DISTANCES, coupling_seed=DEFAULT_COUPLING_SEED,
+                    transversal=False):
+    """
+    All cells of the study, in a fixed order independent of how they are split.
+
+    ``transversal`` puts the drawn field into B_x instead of B_z, i.e. transversal
+    to the spins of the delta -> infinity limit. The draw itself is unchanged, so
+    the two studies share their couplings and field strengths Hamiltonian by
+    Hamiltonian.
+    """
 
     # Sample J and Bz uniformly in [-1, 1] for num_hamiltonian times. Through
     # generators of their own rather than the global RNG: the draw has to come
@@ -294,8 +302,9 @@ def enumerate_cells(num_hamiltonians, num_sites, dimensions, deltas,
     # coverage report of merge are.
     return [Cell(hamiltonian_index, n_sites, dim, float(delta),
                  (float(J_1),) + tuple(float(J) for J in J_far[:distance - 1]),
-                 0.0, 0.0, float(Bz), int(distance))
-            for hamiltonian_index, (J_1, Bz, J_far) in enumerate(couplings)
+                 float(B) if transversal else 0.0, 0.0, 0.0 if transversal else float(B),
+                 int(distance))
+            for hamiltonian_index, (J_1, B, J_far) in enumerate(couplings)
             for n_sites in num_sites
             for dim in dimensions
             for delta in deltas
@@ -312,7 +321,8 @@ def study_cells(args) -> list:
     without the couplings having to be passed around as arguments.
     """
     return enumerate_cells(args.num_hamiltonians, args.num_sites,
-                           args.dimensions, args.deltas, args.distances)
+                           args.dimensions, args.deltas, args.distances,
+                           transversal=args.transversal)
 
 
 # --------------------------------------------------------------------------- #
@@ -1549,6 +1559,10 @@ def build_parser():
                         help="Hilbert-space dimension up to which the full dense "
                              "eigendecomposition is computed and handed to SKQD "
                              "(0 disables it)")
+    parser.add_argument("--transversal", action="store_true",
+                        help="draw the field into B_x and set B_z to 0, transversal "
+                             "to the spins of the delta -> infinity limit; must "
+                             "match between plan, run and merge")
     parser.add_argument("--overwrite", action="store_true",
                         help="re-run a job even if its shard already exists")
     parser.add_argument("--no-resume", dest="resume", action="store_false",
