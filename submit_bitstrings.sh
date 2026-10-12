@@ -39,7 +39,7 @@ MAX_FRACTION=${MAX_FRACTION:-0.5}             # largest budget, as a fraction of
 NUM_JOBS=${NUM_JOBS:-40}
 
 PARTITION=${PARTITION:-intelsr_long}                 # empty -> cluster default
-TIME=${TIME:-04-00:00:00}
+TIME=${TIME:-07-00:00:00}
 MEM=${MEM:-40G}
 # As in the other study: a very large number of small-to-medium dense LAPACK
 # calls plus single-threaded sampling, not a few big ones. Few threads per task,
@@ -50,9 +50,9 @@ THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
 BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
 DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
                                          # full eigendecomposition; 0 disables
-SHARD_DIR=${SHARD_DIR:-bitstring_shards_heisenberg}
-OUTPUT=${OUTPUT:-equal_bitstrings_heisenberg_results.csv}
-OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg}
+SHARD_DIR=${SHARD_DIR:-bitstring_shards_heisenberg_wd}
+OUTPUT=${OUTPUT:-equal_bitstrings_heisenberg_results_wd.csv}
+OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg_wd}
 PYTHON=${PYTHON:-python}
 EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 # ---------------------------------------------------------------------------

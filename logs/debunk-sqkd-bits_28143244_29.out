@@ -1,0 +1,15 @@
+host=node012 task=29 threads=4
+[job 29/40] 12 cells (12 x n=12)
+[job 29] 1/12 n=12 dimensions=1 delta=100.0 J=(-0.958446,) Bx=0.0 By=0.0 Bz=-0.004125 max_distance=1 ham=6 took 47.5s (elapsed 47.5s)
+[job 29] 2/12 n=12 dimensions=1 delta=100.0 J=(0.618667,) Bx=0.0 By=0.0 Bz=-0.813737 max_distance=1 ham=14 took 8784.3s (elapsed 8831.8s)
+[job 29] 3/12 n=12 dimensions=1 delta=100.0 J=(0.0689, -0.230769) Bx=0.0 By=0.0 Bz=0.546175 max_distance=2 ham=2 took 8089.9s (elapsed 16921.7s)
+[job 29] 4/12 n=12 dimensions=2 delta=100.0 J=(-0.806853,) Bx=0.0 By=0.0 Bz=-0.047127 max_distance=1 ham=5 took 15.5s (elapsed 16937.3s)
+[job 29] 5/12 n=12 dimensions=2 delta=100.0 J=(0.454189,) Bx=0.0 By=0.0 Bz=0.225511 max_distance=1 ham=9 took 8278.0s (elapsed 25215.3s)
+[job 29] 6/12 n=12 dimensions=2 delta=100.0 J=(-0.640511,) Bx=0.0 By=0.0 Bz=0.767532 max_distance=1 ham=13 took 16.1s (elapsed 25231.4s)
+[job 29] 7/12 n=12 dimensions=1 delta=100.0 J=(-0.81358, 0.317738, -0.40492) Bx=0.0 By=0.0 Bz=0.120636 max_distance=3 ham=0 took 16.9s (elapsed 25248.3s)
+[job 29] 8/12 n=12 dimensions=1 delta=100.0 J=(-0.746409, 0.527114, 0.245112) Bx=0.0 By=0.0 Bz=-0.96867 max_distance=3 ham=3 took 8417.2s (elapsed 33665.6s)
+[job 29] 9/12 n=12 dimensions=1 delta=100.0 J=(-0.899855, 0.278702, 0.331955) Bx=0.0 By=0.0 Bz=0.734512 max_distance=3 ham=11 took 8286.6s (elapsed 41952.3s)
+[job 29] 10/12 n=12 dimensions=2 delta=100.0 J=(-0.603824, -0.193442) Bx=0.0 By=0.0 Bz=-0.287176 max_distance=2 ham=7 took 15.9s (elapsed 41968.3s)
+[job 29] 11/12 n=12 dimensions=2 delta=100.0 J=(-0.806853, 0.061816, -0.868136) Bx=0.0 By=0.0 Bz=-0.047127 max_distance=3 ham=5 took 15.5s (elapsed 41983.9s)
+[job 29] 12/12 n=12 dimensions=2 delta=100.0 J=(-0.640511, 0.732191, 0.928178) Bx=0.0 By=0.0 Bz=0.767532 max_distance=3 ham=13 took 8271.1s (elapsed 50255.0s)
+[job 29] wrote 4704 rows to bitstring_shards_heisenberg_wd/shard_00029.csv in 50255.2s
