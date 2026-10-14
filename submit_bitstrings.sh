@@ -5,11 +5,15 @@
 # Same shape as submit_study.sh: run it directly and it submits itself as a job
 # array plus a dependent merge job, which also draws the figures. Run it under
 # SLURM (which is what the submission does) and it executes one array task.
+# In front of the array runs a plan job, which selects the Hamiltonians of
+# --balanced; that takes too long for the login node.
 #
 #   ./submit_bitstrings.sh                        # submit with the settings below
 #   NUM_JOBS=40 ./submit_bitstrings.sh            # override any setting from the env
 #   PARTITION=long TIME=48:00:00 ./submit_bitstrings.sh
 #   ./submit_bitstrings.sh --plan                 # just print the split, submit nothing
+#                                                 # (selects on the login node if
+#                                                 # the plan job has not yet)
 #
 # Because every array task gets the same estimated load, one TIME and one MEM
 # setting fits every task -- that is the whole point of the cost-balanced split.
@@ -46,6 +50,8 @@ MEM=${MEM:-40G}
 # spend the freed cores on a larger array instead.
 CPUS=${CPUS:-4}
 THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
+PLAN_CPUS=${PLAN_CPUS:-16}               # the plan job selects one group per core
+PLAN_TIME=${PLAN_TIME:-02:00:00}
 
 BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
 DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
@@ -97,9 +103,17 @@ fi
 
 mkdir -p logs "$SHARD_DIR"
 
-echo "=== planned split ==="
-"$PYTHON" EqualNumberOfBitstrings.py plan "${STUDY_ARGS[@]}"
-echo
+# Plan in a job of its own rather than here on the login node: with --balanced
+# it first selects the Hamiltonians, into $SHARD_DIR where every array task
+# reads them, and that takes too long here. The split goes to its log. Once the
+# selection is on disk, a resubmission just reads it back.
+PLAN_JOB=$(sbatch --parsable \
+  --job-name=debunk-sqkd-bits-plan \
+  --time="$PLAN_TIME" --mem=16G --cpus-per-task="$PLAN_CPUS" \
+  ${PARTITION:+--partition="$PARTITION"} \
+  --output="logs/plan_%j.out" --error="logs/plan_%j.err" \
+  --wrap="cd '$PWD' && $PYTHON EqualNumberOfBitstrings.py plan ${STUDY_ARGS[*]}")
+echo "submitted plan job $PLAN_JOB (split in logs/plan_$PLAN_JOB.out)"
 
 ARRAY_SPEC="0-$((NUM_JOBS - 1))"
 [[ -n "$THROTTLE" ]] && ARRAY_SPEC="${ARRAY_SPEC}%${THROTTLE}"
@@ -107,8 +121,9 @@ ARRAY_SPEC="0-$((NUM_JOBS - 1))"
 SBATCH_COMMON=(--time="$TIME" --mem="$MEM" --cpus-per-task="$CPUS")
 [[ -n "$PARTITION" ]] && SBATCH_COMMON+=(--partition="$PARTITION")
 
-ARRAY_JOB=$(sbatch --parsable --array="$ARRAY_SPEC" "${SBATCH_COMMON[@]}" "$SCRIPT")
-echo "submitted array job $ARRAY_JOB ($ARRAY_SPEC)"
+ARRAY_JOB=$(sbatch --parsable --dependency="afterok:${PLAN_JOB}" --array="$ARRAY_SPEC" \
+  "${SBATCH_COMMON[@]}" "$SCRIPT")
+echo "submitted array job $ARRAY_JOB ($ARRAY_SPEC, runs after the plan job succeeds)"
 
 # Merge once every task has succeeded, then draw the figures from the merged
 # CSV. afterok means a failed task blocks both, so partial results are never
@@ -122,7 +137,7 @@ MERGE_JOB=$(sbatch --parsable \
   --wrap="cd '$PWD' && $PYTHON EqualNumberOfBitstrings.py merge ${STUDY_ARGS[*]} --output '$OUTPUT' && $PYTHON EqualNumberOfBitstrings.py plot ${STUDY_ARGS[*]} --output '$OUTPUT' --output-root '$OUTPUT_ROOT'")
 echo "submitted merge job $MERGE_JOB (runs after the array succeeds)"
 echo
-echo "watch:   squeue -j $ARRAY_JOB,$MERGE_JOB"
+echo "watch:   squeue -j $PLAN_JOB,$ARRAY_JOB,$MERGE_JOB"
 echo "logs:    logs/"
 echo "result:  $OUTPUT"
 echo "figures: $OUTPUT_ROOT/"

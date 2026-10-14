@@ -88,6 +88,7 @@ import os
 import sys
 import time
 from collections import defaultdict, namedtuple
+from multiprocessing import get_context
 from pathlib import Path
 
 import matplotlib
@@ -412,17 +413,36 @@ def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
     return [cell._replace(hamiltonian_index=index) for index, cell in enumerate(cells)], candidates
 
 
+def select_group(group: tuple) -> tuple:
+    """``select_balanced`` for one group of ``balanced_cells``, timed."""
+    coupling_seed, num_hamiltonians, n_sites, dim, delta, distance = group
+    start = time.time()
+    cells, candidates = select_balanced(num_hamiltonians, n_sites, dim, delta, distance,
+                                        coupling_seed)
+    return group, cells, candidates, time.time() - start
+
+
+def available_cpus() -> int:
+    """Cores this process may run on -- under SLURM those of the job, not the node."""
+    try:
+        return len(os.sched_getaffinity(0))
+    except AttributeError:  # macOS
+        return os.cpu_count() or 1
+
+
 def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, table_path,
                    coupling_seed=DEFAULT_COUPLING_SEED):
     """
     All cells of the density-balanced study, in a fixed order.
 
-    Selecting costs a few minutes, and plan, run and merge each enumerate the
-    cells, so the selection is kept in a table at ``table_path`` and only the
-    groups it does not hold yet are selected -- normally all of them by plan,
-    none by the array jobs. The selection is deterministic, so jobs that find
-    no table and select for themselves all come to the same one. The table is
-    replaced in one step, so a job never reads one that is half written.
+    Selecting costs about ten CPU minutes, and plan, run and merge each
+    enumerate the cells, so the selection is kept in a table at ``table_path``
+    and only the groups it does not hold yet are selected -- normally all of
+    them by plan, none by the array jobs. The groups are independent, so they
+    are selected in parallel, one per available core. The selection is
+    deterministic, so jobs that find no table and select for themselves all
+    come to the same one. The table is replaced in one step, so a job never
+    reads one that is half written.
     """
     key = ["Coupling_Seed", "Num_Hamiltonians", "Number_of_Sites", "Dimensions", "Delta",
            "Max_Distance"]
@@ -430,27 +450,40 @@ def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, t
              if os.path.exists(table_path) else pd.DataFrame(columns=key))
     stored = {group: block for group, block in table.groupby(key)} if len(table) else {}
 
-    groups, added = {}, []
+    groups, missing, added = {}, [], []
     for n_sites, dim, delta, distance in itertools.product(num_sites, dimensions, deltas,
                                                            distances):
         group = (coupling_seed, num_hamiltonians, n_sites, dim, float(delta), distance)
-        if group in stored:
-            groups[group] = [Cell(int(row.Hamiltonian_Index), n_sites, dim, float(delta),
-                                  tuple(float(J) for J in row.J_Per_Distance.split(";")),
-                                  float(row.Bx), float(row.By), float(row.Bz), distance)
-                             for row in stored[group].itertuples()]
+        groups[group] = None    # keeps the order of the groups
+        if group not in stored:
+            missing.append(group)
             continue
-        start = time.time()
-        cells, candidates = select_balanced(num_hamiltonians, n_sites, dim, float(delta),
-                                            distance, coupling_seed)
-        print(f"selected {len(cells)} of {num_hamiltonians} Hamiltonians for n={n_sites} "
-              f"dimensions={dim} delta={delta} max_distance={distance} from {candidates} "
-              f"candidates ({time.time() - start:.0f}s)", flush=True)
-        groups[group] = cells
-        added += [dict(zip(key, group), Hamiltonian_Index=cell.hamiltonian_index,
-                       J_Per_Distance=";".join(str(J) for J in cell.J),
-                       Bx=cell.Bx, By=cell.By, Bz=cell.Bz, Candidates=candidates)
-                  for cell in cells]
+        groups[group] = [Cell(int(row.Hamiltonian_Index), n_sites, dim, float(delta),
+                              tuple(float(J) for J in row.J_Per_Distance.split(";")),
+                              float(row.Bx), float(row.By), float(row.Bz), distance)
+                         for row in stored[group].itertuples()]
+
+    if missing:
+        # One BLAS thread per worker: a candidate is far too small to gain from
+        # more, and with one worker per core more would only oversubscribe
+        # them. Spawned rather than forked, so that the workers start BLAS with
+        # that setting instead of inheriting the parent's.
+        for variable in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+                         "VECLIB_MAXIMUM_THREADS"):
+            os.environ[variable] = "1"
+        processes = min(available_cpus(), len(missing))
+        print(f"selecting {len(missing)} groups on {processes} cores", flush=True)
+        with get_context("spawn").Pool(processes) as pool:
+            for group, cells, candidates, seconds in pool.imap_unordered(select_group, missing):
+                _, _, n_sites, dim, delta, distance = group
+                print(f"selected {len(cells)} of {num_hamiltonians} Hamiltonians for "
+                      f"n={n_sites} dimensions={dim} delta={delta} max_distance={distance} "
+                      f"from {candidates} candidates ({seconds:.0f}s)", flush=True)
+                groups[group] = cells
+                added += [dict(zip(key, group), Hamiltonian_Index=cell.hamiltonian_index,
+                               J_Per_Distance=";".join(str(J) for J in cell.J),
+                               Bx=cell.Bx, By=cell.By, Bz=cell.Bz, Candidates=candidates)
+                          for cell in cells]
 
     if added:
         table = (pd.concat([table, pd.DataFrame(added)], ignore_index=True) if len(table)
