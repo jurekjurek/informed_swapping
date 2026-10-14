@@ -27,10 +27,10 @@ set -euo pipefail
 module load Python/3.10.4-GCCcore-11.3.0 && source /home/erosanow_hpc/informed_swapping/.SKQD/bin/activate
 
 # ----------------------------- configuration -------------------------------
-NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-15}
+NUM_HAMILTONIANS=${NUM_HAMILTONIANS:-20}
 NUM_SITES=${NUM_SITES:-"6 8 10 12"}
 DIMENSIONS=${DIMENSIONS:-"1 2"}               # 1 = chain, 2 = open rectangle
-DELTAS=${DELTAS:-"0 0.5 1 10 100"}            # XXZ anisotropies
+DELTAS=${DELTAS:-"0 0.5 1 2 5 10"}            # XXZ anisotropies
 DISTANCES=${DISTANCES:-"1 2 3"}               # largest bond distances; 1 = nearest neighbours
 NUM_INITIAL_STATES=${NUM_INITIAL_STATES:-6}   # from each end of the overlap distribution
 N_REPEATS=${N_REPEATS:-3}                     # SKQD trajectories per run
@@ -50,9 +50,9 @@ THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
 BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
 DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
                                          # full eigendecomposition; 0 disables
-SHARD_DIR=${SHARD_DIR:-bitstring_shards_heisenberg_tv}
-OUTPUT=${OUTPUT:-equal_bitstrings_heisenberg_results_tv.csv}
-OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg_tv}
+SHARD_DIR=${SHARD_DIR:-bitstring_shards_heisenberg_balanced}
+OUTPUT=${OUTPUT:-equal_bitstrings_heisenberg_results_balanced.csv}
+OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg_balanced}
 PYTHON=${PYTHON:-python}
 EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 # ---------------------------------------------------------------------------
@@ -71,7 +71,7 @@ STUDY_ARGS=(
   --shard-dir "$SHARD_DIR"
   --balance "$BALANCE"
   --dense-limit "$DENSE_LIMIT"
-  --transversal
+  --balanced
 )
 
 # ------------------------------ worker mode --------------------------------

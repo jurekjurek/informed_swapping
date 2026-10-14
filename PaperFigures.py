@@ -101,6 +101,9 @@ Panel = namedtuple("Panel", ["title", "group"])     # group None: no runs in thi
 def load(path: str) -> pd.DataFrame:
     """The study's rows, with the same cells dropped as in the study's own plots."""
     data = pd.read_csv(path)
+    # Results written before the longer bonds existed are nearest-neighbour ones.
+    if "Max_Distance" not in data.columns:
+        data["Max_Distance"] = 1
     data = study.drop_trivial_ground_states(data)
     return study.drop_small_gaps(data)
 

@@ -31,8 +31,8 @@ the last digits of the fidelity. Linear axes spend their resolution on the
 regime where all protocols have already won. Curves are not only averaged over
 everything: the runs are clustered by system size, lattice dimension,
 anisotropy, coupling, field, ground-state density, Hamiltonian density and the
-overlap of the initial state, and by every combination of those, one folder each. See
-``plot_results``.
+overlap of the initial state, one folder each, and by system size together with
+each of the others. See ``plot_results``.
 
 The unit of work is a "cell": one ``(hamiltonian_index, num_sites, dimensions,
 delta, J, Bx, By, Bz, max_distance)`` combination, where J holds one coupling per
@@ -54,8 +54,13 @@ Usage
     python EqualNumberOfBitstrings.py merge --output equal_bitstrings_results.csv
     python EqualNumberOfBitstrings.py plot  --output equal_bitstrings_results.csv
 
-    # fewer figures: only up to two clustering axes at a time, four bins each
-    python EqualNumberOfBitstrings.py plot  --max-combination 2 --num-bins 4
+    # four bins per continuous axis instead of three
+    python EqualNumberOfBitstrings.py plot  --num-bins 4
+
+    # Hamiltonians selected for an even spread of ground-state densities (plan
+    # selects them once and keeps them in the shard directory)
+    python EqualNumberOfBitstrings.py plan  --balanced --deltas 0 0.5 1 2 5 10 \
+        --shard-dir bitstring_shards_heisenberg_balanced
 
 Figures
 -------
@@ -72,7 +77,8 @@ its counterparts for the two densities turn the bin names back into numbers:
 the histogram of the quantity over all runs, the quantile cuts as labelled
 vertical lines, and the band the folder keeps highlighted in the bars.
 ``plot_index.csv`` lists every cluster with the number of runs behind it, and
-``bin_edges.csv`` every cut as a number.
+``bin_edges.csv`` every cut as a number. The figures of the paper, from
+PaperFigures.py, are written to ``PaperFigures/`` in the same folder.
 """
 
 import argparse
@@ -186,6 +192,21 @@ TRIVIAL_GROUND_STATE = 1.0 - 1e-10
 MIN_GAP = 1e-4
 
 OUTPUT_ROOT = Path("equal_bitstrings_plots_heisenberg")
+
+# Density-balanced selection, see ``select_balanced`` and
+# StudyOfHamiltonians/report.pdf. Candidates are drawn with a field tilted by
+# theta ~ U(0, 90 deg) away from the z axis and a strength measured against the
+# largest coupling, |B| = b |J_1| max(1, delta), with b log-uniform in this range.
+BALANCED_RATIO_RANGE = (0.1, 10.0)
+# Equal-width bins of the ground-state density the Hamiltonians are spread over.
+BALANCED_BINS = 10
+# Candidates per (N, dimension, delta, distance) before giving up on the bins
+# that are still empty; the bins that can be filled are filled long before.
+BALANCED_MAX_CANDIDATES = 10000
+# Up to this Hilbert-space dimension a candidate is solved densely.
+BALANCED_DENSE_LIMIT = 256
+# Name of the table of selected couplings, kept in the shard directory.
+BALANCED_TABLE = "balanced_hamiltonians.csv"
 
 
 # --------------------------------------------------------------------------- #
@@ -312,14 +333,152 @@ def enumerate_cells(num_hamiltonians, num_sites, dimensions, deltas,
             ]
 
 
+def build_hamiltonian(cell: Cell):
+    """The cell's Hamiltonian as a sparse matrix."""
+    return make_heisenberg_hamiltonian(
+        num_sites=cell.num_sites,
+        dimension=cell.dimensions,
+        delta=cell.delta,
+        J=list(cell.J),
+        h = (cell.Bx, cell.By, cell.Bz),
+        spin = 1,
+        max_distance=cell.max_distance
+    )[0].to_matrix(sparse=True)
+
+
+def ground_state_density(ground_state: np.ndarray) -> float:
+    """Fraction of the basis states whose amplitude in the ground state exceeds 1e-3."""
+    return np.count_nonzero(np.abs(ground_state) > 1e-3) / ground_state.size
+
+
+def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
+                    coupling_seed=DEFAULT_COUPLING_SEED):
+    """
+    ``num_hamiltonians`` cells of one (N, dimension, delta, distance), spread
+    evenly over the ground-state density.
+
+    Neither a longitudinal nor a transversal field covers the density: the first
+    keeps the ground state in one magnetization sector, so it never gets above
+    about 0.3, and the second only gets low where the ordered states are nearly
+    degenerate, which drop_small_gaps then removes. A tilted field covers all
+    of it -- in a strong field the angle alone sets the density -- but unevenly,
+    and differently at every N. So candidates are drawn from the tilted field
+    and kept only while their density bin is not yet full, with the bins filled
+    as evenly as ``num_hamiltonians`` allows. Candidates that drop_small_gaps or
+    drop_trivial_ground_states would remove are skipped, so that nothing
+    selected here is lost in the plots.
+
+    Returns the cells, numbered from 0 in order of their bin, and the number of
+    candidates it took. A bin that is still short after
+    BALANCED_MAX_CANDIDATES stays short; this happens for density < 0.1 at
+    N = 6 in 2D, where at most six of 64 states may carry weight.
+    """
+    targets = (np.full(BALANCED_BINS, num_hamiltonians // BALANCED_BINS)
+               + (np.arange(BALANCED_BINS) < num_hamiltonians % BALANCED_BINS))
+    chosen = [[] for _ in range(BALANCED_BINS)]
+    # One generator per group, so that a group's selection depends on nothing
+    # but the group itself and the table can be extended one group at a time.
+    rng = np.random.default_rng([coupling_seed, num_sites, dimension,
+                                 int(round(delta * 1000)), distance])
+    candidates = 0
+    while (candidates < BALANCED_MAX_CANDIDATES
+           and any(len(members) < target for members, target in zip(chosen, targets))):
+        candidates += 1
+        J_1, log_b, theta = (rng.uniform(-1, 1), rng.uniform(*np.log10(BALANCED_RATIO_RANGE)),
+                             rng.uniform(0, np.pi / 2))
+        J_far = rng.uniform(-1, 1, distance - 1)
+        B = 10 ** log_b * abs(J_1) * max(1.0, delta)
+        J = tuple(float(x) for x in np.round([J_1, *J_far], COUPLING_DECIMALS))
+        Bx, Bz = (float(x) for x in np.round([B * np.sin(theta), B * np.cos(theta)],
+                                             COUPLING_DECIMALS))
+        cell = Cell(-1, num_sites, dimension, float(delta), J, Bx, 0.0, Bz, int(distance))
+
+        hamiltonian = build_hamiltonian(cell)
+        if hamiltonian.shape[0] <= BALANCED_DENSE_LIMIT:
+            values, vectors = np.linalg.eigh(hamiltonian.toarray())
+        else:
+            values, vectors = eigsh(hamiltonian, k=2, which="SA", tol=1e-10)
+            order = np.argsort(values)
+            values, vectors = values[order], vectors[:, order]
+        ground_state = vectors[:, 0]
+        if (values[1] - values[0] < MIN_GAP
+                or np.max(np.abs(ground_state) ** 2) >= TRIVIAL_GROUND_STATE):
+            continue
+        index = min(int(ground_state_density(ground_state) * BALANCED_BINS), BALANCED_BINS - 1)
+        if len(chosen[index]) < targets[index]:
+            chosen[index].append(cell)
+
+    cells = [cell for members in chosen for cell in members]
+    return [cell._replace(hamiltonian_index=index) for index, cell in enumerate(cells)], candidates
+
+
+def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, table_path,
+                   coupling_seed=DEFAULT_COUPLING_SEED):
+    """
+    All cells of the density-balanced study, in a fixed order.
+
+    Selecting costs a few minutes, and plan, run and merge each enumerate the
+    cells, so the selection is kept in a table at ``table_path`` and only the
+    groups it does not hold yet are selected -- normally all of them by plan,
+    none by the array jobs. The selection is deterministic, so jobs that find
+    no table and select for themselves all come to the same one. The table is
+    replaced in one step, so a job never reads one that is half written.
+    """
+    key = ["Coupling_Seed", "Num_Hamiltonians", "Number_of_Sites", "Dimensions", "Delta",
+           "Max_Distance"]
+    table = (pd.read_csv(table_path, dtype={"J_Per_Distance": str})
+             if os.path.exists(table_path) else pd.DataFrame(columns=key))
+    stored = {group: block for group, block in table.groupby(key)} if len(table) else {}
+
+    groups, added = {}, []
+    for n_sites, dim, delta, distance in itertools.product(num_sites, dimensions, deltas,
+                                                           distances):
+        group = (coupling_seed, num_hamiltonians, n_sites, dim, float(delta), distance)
+        if group in stored:
+            groups[group] = [Cell(int(row.Hamiltonian_Index), n_sites, dim, float(delta),
+                                  tuple(float(J) for J in row.J_Per_Distance.split(";")),
+                                  float(row.Bx), float(row.By), float(row.Bz), distance)
+                             for row in stored[group].itertuples()]
+            continue
+        start = time.time()
+        cells, candidates = select_balanced(num_hamiltonians, n_sites, dim, float(delta),
+                                            distance, coupling_seed)
+        print(f"selected {len(cells)} of {num_hamiltonians} Hamiltonians for n={n_sites} "
+              f"dimensions={dim} delta={delta} max_distance={distance} from {candidates} "
+              f"candidates ({time.time() - start:.0f}s)", flush=True)
+        groups[group] = cells
+        added += [dict(zip(key, group), Hamiltonian_Index=cell.hamiltonian_index,
+                       J_Per_Distance=";".join(str(J) for J in cell.J),
+                       Bx=cell.Bx, By=cell.By, Bz=cell.Bz, Candidates=candidates)
+                  for cell in cells]
+
+    if added:
+        table = (pd.concat([table, pd.DataFrame(added)], ignore_index=True) if len(table)
+                 else pd.DataFrame(added))
+        os.makedirs(os.path.dirname(table_path) or ".", exist_ok=True)
+        partial = f"{table_path}.{os.getpid()}.tmp"
+        table.to_csv(partial, index=False)
+        os.replace(partial, table_path)
+
+    # Hamiltonian index outermost, as in enumerate_cells.
+    return [cells[index]
+            for index in range(num_hamiltonians)
+            for cells in groups.values() if index < len(cells)]
+
+
 def study_cells(args) -> list:
     """
     All cells of the study, in a fixed order independent of how they are split.
 
     ``enumerate_cells`` draws J and B_z itself, from a fixed seed rather than
     from the CLI, so that plan, run and merge all see the same Hamiltonians
-    without the couplings having to be passed around as arguments.
+    without the couplings having to be passed around as arguments. With
+    ``--balanced`` the couplings are selected instead, see ``balanced_cells``.
     """
+    if args.balanced:
+        return balanced_cells(args.num_hamiltonians, args.num_sites, args.dimensions,
+                              args.deltas, args.distances,
+                              os.path.join(args.shard_dir, BALANCED_TABLE))
     return enumerate_cells(args.num_hamiltonians, args.num_sites,
                            args.dimensions, args.deltas, args.distances,
                            transversal=args.transversal)
@@ -395,22 +554,14 @@ def run_cell(cell: Cell, args) -> list:
     # SKQD draws its shots through the global RNG, so seed that as well.
     np.random.seed(seed)
 
-    hamiltonian = make_heisenberg_hamiltonian(
-        num_sites=cell.num_sites,
-        dimension=cell.dimensions,
-        delta=cell.delta,
-        J=list(cell.J),
-        h = (cell.Bx, cell.By, cell.Bz),
-        spin = 1,
-        max_distance=cell.max_distance
-    )[0].to_matrix(sparse=True)
+    hamiltonian = build_hamiltonian(cell)
 
     ground_state, all_eigenvalues, all_eigenvectors = solve_ground_state(
         hamiltonian, args.dense_limit)
     probabilities = np.abs(ground_state) ** 2
 
     dimension = hamiltonian.shape[0]
-    ground_state_density = np.count_nonzero(np.abs(ground_state) > 1e-3) / dimension
+    density = ground_state_density(ground_state)
     hamiltonian_density = hamiltonian.nnz / dimension ** 2
 
     # Gap above the ground state, so that the plots can drop the cells where the
@@ -516,7 +667,7 @@ def run_cell(cell: Cell, args) -> list:
                     "Bz": cell.Bz,
                     "Max_Distance": cell.max_distance,
                     "J_Per_Distance": ";".join(str(J) for J in cell.J),
-                    "Ground_State_Density": ground_state_density,
+                    "Ground_State_Density": density,
                     "Hamiltonian_Density": hamiltonian_density,
                     "Gap": gap,
                     "Overlap": overlap,
@@ -1416,16 +1567,17 @@ def cluster_plots(group: pd.DataFrame, title: str, directory: Path, min_drop: fl
 
 def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
                  num_bins: int = DEFAULT_NUM_BINS, min_runs: int = DEFAULT_MIN_RUNS,
-                 bin_scope: str = "per-N", ceiling_jump: float = DEFAULT_CEILING_JUMP,
-                 max_combination=None) -> None:
+                 bin_scope: str = "per-N", ceiling_jump: float = DEFAULT_CEILING_JUMP) -> None:
     """
     Every figure, in one folder per way of clustering the runs.
 
     The runs are cut by the axes of FACETS -- system size, lattice dimension,
     anisotropy, coupling, field, ground-state density, Hamiltonian density and
-    the overlap of the initial state -- and this walks every combination of them,
-    from the plain average over everything (``all/``) through the single axes
-    (``by_gsdens/``) up to all of them at once. Every
+    the overlap of the initial state. The plain average over everything goes to
+    ``all/``, each axis alone to ``by_<axis>/`` (``by_gsdens/``), and system size
+    together with each of the other axes to ``by_N_<axis>/`` (``by_N_gsdens/``).
+    Deeper combinations are not drawn: they cut the runs into hundreds of
+    clusters, most of which hold too few runs to say anything. Every
     cluster gets a subfolder holding the same figures, so the path says exactly
     what is held fixed and nothing has to be read off a file name:
 
@@ -1446,6 +1598,9 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
     cut on: the histogram of that quantity over all runs, with the quantile cuts
     as labelled vertical lines and the band this folder keeps picked out of the
     bars. The same numbers are tabulated once in ``bin_edges.csv``.
+
+    Finally the figures of the paper are drawn from the same file, by
+    PaperFigures.make_figures, into ``output_root / "PaperFigures"``.
     """
     data = add_log_infidelity(pd.read_csv(data_file))
     print(f"Loaded {len(data)} rows from {data_file}")
@@ -1460,29 +1615,31 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
     runs_frame = data.drop_duplicates(RUN_KEY).copy()
     labels, edges = add_facet_labels(data, runs_frame, num_bins, bin_scope)
     names = [name for name, *_ in FACETS]
-    depth = len(FACETS) if max_combination is None else max_combination
+    # Everything, each axis alone, and system size with each of the others.
+    size = names.index("N")
+    combinations = ([()] + [(i,) for i in range(len(FACETS))]
+                    + [(size, i) for i in range(len(FACETS)) if i != size])
 
     index, written, skipped = [], 0, 0
-    for size in range(depth + 1):
-        for combination in itertools.combinations(range(len(FACETS)), size):
-            folder = ("by_" + "_".join(names[i] for i in combination)) if combination else "all"
-            groups = (data.groupby([labels[i] for i in combination]) if combination
-                      else [((), data)])
-            for key, group in groups:
-                key = key if isinstance(key, tuple) else (key,)
-                runs = len(group.drop_duplicates(RUN_KEY))
-                if runs < min_runs:
-                    skipped += 1
-                    continue
-                directory = output_root / folder / "_".join(key) if key else output_root / folder
-                title = cluster_title([names[i] for i in combination], key) or "all runs"
-                written += cluster_plots(group, title, directory, ceiling_jump)
-                written += cluster_histograms(group, [names[i] for i in combination],
-                                              key, runs_frame, edges, title,
-                                              directory, bin_scope)
-                index.append({"Folder": folder, "Cluster": "_".join(key) or "all",
-                              "Runs": runs, "Path": str(directory)})
-            print(f"{folder}: {len(index)} clusters so far, {written} figures")
+    for combination in combinations:
+        folder = ("by_" + "_".join(names[i] for i in combination)) if combination else "all"
+        groups = (data.groupby([labels[i] for i in combination]) if combination
+                  else [((), data)])
+        for key, group in groups:
+            key = key if isinstance(key, tuple) else (key,)
+            runs = len(group.drop_duplicates(RUN_KEY))
+            if runs < min_runs:
+                skipped += 1
+                continue
+            directory = output_root / folder / "_".join(key) if key else output_root / folder
+            title = cluster_title([names[i] for i in combination], key) or "all runs"
+            written += cluster_plots(group, title, directory, ceiling_jump)
+            written += cluster_histograms(group, [names[i] for i in combination],
+                                          key, runs_frame, edges, title,
+                                          directory, bin_scope)
+            index.append({"Folder": folder, "Cluster": "_".join(key) or "all",
+                          "Runs": runs, "Path": str(directory)})
+        print(f"{folder}: {len(index)} clusters so far, {written} figures")
 
     output_root.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(index).to_csv(output_root / "plot_index.csv", index=False)
@@ -1491,6 +1648,10 @@ def plot_results(data_file: str, output_root: Path = OUTPUT_ROOT,
           f"({skipped} clusters skipped for holding fewer than {min_runs} runs)")
     print(f"index: {output_root / 'plot_index.csv'}")
     print(f"bins:  {output_root / 'bin_edges.csv'}")
+
+    # Imported here rather than at the top: PaperFigures imports this module.
+    import PaperFigures
+    PaperFigures.make_figures(data_file, output_root / "PaperFigures", "pdf")
 
 
 # --------------------------------------------------------------------------- #
@@ -1549,9 +1710,6 @@ def build_parser():
                         help="plot mode: decades the ceiling has to lose in one "
                              "budget step for the extra figures that stop in front "
                              "of it to be drawn")
-    parser.add_argument("--max-combination", type=int, default=None,
-                        help="plot mode: cluster by at most this many axes at once "
-                             "(default: all of them)")
     parser.add_argument("--balance", choices=["cost", "stratified"], default="cost",
                         help="how cells are spread over the array; must match "
                              "between plan, run and merge")
@@ -1559,10 +1717,17 @@ def build_parser():
                         help="Hilbert-space dimension up to which the full dense "
                              "eigendecomposition is computed and handed to SKQD "
                              "(0 disables it)")
-    parser.add_argument("--transversal", action="store_true",
-                        help="draw the field into B_x and set B_z to 0, transversal "
-                             "to the spins of the delta -> infinity limit; must "
-                             "match between plan, run and merge")
+    field = parser.add_mutually_exclusive_group()
+    field.add_argument("--transversal", action="store_true",
+                       help="draw the field into B_x and set B_z to 0, transversal "
+                            "to the spins of the delta -> infinity limit; must "
+                            "match between plan, run and merge")
+    field.add_argument("--balanced", action="store_true",
+                       help="select the Hamiltonians, with a tilted field, so that "
+                            "their ground-state densities spread evenly over [0, 1] "
+                            f"for every (N, dimension, delta, distance); kept in "
+                            f"<shard-dir>/{BALANCED_TABLE}; must match between plan, "
+                            "run and merge")
     parser.add_argument("--overwrite", action="store_true",
                         help="re-run a job even if its shard already exists")
     parser.add_argument("--no-resume", dest="resume", action="store_false",
@@ -1604,8 +1769,7 @@ def main(argv=None):
     else:
         plot_results(args.output, Path(args.output_root), num_bins=args.num_bins,
                      min_runs=args.min_runs, bin_scope=args.bin_scope,
-                     ceiling_jump=args.ceiling_jump,
-                     max_combination=args.max_combination)
+                     ceiling_jump=args.ceiling_jump)
 
 
 if __name__ == "__main__":
