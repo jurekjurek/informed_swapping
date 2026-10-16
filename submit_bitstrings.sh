@@ -56,9 +56,9 @@ PLAN_TIME=${PLAN_TIME:-02:00:00}
 BALANCE=${BALANCE:-cost}                 # cost (load-balanced) or stratified
 DENSE_LIMIT=${DENSE_LIMIT:-4096}         # dimension up to which SKQD gets the
                                          # full eigendecomposition; 0 disables
-SHARD_DIR=${SHARD_DIR:-bitstring_shards_heisenberg_balanced}
-OUTPUT=${OUTPUT:-equal_bitstrings_heisenberg_results_balanced.csv}
-OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg_balanced}
+SHARD_DIR=${SHARD_DIR:-bitstring_shards_heisenberg_balanced_log}
+OUTPUT=${OUTPUT:-equal_bitstrings_heisenberg_results_balanced_log.csv}
+OUTPUT_ROOT=${OUTPUT_ROOT:-equal_bitstrings_plots_heisenberg_balanced_log}
 PYTHON=${PYTHON:-python}
 EXTRA_ARGS=${EXTRA_ARGS:-}               # e.g. "--overwrite" or "--no-resume"
 # ---------------------------------------------------------------------------

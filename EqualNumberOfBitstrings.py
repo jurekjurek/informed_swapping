@@ -60,7 +60,7 @@ Usage
     # Hamiltonians selected for an even spread of ground-state densities (plan
     # selects them once and keeps them in the shard directory)
     python EqualNumberOfBitstrings.py plan  --balanced --deltas 0 0.5 1 2 5 10 \
-        --shard-dir bitstring_shards_heisenberg_balanced
+        --shard-dir bitstring_shards_heisenberg_balanced_log
 
 Figures
 -------
@@ -96,7 +96,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.sparse.linalg import eigsh
+from scipy.sparse.linalg import ArpackNoConvergence, eigsh
 
 import ClusterStudy
 from RandomSpinModel import make_heisenberg_hamiltonian
@@ -199,15 +199,24 @@ OUTPUT_ROOT = Path("equal_bitstrings_plots_heisenberg")
 # theta ~ U(0, 90 deg) away from the z axis and a strength measured against the
 # largest coupling, |B| = b |J_1| max(1, delta), with b log-uniform in this range.
 BALANCED_RATIO_RANGE = (0.1, 10.0)
-# Equal-width bins of the ground-state density the Hamiltonians are spread over.
+# Bins of the ground-state density the Hamiltonians are spread over, of equal
+# width in log10(density) across this range. Densities below its lower end go
+# into the first bin.
+BALANCED_DENSITY_RANGE = (1e-3, 1.0)
 BALANCED_BINS = 10
-# Candidates per (N, dimension, delta, distance) before giving up on the bins
-# that are still empty; the bins that can be filled are filled long before.
-BALANCED_MAX_CANDIDATES = 10000
-# Up to this Hilbert-space dimension a candidate is solved densely.
-BALANCED_DENSE_LIMIT = 256
+# Candidates per (N, dimension, delta, distance) before the bins that are still
+# short hand their share to the others; the bins that can be filled readily are
+# filled long before.
+BALANCED_MAX_CANDIDATES = 2000
+# Up to this Hilbert-space dimension a candidate is solved densely; from N = 8
+# on, eigsh is the faster one.
+BALANCED_DENSE_LIMIT = 64
+# Restarts of eigsh before a candidate is given up on. A well-behaved one
+# converges in a few dozen; at the default of 10 * 2^N a nearly degenerate one
+# runs for minutes.
+BALANCED_MAX_RESTARTS = 1000
 # Name of the table of selected couplings, kept in the shard directory.
-BALANCED_TABLE = "balanced_hamiltonians.csv"
+BALANCED_TABLE = "balanced_hamiltonians_log.csv"
 
 
 # --------------------------------------------------------------------------- #
@@ -348,15 +357,27 @@ def build_hamiltonian(cell: Cell):
 
 
 def ground_state_density(ground_state: np.ndarray) -> float:
-    """Fraction of the basis states whose amplitude in the ground state exceeds 1e-3."""
-    return np.count_nonzero(np.abs(ground_state) > 1e-3) / ground_state.size
+    """
+    Fraction of the basis states whose probability in the ground state exceeds
+    10% of the uniform one, 1 / 2^N -- a threshold that scales with the system
+    size, unlike a fixed one.
+    """
+    return (np.count_nonzero(np.abs(ground_state) ** 2 > 0.1 / ground_state.size)
+            / ground_state.size)
+
+
+def density_bin(density: float) -> int:
+    """Index of the bin of BALANCED_DENSITY_RANGE that ``density`` falls into."""
+    low, high = np.log10(BALANCED_DENSITY_RANGE)
+    position = (np.log10(density) - low) / (high - low)
+    return int(min(max(np.floor(position * BALANCED_BINS), 0), BALANCED_BINS - 1))
 
 
 def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
                     coupling_seed=DEFAULT_COUPLING_SEED):
     """
     ``num_hamiltonians`` cells of one (N, dimension, delta, distance), spread
-    evenly over the ground-state density.
+    evenly over log10 of the ground-state density.
 
     Neither a longitudinal nor a transversal field covers the density: the first
     keeps the ground state in one magnetization sector, so it never gets above
@@ -364,18 +385,27 @@ def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
     degenerate, which drop_small_gaps then removes. A tilted field covers all
     of it -- in a strong field the angle alone sets the density -- but unevenly,
     and differently at every N. So candidates are drawn from the tilted field
-    and kept only while their density bin is not yet full, with the bins filled
-    as evenly as ``num_hamiltonians`` allows. Candidates that drop_small_gaps or
-    drop_trivial_ground_states would remove are skipped, so that nothing
-    selected here is lost in the plots.
+    until every bin holds its share of ``num_hamiltonians``, as even as the
+    number allows. Candidates that drop_small_gaps or drop_trivial_ground_states
+    would remove are skipped, so that nothing selected here is lost in the plots.
+
+    The density is a multiple of 1 / 2^N, so at small N the lowest bins cannot
+    hold any -- at N = 6 nothing lies below 1/64, three bins up -- and those get
+    no share at all. Others can, but hardly ever do: the basis states come in
+    symmetry multiplets, so a bin that only, say, exactly two of 64 states fall
+    into stays nearly empty. Whatever is still short after
+    BALANCED_MAX_CANDIDATES is filled from the other bins instead, again as
+    evenly as possible, so the group still gets all ``num_hamiltonians``.
 
     Returns the cells, numbered from 0 in order of their bin, and the number of
-    candidates it took. A bin that is still short after
-    BALANCED_MAX_CANDIDATES stays short; this happens for density < 0.1 at
-    N = 6 in 2D, where at most six of 64 states may carry weight.
+    candidates it took.
     """
-    targets = (np.full(BALANCED_BINS, num_hamiltonians // BALANCED_BINS)
-               + (np.arange(BALANCED_BINS) < num_hamiltonians % BALANCED_BINS))
+    dimension_of_space = 2 ** num_sites
+    reachable = np.unique([density_bin(count / dimension_of_space)
+                           for count in range(1, dimension_of_space + 1)])
+    targets = np.zeros(BALANCED_BINS, dtype=int)
+    targets[reachable] = (num_hamiltonians // len(reachable)
+                          + (np.arange(len(reachable)) < num_hamiltonians % len(reachable)))
     chosen = [[] for _ in range(BALANCED_BINS)]
     # One generator per group, so that a group's selection depends on nothing
     # but the group itself and the table can be extended one group at a time.
@@ -398,18 +428,37 @@ def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
         if hamiltonian.shape[0] <= BALANCED_DENSE_LIMIT:
             values, vectors = np.linalg.eigh(hamiltonian.toarray())
         else:
-            values, vectors = eigsh(hamiltonian, k=2, which="SA", tol=1e-10)
+            # The start vector from the group's generator: ARPACK's own carries
+            # on from whatever the process solved before, which would make the
+            # selection depend on how the groups were spread over the workers.
+            # Nearly degenerate ground states, which drop_small_gaps would
+            # mostly remove anyway, are given up on rather than waited for.
+            try:
+                values, vectors = eigsh(hamiltonian, k=2, which="SA", tol=1e-10,
+                                        v0=rng.uniform(-1, 1, hamiltonian.shape[0]),
+                                        maxiter=BALANCED_MAX_RESTARTS)
+            except ArpackNoConvergence:
+                continue
             order = np.argsort(values)
             values, vectors = values[order], vectors[:, order]
         ground_state = vectors[:, 0]
         if (values[1] - values[0] < MIN_GAP
                 or np.max(np.abs(ground_state) ** 2) >= TRIVIAL_GROUND_STATE):
             continue
-        index = min(int(ground_state_density(ground_state) * BALANCED_BINS), BALANCED_BINS - 1)
-        if len(chosen[index]) < targets[index]:
+        index = density_bin(ground_state_density(ground_state))
+        # More than the share, for the bins that may have to stand in for others.
+        if len(chosen[index]) < num_hamiltonians:
             chosen[index].append(cell)
 
-    cells = [cell for members in chosen for cell in members]
+    # One per bin and round, lowest bins first, until num_hamiltonians are
+    # taken: exactly the shares if every bin filled, and an even spread over
+    # the others if not.
+    taken = np.zeros(BALANCED_BINS, dtype=int)
+    available = np.array([len(members) for members in chosen])
+    while taken.sum() < num_hamiltonians and (taken < available).any():
+        for index in np.flatnonzero(taken < available)[:num_hamiltonians - taken.sum()]:
+            taken[index] += 1
+    cells = [cell for members, count in zip(chosen, taken) for cell in members[:count]]
     return [cell._replace(hamiltonian_index=index) for index, cell in enumerate(cells)], candidates
 
 
@@ -435,7 +484,7 @@ def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, t
     """
     All cells of the density-balanced study, in a fixed order.
 
-    Selecting costs about ten CPU minutes, and plan, run and merge each
+    Selecting costs about an hour of CPU time, and plan, run and merge each
     enumerate the cells, so the selection is kept in a table at ``table_path``
     and only the groups it does not hold yet are selected -- normally all of
     them by plan, none by the array jobs. The groups are independent, so they
@@ -1757,7 +1806,8 @@ def build_parser():
                             "match between plan, run and merge")
     field.add_argument("--balanced", action="store_true",
                        help="select the Hamiltonians, with a tilted field, so that "
-                            "their ground-state densities spread evenly over [0, 1] "
+                            "their ground-state densities spread evenly over "
+                            "log10(density) in [-3, 0] "
                             f"for every (N, dimension, delta, distance); kept in "
                             f"<shard-dir>/{BALANCED_TABLE}; must match between plan, "
                             "run and merge")
