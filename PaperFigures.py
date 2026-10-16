@@ -48,7 +48,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.ticker import NullLocator
+from matplotlib.ticker import LogLocator, MaxNLocator, NullLocator
 
 import EqualNumberOfBitstrings as study
 
@@ -248,8 +248,7 @@ def draw_infidelity(ax: plt.Axes, stats: pd.DataFrame, statistic: str = "median"
                             linewidth=0)
     style(ax)
     ax.set_yscale("log")
-    ax.set_ylim(10.0 ** -16.8, 3.0)
-    ax.set_yticks([1e0, 1e-4, 1e-8, 1e-12, 1e-16])
+    ax.yaxis.set_major_locator(LogLocator(numticks=5))
     ax.yaxis.set_minor_locator(NullLocator())
 
 
@@ -260,8 +259,23 @@ def draw_converged(ax: plt.Axes, stats: pd.DataFrame) -> None:
         if not rows.empty:
             draw_line(ax, rows, name, colour, marker, linestyle, rows["converged"].to_numpy())
     style(ax)
-    ax.set_ylim(-0.04, 1.04)
-    ax.set_yticks([0.0, 0.5, 1.0])
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=2))
+
+
+def share_ylimits(infidelity_axes: list, converged_axes: list = ()) -> None:
+    """
+    One y-range for all panels of a figure: the infidelity from 1 down to the
+    lowest value drawn (bands included), the converged fraction from 0 up to the
+    highest.
+    """
+    lowest = min(ax.dataLim.y0 for ax in infidelity_axes)
+    pad = 10.0 ** (-0.04 * np.log10(lowest))
+    for ax in infidelity_axes:
+        ax.set_ylim(lowest / pad, pad)
+    if converged_axes:
+        highest = max(ax.dataLim.y1 for ax in converged_axes) or 1.0
+        for ax in converged_axes:
+            ax.set_ylim(-0.04 * highest, 1.04 * highest)
 
 
 def budget_limits(group: pd.DataFrame) -> tuple:
@@ -308,6 +322,7 @@ def paired_figure(name: str, rows: list, recorder: Recorder) -> plt.Figure:
                              gridspec_kw={"height_ratios": heights}, squeeze=False)
     letters = iter(string.ascii_lowercase)
     legend_axis = None
+    drawn = {draw_infidelity: [], draw_converged: []}
 
     for r, row in enumerate(rows):
         top, bottom = axes[2 * r], axes[2 * r + 1]
@@ -324,6 +339,7 @@ def paired_figure(name: str, rows: list, recorder: Recorder) -> plt.Figure:
                     continue
                 letter = next(letters)
                 draw(ax, panel_stats)
+                drawn[draw].append(ax)
                 ax.set_xlim(*budget_limits(panel.group))
                 ax.set_title(f"({letter})", loc="left", fontweight="bold")
                 if draw is draw_infidelity:
@@ -341,6 +357,7 @@ def paired_figure(name: str, rows: list, recorder: Recorder) -> plt.Figure:
 
     for ax in axes[-1]:
         ax.set_xlabel(r"Bitstrings $K/2^N$")
+    share_ylimits(drawn[draw_infidelity], drawn[draw_converged])
     figure_legend(fig, legend_axis)
     return fig
 
@@ -411,6 +428,7 @@ def statistic_figure(data: pd.DataFrame, recorder: Recorder) -> plt.Figure:
         ax.set_xlabel(r"Bitstrings $K/2^N$")
         recorder.add("figA4_choice_of_statistic", letter, title, stats, Floor=floor)
     axes[0].set_ylabel(r"Infidelity $1-F$")
+    share_ylimits(list(axes))
     figure_legend(fig, axes[0])
     return fig
 

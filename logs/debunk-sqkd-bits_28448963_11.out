@@ -1,0 +1,2 @@
+host=node018 task=11 threads=4
+[job 11] bitstring_shards_heisenberg_balanced/shard_00011.csv exists, nothing to do (pass --overwrite to force a re-run)
