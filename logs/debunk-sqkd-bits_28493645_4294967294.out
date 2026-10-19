@@ -1,0 +1,13 @@
+submitted plan job 28493662 (split in logs/plan_28493662.out)
+submitted array job 28493663 (0-39, runs after the plan job succeeds)
+submitted merge job 28493664 (runs after the array succeeds)
+
+watch:   squeue -j 28493662,28493663,28493664
+logs:    logs/
+result:  equal_bitstrings_heisenberg_results_balanced_log.csv
+figures: equal_bitstrings_plots_heisenberg_balanced_log/
+
+If some tasks time out, raise TIME (or lower MAX_FRACTION) and re-run
+./submit_bitstrings.sh -- finished shards in bitstring_shards_heisenberg_balanced_log are skipped, and a
+task that died mid-shard resumes from its .partial file, so only the
+missing cells are redone.
