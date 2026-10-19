@@ -129,18 +129,20 @@ DEFAULT_COUPLING_SEED = 20250921
 COUPLING_DECIMALS = 6
 
 # Initial states per Hamiltonian, drawn uniformly at random -- without
-# replacement -- from every basis state the ground state has non-zero overlap
-# with. Unlike ClusterStudy.run_cell, which takes both ends of the overlap
-# distribution, this samples the distribution itself, so an average over the
-# initial states is an average over a typical starting point instead of over a
-# mixture of two tails.
+# replacement -- from the basis states the ground state is made of, see
+# GROUND_STATE_WEIGHT. Unlike ClusterStudy.run_cell, which takes both ends of
+# the overlap distribution, this samples the distribution itself, so an average
+# over the initial states is an average over a typical starting point instead
+# of over a mixture of two tails.
 DEFAULT_NUM_INITIAL_STATES = 6
 
-# What counts as non-zero overlap, as a probability. The zeros that matter are
-# the exact ones of the symmetry sectors; an eigensolver leaves those at about
-# 1e-16 in the amplitude, i.e. 1e-32 here, so anything well below the smallest
-# physically meaningful weight and well above that separates the two.
-OVERLAP_FLOOR = 1e-12
+# What counts as a basis state of the ground state: a probability above this
+# fraction of the uniform one, 1 / 2^N. ground_state_density counts these
+# states, and the initial states are drawn from them. A fixed floor of 1e-12
+# instead let the draw land in the exponentially small tail of the ground
+# state, at a median overlap of 1e-6.6, and the more so the lower the density;
+# see StudyOfHamiltonians/overlap_report.pdf.
+GROUND_STATE_WEIGHT = 0.1
 
 # Repeats of the SKQD trajectory per run. BARK is deterministic and needs none.
 DEFAULT_N_REPEATS = 3
@@ -362,7 +364,7 @@ def ground_state_density(ground_state: np.ndarray) -> float:
     10% of the uniform one, 1 / 2^N -- a threshold that scales with the system
     size, unlike a fixed one.
     """
-    return (np.count_nonzero(np.abs(ground_state) ** 2 > 0.1 / ground_state.size)
+    return (np.count_nonzero(np.abs(ground_state) ** 2 > GROUND_STATE_WEIGHT / ground_state.size)
             / ground_state.size)
 
 
@@ -668,20 +670,23 @@ def run_cell(cell: Cell, args) -> list:
                          eigenvectors=all_eigenvectors)
 
     # Initial states: a uniform sample, without replacement, from the basis
-    # states the ground state actually has weight on. A state of exactly zero
-    # overlap is not a starting point at all -- BARK has nothing to rank from it
-    # and SKQD's first shot is uncorrelated with the target -- and the symmetry
-    # sectors of these Hamiltonians make a large part of the basis exactly that.
+    # states the ground state is made of, i.e. the ones ground_state_density
+    # counts. A state of exactly zero overlap is not a starting point at all --
+    # BARK has nothing to rank from it and SKQD's first shot is uncorrelated
+    # with the target -- and the symmetry sectors of these Hamiltonians make a
+    # large part of the basis exactly that. The exponentially small tail of the
+    # ground state is hardly better, and it would tie the overlap to the
+    # density: the sparser the ground state, the more tail there is to draw.
     # Drawing uniformly from the rest makes the overlap column a sample of the
-    # true overlap distribution of the Hamiltonian, so the plots can be read as
+    # overlap distribution of the ground state, so the plots can be read as
     # statements about a typical starting point; the earlier extremes-only choice
     # sampled two tails that no run would ever draw by itself.
     # ``rng`` is separate from the global RNG so that changing this selection
     # leaves SKQD's shots, which come from the global one, exactly as they were.
     rng = np.random.default_rng(seed)
-    non_zero_indices = np.flatnonzero(probabilities > OVERLAP_FLOOR)
-    indices_to_test = rng.choice(non_zero_indices,
-                                 size=min(args.num_initial_states, non_zero_indices.size),
+    ground_state_indices = np.flatnonzero(probabilities > GROUND_STATE_WEIGHT / dimension)
+    indices_to_test = rng.choice(ground_state_indices,
+                                 size=min(args.num_initial_states, ground_state_indices.size),
                                  replace=False)
 
     rows = []
@@ -1758,7 +1763,8 @@ def build_parser():
                              "each; 1 is nearest neighbours only")
     parser.add_argument("--num-initial-states", type=int, default=DEFAULT_NUM_INITIAL_STATES,
                         help="initial states per Hamiltonian, drawn uniformly at "
-                             "random from the basis states of non-zero overlap")
+                             "random from the basis states the ground state is "
+                             "made of (see GROUND_STATE_WEIGHT)")
     parser.add_argument("--n-repeats", type=int, default=DEFAULT_N_REPEATS,
                         help="repeats of the SKQD trajectory per run")
     parser.add_argument("--grid-points", type=int, default=DEFAULT_GRID_POINTS,

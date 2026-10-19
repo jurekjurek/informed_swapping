@@ -1,7 +1,7 @@
 import sys, heapq, warnings, numpy as np, pandas as pd
 sys.path.insert(0, ".")
 warnings.filterwarnings("ignore")
-from EqualNumberOfBitstrings import Cell, cell_seed, budget_grid, with_initial_point, OVERLAP_FLOOR
+from EqualNumberOfBitstrings import Cell, cell_seed, budget_grid, with_initial_point
 from RandomSpinModel import make_heisenberg_hamiltonian
 from ClusterStudy import solve_ground_state
 from BARK import BARK
