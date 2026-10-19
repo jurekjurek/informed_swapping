@@ -57,10 +57,11 @@ Usage
     # four bins per continuous axis instead of three
     python EqualNumberOfBitstrings.py plot  --num-bins 4
 
-    # Hamiltonians selected for an even spread of ground-state densities (plan
-    # selects them once and keeps them in the shard directory)
+    # Hamiltonians and initial states selected for an even spread of ground-state
+    # densities and initial overlaps (plan selects them once and keeps them in
+    # the shard directory)
     python EqualNumberOfBitstrings.py plan  --balanced --deltas 0 0.5 1 2 5 10 \
-        --shard-dir bitstring_shards_heisenberg_balanced_log
+        --shard-dir bitstring_shards_heisenberg_balanced_runs
 
 Figures
 -------
@@ -133,12 +134,14 @@ COUPLING_DECIMALS = 6
 # GROUND_STATE_WEIGHT. Unlike ClusterStudy.run_cell, which takes both ends of
 # the overlap distribution, this samples the distribution itself, so an average
 # over the initial states is an average over a typical starting point instead
-# of over a mixture of two tails.
+# of over a mixture of two tails. With --balanced they are chosen together with
+# the Hamiltonians instead, see select_balanced.
 DEFAULT_NUM_INITIAL_STATES = 6
 
 # What counts as a basis state of the ground state: a probability above this
 # fraction of the uniform one, 1 / 2^N. ground_state_density counts these
-# states, and the initial states are drawn from them. A fixed floor of 1e-12
+# states, and without --balanced the initial states are drawn from them. A fixed
+# floor of 1e-12
 # instead let the draw land in the exponentially small tail of the ground
 # state, at a median overlap of 1e-6.6, and the more so the lower the density;
 # see StudyOfHamiltonians/overlap_report.pdf.
@@ -201,10 +204,16 @@ OUTPUT_ROOT = Path("equal_bitstrings_plots_heisenberg")
 # theta ~ U(0, 90 deg) away from the z axis and a strength measured against the
 # largest coupling, |B| = b |J_1| max(1, delta), with b log-uniform in this range.
 BALANCED_RATIO_RANGE = (0.1, 10.0)
-# Bins of the ground-state density the Hamiltonians are spread over, of equal
-# width in log10(density) across this range. Densities below its lower end go
-# into the first bin.
+# Bins of the ground-state density the runs are spread over, of equal width in
+# log10(density) across this range. Densities below its lower end go into the
+# first bin.
 BALANCED_DENSITY_RANGE = (1e-3, 1.0)
+# Initial overlaps the runs start from, spread over as many bins of equal width
+# in log10(overlap). The range is the same at every N, so that the overlap does
+# not shrink with the Hilbert space, and it stops at 0.5: the near-product
+# ground states each have one state of nearly all the weight, and a run started
+# from it has converged before it begins.
+BALANCED_OVERLAP_RANGE = (1e-4, 0.5)
 BALANCED_BINS = 10
 # Candidates per (N, dimension, delta, distance) before the bins that are still
 # short hand their share to the others; the bins that can be filled readily are
@@ -217,8 +226,9 @@ BALANCED_DENSE_LIMIT = 64
 # converges in a few dozen; at the default of 10 * 2^N a nearly degenerate one
 # runs for minutes.
 BALANCED_MAX_RESTARTS = 1000
-# Name of the table of selected couplings, kept in the shard directory.
-BALANCED_TABLE = "balanced_hamiltonians_log.csv"
+# Name of the table of selected couplings and initial states, kept in the shard
+# directory.
+BALANCED_TABLE = "balanced_runs.csv"
 
 
 # --------------------------------------------------------------------------- #
@@ -231,8 +241,11 @@ BALANCED_TABLE = "balanced_hamiltonians_log.csv"
 # keeps running unchanged; everything else imported from it only ever reads
 # ``num_sites`` off a cell, or hands it to the cost model patched in below.
 # ``J`` is a tuple of one coupling per bond distance, ``(J_1, ..., J_max_distance)``.
+# ``initial_states`` holds the basis states the runs start from where the
+# balanced selection chose them with the Hamiltonian; None has run_cell draw them.
 Cell = namedtuple("Cell", ["hamiltonian_index", "num_sites", "dimensions", "delta",
-                           "J", "Bx", "By", "Bz", "max_distance"])
+                           "J", "Bx", "By", "Bz", "max_distance", "initial_states"],
+                  defaults=[None])
 
 
 def cell_key(cell: Cell) -> tuple:
@@ -255,9 +268,11 @@ def cell_seed(cell: Cell) -> int:
 
     A nearest-neighbour cell is keyed as it was before the longer bonds existed
     -- J a bare float, no max_distance -- so that it keeps its seed, and with it
-    its initial states and SKQD shots.
+    its initial states and SKQD shots. The chosen initial states, where there
+    are any, are not part of the key: they belong to the Hamiltonian, which the
+    rest of the key already names.
     """
-    fields = list(cell)
+    fields = list(cell[:-1])
     if cell.max_distance == 1:
         fields = [*cell[:4], cell.J[0], *cell[5:8]]
     key = "|".join(repr(field) for field in fields).encode()
@@ -285,7 +300,10 @@ def estimate_cost(cell: Cell) -> float:
     # under one bond per site, the open rectangle just under 2d.
     D = cell.max_distance
     bonds_per_site = float(D) if cell.dimensions == 1 else float(D * (D + 1))
-    return dimension ** 3.5 * (1.0 + 0.8 * (bonds_per_site - 1))
+    # A cell of the balanced selection runs only the initial states chosen for
+    # it, between one and num_initial_states of them.
+    runs = 1.0 if cell.initial_states is None else len(cell.initial_states)
+    return dimension ** 3.5 * (1.0 + 0.8 * (bonds_per_site - 1)) * runs
 
 
 # ClusterStudy's splitter weights cells with ClusterStudy's cost model, and it
@@ -375,11 +393,25 @@ def density_bin(density: float) -> int:
     return int(min(max(np.floor(position * BALANCED_BINS), 0), BALANCED_BINS - 1))
 
 
-def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
-                    coupling_seed=DEFAULT_COUPLING_SEED):
+def overlap_bins(overlaps: np.ndarray) -> np.ndarray:
+    """Indices of the bins of BALANCED_OVERLAP_RANGE that ``overlaps`` fall into."""
+    low, high = np.log10(BALANCED_OVERLAP_RANGE)
+    position = (np.log10(overlaps) - low) / (high - low)
+    return np.clip(np.floor(position * BALANCED_BINS), 0, BALANCED_BINS - 1).astype(int)
+
+
+def even_split(total: int, count: int) -> np.ndarray:
+    """``total`` split into ``count`` integer shares as even as possible, larger ones first."""
+    return total // count + (np.arange(count) < total % count)
+
+
+def select_balanced(num_hamiltonians, num_initial_states, num_sites, dimension, delta,
+                    distance, coupling_seed=DEFAULT_COUPLING_SEED):
     """
-    ``num_hamiltonians`` cells of one (N, dimension, delta, distance), spread
-    evenly over log10 of the ground-state density.
+    Cells of one (N, dimension, delta, distance) together with their initial
+    states, ``num_hamiltonians * num_initial_states`` runs in all, spread evenly
+    over log10 of the ground-state density and, at the same time, over log10 of
+    the initial overlap across BALANCED_OVERLAP_RANGE.
 
     Neither a longitudinal nor a transversal field covers the density: the first
     keeps the ground state in one magnetization sector, so it never gets above
@@ -387,35 +419,54 @@ def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
     degenerate, which drop_small_gaps then removes. A tilted field covers all
     of it -- in a strong field the angle alone sets the density -- but unevenly,
     and differently at every N. So candidates are drawn from the tilted field
-    until every bin holds its share of ``num_hamiltonians``, as even as the
-    number allows. Candidates that drop_small_gaps or drop_trivial_ground_states
-    would remove are skipped, so that nothing selected here is lost in the plots.
+    until every bin holds its share of the runs. Candidates that drop_small_gaps
+    or drop_trivial_ground_states would remove are skipped, so that nothing
+    selected here is lost in the plots.
+
+    The unit is the run rather than the Hamiltonian, because neither
+    distribution comes out even per Hamiltonian. A uniform draw within one
+    ground state lands on its many light states, around 1 / 2^N, and the high
+    overlaps only exist in the sparse ground states, which offer few states. So
+    the initial states of a candidate are taken one at a time, each from the
+    overlap bin with the most room left -- the state closest to a random point
+    inside that bin, so that the bin is filled evenly, too -- for as long as
+    its density bin and that overlap bin have room. That takes as many
+    Hamiltonians as the runs need: more of the sparse ones, fewer of the dense
+    ones. At small N the lowest overlaps lie below 0.1 / 2^N, i.e. on states
+    the density does not count; that is the price of a range that is the same
+    at every N.
 
     The density is a multiple of 1 / 2^N, so at small N the lowest bins cannot
     hold any -- at N = 6 nothing lies below 1/64, three bins up -- and those get
     no share at all. Others can, but hardly ever do: the basis states come in
     symmetry multiplets, so a bin that only, say, exactly two of 64 states fall
-    into stays nearly empty. Whatever is still short after
-    BALANCED_MAX_CANDIDATES is filled from the other bins instead, again as
-    evenly as possible, so the group still gets all ``num_hamiltonians``.
+    into stays nearly empty, and the overlaps between 0.1 and 0.5 are rare
+    everywhere. Whatever is still short after BALANCED_MAX_CANDIDATES is taken
+    from all candidates seen instead, one run at a time from the density and
+    overlap bins that are least full, so the group still gets all of its runs.
 
-    Returns the cells, numbered from 0 in order of their bin, and the number of
-    candidates it took.
+    Returns the cells with their initial states, numbered from 0 in order of
+    their density bin, and the number of candidates it took.
     """
+    runs = num_hamiltonians * num_initial_states
     dimension_of_space = 2 ** num_sites
     reachable = np.unique([density_bin(count / dimension_of_space)
                            for count in range(1, dimension_of_space + 1)])
-    targets = np.zeros(BALANCED_BINS, dtype=int)
-    targets[reachable] = (num_hamiltonians // len(reachable)
-                          + (np.arange(len(reachable)) < num_hamiltonians % len(reachable)))
-    chosen = [[] for _ in range(BALANCED_BINS)]
+    density_targets = np.zeros(BALANCED_BINS, dtype=int)
+    density_targets[reachable] = even_split(runs, len(reachable))
+    overlap_targets = even_split(runs, BALANCED_BINS)
+    density_taken = np.zeros(BALANCED_BINS, dtype=int)
+    overlap_taken = np.zeros(BALANCED_BINS, dtype=int)
+    overlap_edges = np.linspace(*np.log10(BALANCED_OVERLAP_RANGE), BALANCED_BINS + 1)
+    # Every candidate that passed the filters, with its states in
+    # BALANCED_OVERLAP_RANGE, their overlap bins and which of them are taken.
+    seen = []
     # One generator per group, so that a group's selection depends on nothing
     # but the group itself and the table can be extended one group at a time.
     rng = np.random.default_rng([coupling_seed, num_sites, dimension,
                                  int(round(delta * 1000)), distance])
     candidates = 0
-    while (candidates < BALANCED_MAX_CANDIDATES
-           and any(len(members) < target for members, target in zip(chosen, targets))):
+    while candidates < BALANCED_MAX_CANDIDATES and (density_taken < density_targets).any():
         candidates += 1
         J_1, log_b, theta = (rng.uniform(-1, 1), rng.uniform(*np.log10(BALANCED_RATIO_RANGE)),
                              rng.uniform(0, np.pi / 2))
@@ -447,29 +498,67 @@ def select_balanced(num_hamiltonians, num_sites, dimension, delta, distance,
         if (values[1] - values[0] < MIN_GAP
                 or np.max(np.abs(ground_state) ** 2) >= TRIVIAL_GROUND_STATE):
             continue
-        index = density_bin(ground_state_density(ground_state))
-        # More than the share, for the bins that may have to stand in for others.
-        if len(chosen[index]) < num_hamiltonians:
-            chosen[index].append(cell)
+        probabilities = np.abs(ground_state) ** 2
+        low, high = BALANCED_OVERLAP_RANGE
+        states = np.flatnonzero((probabilities >= low) & (probabilities <= high))
+        candidate = dict(cell=cell, density=density_bin(ground_state_density(ground_state)),
+                         states=states, logs=np.log10(probabilities[states]),
+                         overlaps=overlap_bins(probabilities[states]),
+                         taken=np.zeros(states.size, dtype=bool))
+        seen.append(candidate)
 
-    # One per bin and round, lowest bins first, until num_hamiltonians are
-    # taken: exactly the shares if every bin filled, and an even spread over
-    # the others if not.
-    taken = np.zeros(BALANCED_BINS, dtype=int)
-    available = np.array([len(members) for members in chosen])
-    while taken.sum() < num_hamiltonians and (taken < available).any():
-        for index in np.flatnonzero(taken < available)[:num_hamiltonians - taken.sum()]:
-            taken[index] += 1
-    cells = [cell for members, count in zip(chosen, taken) for cell in members[:count]]
-    return [cell._replace(hamiltonian_index=index) for index, cell in enumerate(cells)], candidates
+        index = candidate["density"]
+        while (candidate["taken"].sum() < num_initial_states
+               and density_taken[index] < density_targets[index]):
+            room = ((overlap_targets - overlap_taken) / np.maximum(overlap_targets, 1))[
+                candidate["overlaps"]]
+            room[candidate["taken"]] = 0
+            if room.size == 0 or room.max() <= 0:
+                break
+            bin_ = rng.choice(np.unique(candidate["overlaps"][room == room.max()]))
+            members = np.flatnonzero((candidate["overlaps"] == bin_) & ~candidate["taken"])
+            target = rng.uniform(overlap_edges[bin_], overlap_edges[bin_ + 1])
+            state = members[np.argmin(np.abs(candidate["logs"][members] - target))]
+            candidate["taken"][state] = True
+            density_taken[index] += 1
+            overlap_taken[bin_] += 1
+
+    # The runs of the bins that stayed short, one at a time from the least full
+    # density and overlap bins among every candidate seen.
+    while density_taken.sum() < runs:
+        best, best_fill = None, np.inf
+        for candidate in seen:
+            if (candidate["taken"].sum() == num_initial_states
+                    or candidate["taken"].all()):
+                continue
+            index = candidate["density"]
+            fill = (density_taken[index] / max(density_targets[index], 1)
+                    + (overlap_taken / np.maximum(overlap_targets, 1))[candidate["overlaps"]])
+            fill[candidate["taken"]] = np.inf
+            if fill.min() < best_fill:
+                best, best_fill = (candidate, int(np.argmin(fill))), fill.min()
+        if best is None:
+            break
+        candidate, state = best
+        candidate["taken"][state] = True
+        density_taken[candidate["density"]] += 1
+        overlap_taken[candidate["overlaps"][state]] += 1
+
+    chosen = sorted((candidate for candidate in seen if candidate["taken"].any()),
+                    key=lambda candidate: candidate["density"])
+    cells = [candidate["cell"]._replace(
+                 hamiltonian_index=index,
+                 initial_states=tuple(int(s) for s in candidate["states"][candidate["taken"]]))
+             for index, candidate in enumerate(chosen)]
+    return cells, candidates
 
 
 def select_group(group: tuple) -> tuple:
     """``select_balanced`` for one group of ``balanced_cells``, timed."""
-    coupling_seed, num_hamiltonians, n_sites, dim, delta, distance = group
+    coupling_seed, num_hamiltonians, num_initial_states, n_sites, dim, delta, distance = group
     start = time.time()
-    cells, candidates = select_balanced(num_hamiltonians, n_sites, dim, delta, distance,
-                                        coupling_seed)
+    cells, candidates = select_balanced(num_hamiltonians, num_initial_states, n_sites, dim,
+                                        delta, distance, coupling_seed)
     return group, cells, candidates, time.time() - start
 
 
@@ -481,8 +570,8 @@ def available_cpus() -> int:
         return os.cpu_count() or 1
 
 
-def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, table_path,
-                   coupling_seed=DEFAULT_COUPLING_SEED):
+def balanced_cells(num_hamiltonians, num_initial_states, num_sites, dimensions, deltas,
+                   distances, table_path, coupling_seed=DEFAULT_COUPLING_SEED):
     """
     All cells of the density-balanced study, in a fixed order.
 
@@ -495,23 +584,25 @@ def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, t
     come to the same one. The table is replaced in one step, so a job never
     reads one that is half written.
     """
-    key = ["Coupling_Seed", "Num_Hamiltonians", "Number_of_Sites", "Dimensions", "Delta",
-           "Max_Distance"]
-    table = (pd.read_csv(table_path, dtype={"J_Per_Distance": str})
+    key = ["Coupling_Seed", "Num_Hamiltonians", "Num_Initial_States", "Number_of_Sites",
+           "Dimensions", "Delta", "Max_Distance"]
+    table = (pd.read_csv(table_path, dtype={"J_Per_Distance": str, "Initial_States": str})
              if os.path.exists(table_path) else pd.DataFrame(columns=key))
     stored = {group: block for group, block in table.groupby(key)} if len(table) else {}
 
     groups, missing, added = {}, [], []
     for n_sites, dim, delta, distance in itertools.product(num_sites, dimensions, deltas,
                                                            distances):
-        group = (coupling_seed, num_hamiltonians, n_sites, dim, float(delta), distance)
+        group = (coupling_seed, num_hamiltonians, num_initial_states, n_sites, dim,
+                 float(delta), distance)
         groups[group] = None    # keeps the order of the groups
         if group not in stored:
             missing.append(group)
             continue
         groups[group] = [Cell(int(row.Hamiltonian_Index), n_sites, dim, float(delta),
                               tuple(float(J) for J in row.J_Per_Distance.split(";")),
-                              float(row.Bx), float(row.By), float(row.Bz), distance)
+                              float(row.Bx), float(row.By), float(row.Bz), distance,
+                              tuple(int(state) for state in row.Initial_States.split(";")))
                          for row in stored[group].itertuples()]
 
     if missing:
@@ -526,14 +617,18 @@ def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, t
         print(f"selecting {len(missing)} groups on {processes} cores", flush=True)
         with get_context("spawn").Pool(processes) as pool:
             for group, cells, candidates, seconds in pool.imap_unordered(select_group, missing):
-                _, _, n_sites, dim, delta, distance = group
-                print(f"selected {len(cells)} of {num_hamiltonians} Hamiltonians for "
-                      f"n={n_sites} dimensions={dim} delta={delta} max_distance={distance} "
-                      f"from {candidates} candidates ({seconds:.0f}s)", flush=True)
+                _, _, _, n_sites, dim, delta, distance = group
+                runs = sum(len(cell.initial_states) for cell in cells)
+                print(f"selected {runs} of {num_hamiltonians * num_initial_states} runs on "
+                      f"{len(cells)} Hamiltonians for n={n_sites} dimensions={dim} "
+                      f"delta={delta} max_distance={distance} from {candidates} candidates "
+                      f"({seconds:.0f}s)", flush=True)
                 groups[group] = cells
                 added += [dict(zip(key, group), Hamiltonian_Index=cell.hamiltonian_index,
                                J_Per_Distance=";".join(str(J) for J in cell.J),
-                               Bx=cell.Bx, By=cell.By, Bz=cell.Bz, Candidates=candidates)
+                               Bx=cell.Bx, By=cell.By, Bz=cell.Bz,
+                               Initial_States=";".join(str(s) for s in cell.initial_states),
+                               Candidates=candidates)
                           for cell in cells]
 
     if added:
@@ -546,7 +641,7 @@ def balanced_cells(num_hamiltonians, num_sites, dimensions, deltas, distances, t
 
     # Hamiltonian index outermost, as in enumerate_cells.
     return [cells[index]
-            for index in range(num_hamiltonians)
+            for index in range(max(len(cells) for cells in groups.values()))
             for cells in groups.values() if index < len(cells)]
 
 
@@ -560,8 +655,8 @@ def study_cells(args) -> list:
     ``--balanced`` the couplings are selected instead, see ``balanced_cells``.
     """
     if args.balanced:
-        return balanced_cells(args.num_hamiltonians, args.num_sites, args.dimensions,
-                              args.deltas, args.distances,
+        return balanced_cells(args.num_hamiltonians, args.num_initial_states, args.num_sites,
+                              args.dimensions, args.deltas, args.distances,
                               os.path.join(args.shard_dir, BALANCED_TABLE))
     return enumerate_cells(args.num_hamiltonians, args.num_sites,
                            args.dimensions, args.deltas, args.distances,
@@ -617,9 +712,12 @@ def expected_rows(cell: Cell, args) -> int:
     coupling the field dominates, give a ground state of one or two components,
     so this is an upper bound on the row count and not the row count itself; it
     is used to say how large a complete run would be, never to decide whether a
-    cell is finished.
+    cell is finished. A cell of the balanced selection runs exactly the initial
+    states chosen for it.
     """
-    return args.num_initial_states * rows_per_initial_state(cell, args)
+    runs = (args.num_initial_states if cell.initial_states is None
+            else len(cell.initial_states))
+    return runs * rows_per_initial_state(cell, args)
 
 
 def run_cell(cell: Cell, args) -> list:
@@ -683,11 +781,14 @@ def run_cell(cell: Cell, args) -> list:
     # sampled two tails that no run would ever draw by itself.
     # ``rng`` is separate from the global RNG so that changing this selection
     # leaves SKQD's shots, which come from the global one, exactly as they were.
+    # With --balanced the selection has chosen them already, see select_balanced.
     rng = np.random.default_rng(seed)
     ground_state_indices = np.flatnonzero(probabilities > GROUND_STATE_WEIGHT / dimension)
-    indices_to_test = rng.choice(ground_state_indices,
-                                 size=min(args.num_initial_states, ground_state_indices.size),
-                                 replace=False)
+    indices_to_test = (np.array(cell.initial_states) if cell.initial_states is not None
+                       else rng.choice(ground_state_indices,
+                                       size=min(args.num_initial_states,
+                                                ground_state_indices.size),
+                                       replace=False))
 
     rows = []
     for initial_state_index in indices_to_test:
@@ -1764,7 +1865,8 @@ def build_parser():
     parser.add_argument("--num-initial-states", type=int, default=DEFAULT_NUM_INITIAL_STATES,
                         help="initial states per Hamiltonian, drawn uniformly at "
                              "random from the basis states the ground state is "
-                             "made of (see GROUND_STATE_WEIGHT)")
+                             "made of (see GROUND_STATE_WEIGHT); with --balanced, "
+                             "runs per Hamiltonian at most, chosen with it")
     parser.add_argument("--n-repeats", type=int, default=DEFAULT_N_REPEATS,
                         help="repeats of the SKQD trajectory per run")
     parser.add_argument("--grid-points", type=int, default=DEFAULT_GRID_POINTS,
@@ -1811,9 +1913,10 @@ def build_parser():
                             "to the spins of the delta -> infinity limit; must "
                             "match between plan, run and merge")
     field.add_argument("--balanced", action="store_true",
-                       help="select the Hamiltonians, with a tilted field, so that "
-                            "their ground-state densities spread evenly over "
-                            "log10(density) in [-3, 0] "
+                       help="select the Hamiltonians, with a tilted field, together "
+                            "with their initial states, so that the runs spread "
+                            "evenly over log10(density) in [-3, 0] and over "
+                            "log10(overlap) in [-4, log10(0.5)] "
                             f"for every (N, dimension, delta, distance); kept in "
                             f"<shard-dir>/{BALANCED_TABLE}; must match between plan, "
                             "run and merge")
