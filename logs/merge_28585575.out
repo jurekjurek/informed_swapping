@@ -1,0 +1,38 @@
+merged 40 shards -> equal_bitstrings_heisenberg_results_balanced_runs.csv: 1710720 rows (1710720 expected for a complete run)
+coverage per number of sites:
+  n=  6: 1056/1056 cells  COMPLETE
+  n=  8: 1148/1148 cells  COMPLETE
+  n= 10: 1281/1281 cells  COMPLETE
+  n= 12: 1194/1194 cells  COMPLETE
+Loaded 1710720 rows from equal_bitstrings_heisenberg_results_balanced_runs.csv
+Dropped 0 of 4679 cells with a trivial ground state
+Dropped 51 of 4679 cells with a gap below 0.0001
+all: 1 clusters so far, 12 figures
+by_N: 5 clusters so far, 60 figures
+by_dim: 7 clusters so far, 84 figures
+by_delta: 13 clusters so far, 156 figures
+by_J: 16 clusters so far, 180 figures
+by_Bz: 19 clusters so far, 204 figures
+by_gsdens: 22 clusters so far, 228 figures
+by_hamdens: 25 clusters so far, 252 figures
+by_overlap: 28 clusters so far, 276 figures
+by_N_dim: 36 clusters so far, 372 figures
+by_N_delta: 60 clusters so far, 678 figures
+by_N_J: 72 clusters so far, 774 figures
+by_N_Bz: 84 clusters so far, 870 figures
+by_N_gsdens: 96 clusters so far, 966 figures
+by_N_hamdens: 108 clusters so far, 1062 figures
+by_N_overlap: 120 clusters so far, 1158 figures
+Wrote 1158 PDF files in 120 clusters under equal_bitstrings_plots_heisenberg_balanced_runs/ (0 clusters skipped for holding fewer than 5 runs)
+index: equal_bitstrings_plots_heisenberg_balanced_runs/plot_index.csv
+bins:  equal_bitstrings_plots_heisenberg_balanced_runs/bin_edges.csv
+Dropped 0 of 4679 cells with a trivial ground state
+Dropped 51 of 4679 cells with a gap below 0.0001
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/fig1_system_size.pdf
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/fig2_ground_state_density.pdf
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/fig3_initial_overlap.pdf
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/figA1_lattice_dimension.pdf
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/figA2_ground_state_density_other_N.pdf
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/figA3_initial_overlap_other_N.pdf
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/figA4_choice_of_statistic.pdf
+Wrote equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/figure_data.csv and equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures/bin_edges.csv

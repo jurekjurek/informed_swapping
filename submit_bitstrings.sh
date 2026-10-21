@@ -15,8 +15,13 @@
 #                                                 # (selects on the login node if
 #                                                 # the plan job has not yet)
 #
-# Because every array task gets the same estimated load, one TIME and one MEM
-# setting fits every task -- that is the whole point of the cost-balanced split.
+# Because every shard gets the same estimated load, one TIME and one MEM
+# setting fits every shard -- that is the whole point of the cost-balanced split.
+#
+# To go easy on the SLURM controller, one array task does not run one shard but
+# SHARDS_PER_JOB of them, side by side as background processes with CPUS cores
+# each. Same cores per shard, all at once, so the wall time is unchanged -- but
+# 40 shards become 5 array tasks instead of 40.
 # Unlike the fixed-target study, these runs grow a pool proportional to the
 # Hilbert space, so MAX_FRACTION is the knob that decides the cost: halving it
 # takes roughly an order of magnitude off the largest cells.
@@ -40,16 +45,17 @@ NUM_INITIAL_STATES=${NUM_INITIAL_STATES:-6}   # from each end of the overlap dis
 N_REPEATS=${N_REPEATS:-3}                     # SKQD trajectories per run
 GRID_POINTS=${GRID_POINTS:-30}                # budgets at which the curves are read
 MAX_FRACTION=${MAX_FRACTION:-0.5}             # largest budget, as a fraction of 2^N
-NUM_JOBS=${NUM_JOBS:-40}
+NUM_JOBS=${NUM_JOBS:-40}                      # shards the study is split into
+SHARDS_PER_JOB=${SHARDS_PER_JOB:-8}           # shards run side by side in one array task
 
 PARTITION=${PARTITION:-intelsr_long}                 # empty -> cluster default
 TIME=${TIME:-07-00:00:00}
-MEM=${MEM:-40G}
+MEM=${MEM:-40G}                          # per shard, in G; a task asks for SHARDS_PER_JOB times this
 # As in the other study: a very large number of small-to-medium dense LAPACK
 # calls plus single-threaded sampling, not a few big ones. Few threads per task,
-# spend the freed cores on a larger array instead.
-CPUS=${CPUS:-4}
-THROTTLE=${THROTTLE:-}                   # e.g. 10 -> at most 10 tasks at once
+# spend the freed cores on more shards instead.
+CPUS=${CPUS:-4}                          # per shard; a task asks for SHARDS_PER_JOB times this
+THROTTLE=${THROTTLE:-}                   # e.g. 2 -> at most 2 array tasks at once
 PLAN_CPUS=${PLAN_CPUS:-16}               # the plan job selects one group per core
 PLAN_TIME=${PLAN_TIME:-02:00:00}
 
@@ -83,14 +89,38 @@ STUDY_ARGS=(
 # ------------------------------ worker mode --------------------------------
 if [[ -n "${SLURM_ARRAY_TASK_ID:-}" ]]; then
   cd "${SLURM_SUBMIT_DIR:-$PWD}"
-  # One thread per core, so CPUS=1 does not have BLAS oversubscribing the node.
-  export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
+  # CPUS threads per shard, so the shards of this task share its cores evenly
+  # instead of every BLAS grabbing all of them.
+  export OMP_NUM_THREADS="$CPUS"
   export MKL_NUM_THREADS="$OMP_NUM_THREADS"
   export OPENBLAS_NUM_THREADS="$OMP_NUM_THREADS"
 
-  echo "host=$(hostname) task=$SLURM_ARRAY_TASK_ID threads=$OMP_NUM_THREADS"
-  exec "$PYTHON" EqualNumberOfBitstrings.py run "${STUDY_ARGS[@]}" \
-       --job-index "$SLURM_ARRAY_TASK_ID" $EXTRA_ARGS
+  first=$((SLURM_ARRAY_TASK_ID * SHARDS_PER_JOB))
+  last=$((first + SHARDS_PER_JOB - 1))
+  (( last > NUM_JOBS - 1 )) && last=$((NUM_JOBS - 1))
+  echo "host=$(hostname) task=$SLURM_ARRAY_TASK_ID shards=$first-$last threads/shard=$OMP_NUM_THREADS"
+
+  # Plain background processes, not srun steps: nothing here reaches the
+  # controller. Each shard logs to a file of its own.
+  pids=()
+  for (( shard = first; shard <= last; shard++ )); do
+    "$PYTHON" EqualNumberOfBitstrings.py run "${STUDY_ARGS[@]}" \
+        --job-index "$shard" $EXTRA_ARGS \
+        > "logs/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_shard${shard}.out" \
+        2> "logs/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_shard${shard}.err" &
+    pids+=("$!")
+  done
+
+  # Wait for every shard; fail the task if any of them failed, so the
+  # afterok merge still never runs on incomplete results.
+  failed=0
+  for i in "${!pids[@]}"; do
+    if ! wait "${pids[$i]}"; then
+      echo "shard $((first + i)) failed" >&2
+      failed=1
+    fi
+  done
+  exit "$failed"
 fi
 
 # ---------------------------- submission mode ------------------------------
@@ -115,15 +145,21 @@ PLAN_JOB=$(sbatch --parsable \
   --wrap="cd '$PWD' && $PYTHON EqualNumberOfBitstrings.py plan ${STUDY_ARGS[*]}")
 echo "submitted plan job $PLAN_JOB (split in logs/plan_$PLAN_JOB.out)"
 
-ARRAY_SPEC="0-$((NUM_JOBS - 1))"
+NUM_TASKS=$(( (NUM_JOBS + SHARDS_PER_JOB - 1) / SHARDS_PER_JOB ))
+ARRAY_SPEC="0-$((NUM_TASKS - 1))"
 [[ -n "$THROTTLE" ]] && ARRAY_SPEC="${ARRAY_SPEC}%${THROTTLE}"
 
-SBATCH_COMMON=(--time="$TIME" --mem="$MEM" --cpus-per-task="$CPUS")
+[[ "$MEM" =~ ^([0-9]+)[Gg]$ ]] || { echo "MEM must be given in G, e.g. 40G" >&2; exit 1; }
+TASK_MEM="$(( BASH_REMATCH[1] * SHARDS_PER_JOB ))G"
+TASK_CPUS=$(( CPUS * SHARDS_PER_JOB ))
+
+SBATCH_COMMON=(--time="$TIME" --mem="$TASK_MEM" --cpus-per-task="$TASK_CPUS")
 [[ -n "$PARTITION" ]] && SBATCH_COMMON+=(--partition="$PARTITION")
 
 ARRAY_JOB=$(sbatch --parsable --dependency="afterok:${PLAN_JOB}" --array="$ARRAY_SPEC" \
   "${SBATCH_COMMON[@]}" "$SCRIPT")
-echo "submitted array job $ARRAY_JOB ($ARRAY_SPEC, runs after the plan job succeeds)"
+echo "submitted array job $ARRAY_JOB ($ARRAY_SPEC: $NUM_JOBS shards, $SHARDS_PER_JOB per task,"
+echo "  $TASK_CPUS cores / $TASK_MEM each; runs after the plan job succeeds)"
 
 # Merge once every task has succeeded, then draw the figures from the merged
 # CSV. afterok means a failed task blocks both, so partial results are never
