@@ -1,0 +1,4 @@
+usage: PaperFigures.py [-h] [--data DATA] [--output OUTPUT]
+                       [--format {pdf,png,svg}]
+PaperFigures.py: error: argument --output: expected one argument
+/var/spool/slurmd/job28599684/slurm_script: line 5: equal_bitstrings_plots_heisenberg_balanced_runs/PaperFigures: Is a directory

@@ -1,0 +1,74 @@
+fig1_system_size
+  (a) $N = 6$  [4320 runs]
+  (b) $N = 8$  [4316 runs]
+  (c) $N = 10$  [4305 runs]
+  (d) $N = 12$  [4280 runs]
+
+fig2_ground_state_density
+  (a) low: $\rho_0 \leq 0.019$  [1510 runs]
+  (b) mid: $0.019 < \rho_0 \leq 0.17$  [1347 runs]
+  (c) high: $\rho_0 > 0.17$  [1423 runs]
+
+fig3_initial_overlap
+  (a) low: $|\langle b_0|\psi_0\rangle|^2 \leq 2.0\times 10^{-3}$ (163 Hamiltonians)  [163 runs]
+  (b) mid: $2.0\times 10^{-3} < |\langle b_0|\psi_0\rangle|^2 \leq 0.02$ (163 Hamiltonians)  [163 runs]
+  (c) high: $|\langle b_0|\psi_0\rangle|^2 > 0.02$ (163 Hamiltonians)  [163 runs]
+
+figA1_lattice_dimension
+  (a) 1D lattice, $N = 12$  [2143 runs]
+  (b) 2D lattice, $N = 12$  [2137 runs]
+
+figA2_ground_state_density_other_N
+  (a) $N = 6$, low: $\rho_0 \leq 0.11$  [1924 runs]
+  (b) $N = 6$, mid: $0.11 < \rho_0 \leq 0.28$  [1036 runs]
+  (c) $N = 6$, high: $\rho_0 > 0.28$  [1360 runs]
+  (g) $N = 8$, low: $\rho_0 \leq 0.035$  [1665 runs]
+  (h) $N = 8$, mid: $0.035 < \rho_0 \leq 0.23$  [1238 runs]
+  (i) $N = 8$, high: $\rho_0 > 0.23$  [1413 runs]
+  (m) $N = 10$, low: $\rho_0 \leq 0.043$  [1437 runs]
+  (n) $N = 10$, mid: $0.043 < \rho_0 \leq 0.19$  [1438 runs]
+  (o) $N = 10$, high: $\rho_0 > 0.19$  [1430 runs]
+
+figA3_initial_overlap_other_N
+  (a) $N = 6$, low: $|\langle b_0|\psi_0\rangle|^2 \leq 2.0\times 10^{-3}$ (154 Hamiltonians)  [154 runs]
+  (b) $N = 6$, mid: $2.0\times 10^{-3} < |\langle b_0|\psi_0\rangle|^2 \leq 0.02$ (154 Hamiltonians)  [154 runs]
+  (c) $N = 6$, high: $|\langle b_0|\psi_0\rangle|^2 > 0.02$ (154 Hamiltonians)  [154 runs]
+  (g) $N = 8$, low: $|\langle b_0|\psi_0\rangle|^2 \leq 2.0\times 10^{-3}$ (185 Hamiltonians)  [185 runs]
+  (h) $N = 8$, mid: $2.0\times 10^{-3} < |\langle b_0|\psi_0\rangle|^2 \leq 0.02$ (185 Hamiltonians)  [185 runs]
+  (i) $N = 8$, high: $|\langle b_0|\psi_0\rangle|^2 > 0.02$ (185 Hamiltonians)  [185 runs]
+  (m) $N = 10$, low: $|\langle b_0|\psi_0\rangle|^2 \leq 2.0\times 10^{-3}$ (201 Hamiltonians)  [201 runs]
+  (n) $N = 10$, mid: $2.0\times 10^{-3} < |\langle b_0|\psi_0\rangle|^2 \leq 0.02$ (201 Hamiltonians)  [201 runs]
+  (o) $N = 10$, high: $|\langle b_0|\psi_0\rangle|^2 > 0.02$ (201 Hamiltonians)  [201 runs]
+
+figA4_choice_of_statistic
+  (a) median, 45%-55% range  [4280 runs]
+  (b) mean $\pm$ SEM, floor $10^{-16}$  [4280 runs]
+  (c) mean $\pm$ SEM, floor $10^{-8}$  [4280 runs]
+
+Converged: 1 - F < 0.0001. Band: quantiles 0.45 to 0.55 of log10(1 - F).
+
+Bin edges (Facet, N, Bin, Lower, Upper, Runs):
+  gsdens, N = 12, low: 0.000732422 to 0.0192871, 1510 runs
+  gsdens, N = 12, mid: 0.0192871 to 0.165039, 1347 runs
+  gsdens, N = 12, high: 0.165039 to 1, 1423 runs
+  overlap (matched), N = 12, low: 0 to 0.002, 163 runs
+  overlap (matched), N = 12, mid: 0.002 to 0.02, 163 runs
+  overlap (matched), N = 12, high: 0.02 to 1, 163 runs
+  gsdens, N = 6, low: 0.015625 to 0.109375, 1924 runs
+  gsdens, N = 6, mid: 0.109375 to 0.28125, 1036 runs
+  gsdens, N = 6, high: 0.28125 to 1, 1360 runs
+  gsdens, N = 8, low: 0.00390625 to 0.0351562, 1665 runs
+  gsdens, N = 8, mid: 0.0351562 to 0.226562, 1238 runs
+  gsdens, N = 8, high: 0.226562 to 1, 1413 runs
+  gsdens, N = 10, low: 0.00195312 to 0.0429688, 1437 runs
+  gsdens, N = 10, mid: 0.0429688 to 0.191406, 1438 runs
+  gsdens, N = 10, high: 0.191406 to 1, 1430 runs
+  overlap (matched), N = 6, low: 0 to 0.002, 154 runs
+  overlap (matched), N = 6, mid: 0.002 to 0.02, 154 runs
+  overlap (matched), N = 6, high: 0.02 to 1, 154 runs
+  overlap (matched), N = 8, low: 0 to 0.002, 185 runs
+  overlap (matched), N = 8, mid: 0.002 to 0.02, 185 runs
+  overlap (matched), N = 8, high: 0.02 to 1, 185 runs
+  overlap (matched), N = 10, low: 0 to 0.002, 201 runs
+  overlap (matched), N = 10, mid: 0.002 to 0.02, 201 runs
+  overlap (matched), N = 10, high: 0.02 to 1, 201 runs

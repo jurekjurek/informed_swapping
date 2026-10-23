@@ -6,15 +6,15 @@ the paper to ``PaperFigures/``, numbered in the order they appear:
 
     fig1_system_size                     all runs, one column per system size N
     fig2_ground_state_density            N = 12, clustered by ground-state density
-    fig3_initial_overlap                 N = 12, clustered by initial overlap
+    fig3_initial_overlap                 N = 12, by initial overlap, same Hamiltonians per bin
     figA1_lattice_dimension              N = 12, 1D against 2D lattices
     figA2_ground_state_density_other_N   Fig. 2 for N = 6, 8 and 10
-    figA3_initial_overlap_other_N        Fig. 3 for N = 6, 8 and 10
+    figA3_initial_overlap_other_N        Fig. 3 for N = 6, 8 and 10, same Hamiltonians per bin
     figA4_choice_of_statistic            median against mean, and the mean's floor dependence
 
 Every figure except A4 pairs two rows of panels per cluster of runs: the median
-infidelity 1 - F against the number of bitstrings K / 2^N with the interquartile
-range as band, and below it the fraction of runs that have converged, i.e. reached
+infidelity 1 - F against the number of bitstrings K / 2^N with the band between the
+BAND_QUANTILES around it, and below it the fraction of runs that have converged, i.e. reached
 1 - F < CONVERGED.
 
 Why the median. A run that has converged has 1 - F = 0 to machine precision, and
@@ -48,7 +48,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.text import Annotation
 from matplotlib.ticker import LogLocator, MaxNLocator, NullLocator
+from matplotlib.transforms import Bbox
 
 import EqualNumberOfBitstrings as study
 
@@ -58,14 +60,23 @@ DEFAULT_OUTPUT = Path("PaperFigures")
 # The system size of the main-text figures; the others go to the appendix.
 MAIN_N = 12
 
-# A run counts as converged below this infidelity. It sits six decades above the
-# floor, so the floor's exact value does not decide who has converged.
-CONVERGED = 1e-10
+# A run counts as converged below this infidelity. It sits twelve decades above
+# the floor, so the floor's exact value does not decide who has converged.
+CONVERGED = 1e-4
+# Quantiles of log10(1 - F) that bound the band around the median: the median
+# plus and minus five percentage points.
+BAND_QUANTILES = (0.45, 0.55)
 INFIDELITY_FLOOR = study.INFIDELITY_FLOOR
 # The second floor of figA4, to show how much the mean depends on the first.
-ALTERNATIVE_FLOOR = 1e-12
+ALTERNATIVE_FLOOR = 1e-8
 
 NUM_BINS = study.DEFAULT_NUM_BINS
+
+# Fixed overlap cuts of fig3. Unlike the quantile bins, its panels hold the same
+# Hamiltonians: one initial state per bin from every Hamiltonian that has one in
+# each, drawn with this seed where a bin holds several.
+OVERLAP_EDGES = np.array([0.0, 2e-3, 2e-2, 1.0])
+MATCHED_SEED = 0
 
 # Notation of the binned quantities, as it appears in the panel titles. Change
 # these to whatever symbols the paper defines.
@@ -80,7 +91,7 @@ TEXT_WIDTH = 7.05
 INFIDELITY_HEIGHT = 1.55
 CONVERGED_HEIGHT = 0.95
 
-# Interquartile bands only for the two protocols the paper compares. Simplified
+# Quantile bands only for the two protocols the paper compares. Simplified
 # BARK lies on top of BARK and the ceiling's band would cover both.
 BANDED = ("BARK", "SKQD")
 BAND_ALPHA = 0.15
@@ -91,7 +102,9 @@ MARK_EVERY = 2
 INK = "#2b2a28"
 MUTED_INK = "#6b6a66"
 
-Panel = namedtuple("Panel", ["title", "group"])     # group None: no runs in this bin
+# title: what the panel holds, for the captions (panel_labels.txt); label: what is
+# written on top of it, if anything. group None: no runs in this bin.
+Panel = namedtuple("Panel", ["title", "group", "label"], defaults=(None,))
 
 
 # --------------------------------------------------------------------------- #
@@ -116,7 +129,7 @@ def curves(group: pd.DataFrame, floor: float = INFIDELITY_FLOOR) -> pd.DataFrame
 
 def summarize(group: pd.DataFrame, floor: float = INFIDELITY_FLOOR) -> pd.DataFrame:
     """
-    Per algorithm and budget: median and quartiles, mean and its standard error,
+    Per algorithm and budget: median and the BAND_QUANTILES, mean and its standard error,
     and the fraction of converged runs -- all of log10(1 - F).
     """
     if floor >= CONVERGED:
@@ -127,8 +140,8 @@ def summarize(group: pd.DataFrame, floor: float = INFIDELITY_FLOOR) -> pd.DataFr
     groups = frame.groupby(["Algorithm", "Budget_Fraction"])
     values = groups["Log_Infidelity"]
     stats = values.agg(median="median", mean="mean", std="std", runs="count")
-    stats["q1"] = values.quantile(0.25)
-    stats["q3"] = values.quantile(0.75)
+    stats["q_low"] = values.quantile(BAND_QUANTILES[0])
+    stats["q_high"] = values.quantile(BAND_QUANTILES[1])
     stats["sem"] = stats["std"].fillna(0.0) / np.sqrt(stats["runs"])
     stats["converged"] = groups["Converged"].mean()
     return stats.drop(columns="std").reset_index()
@@ -231,13 +244,13 @@ def draw_line(ax: plt.Axes, rows: pd.DataFrame, name: str, colour: str, marker,
 
 
 def draw_infidelity(ax: plt.Axes, stats: pd.DataFrame, statistic: str = "median") -> None:
-    """Median (or mean) infidelity with the interquartile range (or SEM) as band."""
+    """Median (or mean) infidelity with the BAND_QUANTILES (or SEM) as band."""
     for name, colour, marker, linestyle in study.ALGORITHMS:
         rows = stats[stats["Algorithm"] == name].sort_values("Budget_Fraction")
         if rows.empty:
             continue
         if statistic == "median":
-            centre, lower, upper = rows["median"], rows["q1"], rows["q3"]
+            centre, lower, upper = rows["median"], rows["q_low"], rows["q_high"]
         else:
             centre = rows["mean"]
             lower, upper = centre - rows["sem"], centre + rows["sem"]
@@ -305,10 +318,29 @@ class Recorder:
         frame[first + [c for c in frame.columns if c not in first]].to_csv(path, index=False)
 
 
-def paired_figure(name: str, rows: list, recorder: Recorder) -> plt.Figure:
+def pair_extent(top: plt.Axes, bottom: plt.Axes):
+    """
+    Where a row label goes, as an annotation's ``xycoords``: from the left edge
+    of the two y-axis labels, over the full height of the pair of rows.
+    """
+    def extent(renderer):
+        labels = [ax.yaxis.label.get_window_extent(renderer) for ax in (top, bottom)]
+        return Bbox.from_extents(min(box.x0 for box in labels),
+                                 bottom.get_window_extent(renderer).y0,
+                                 max(box.x1 for box in labels),
+                                 top.get_window_extent(renderer).y1)
+    return extent
+
+
+def paired_figure(name: str, rows: list, recorder: Recorder,
+                  row_labels: list = None) -> plt.Figure:
     """
     One pair of rows per entry of ``rows`` -- infidelity above, converged
     fraction below -- and one column per panel.
+
+    Only a panel's short ``label`` is written on top of it; its full ``title``
+    goes to the caption, see ``write_panel_labels``. ``row_labels`` are written
+    vertically left of the y-axis labels, centred on each pair of rows.
 
     The panels of a row share their budget range, those of different rows need
     not (fig1 and the appendix figures change N from one to the next), so every
@@ -343,7 +375,8 @@ def paired_figure(name: str, rows: list, recorder: Recorder) -> plt.Figure:
                 ax.set_xlim(*budget_limits(panel.group))
                 ax.set_title(f"({letter})", loc="left", fontweight="bold")
                 if draw is draw_infidelity:
-                    ax.set_title(panel.title)
+                    if panel.label:
+                        ax.set_title(panel.label)
                     ax.tick_params(labelbottom=False)
                     recorder.add(name, letter, panel.title, panel_stats)
                     legend_axis = legend_axis or ax
@@ -351,6 +384,14 @@ def paired_figure(name: str, rows: list, recorder: Recorder) -> plt.Figure:
                     ax.tick_params(labelleft=False)
         top[0].set_ylabel(r"Infidelity $1-F$")
         bottom[0].set_ylabel("Fraction\nconverged")
+        if row_labels is not None:
+            # A figure-level artist: constrained layout leaves it alone, and
+            # bbox_inches="tight" on saving widens the page to take it in.
+            fig.add_artist(Annotation(row_labels[r], xy=(0.0, 0.5),
+                                      xycoords=pair_extent(top[0], bottom[0]),
+                                      xytext=(-6, 0), textcoords="offset points",
+                                      rotation=90, ha="right", va="center",
+                                      fontweight="bold"))
         for c in range(len(row), num_cols):
             top[c].axis("off")
             bottom[c].axis("off")
@@ -368,7 +409,8 @@ def paired_figure(name: str, rows: list, recorder: Recorder) -> plt.Figure:
 
 def by_size(data: pd.DataFrame) -> list:
     sizes = sorted(data["Number_of_Sites"].unique())
-    return [[Panel(f"$N = {n}$", data[data["Number_of_Sites"] == n]) for n in sizes]]
+    return [[Panel(f"$N = {n}$", data[data["Number_of_Sites"] == n], f"$N = {n}$")
+             for n in sizes]]
 
 
 def by_bin(data: pd.DataFrame, column: str, symbol: str, sizes: list,
@@ -389,16 +431,52 @@ def by_bin(data: pd.DataFrame, column: str, symbol: str, sizes: list,
                                   "Runs": len(runs_of(groups[name]))})
             else:
                 title = f"{name}: merged by ties"
+            # The bin name on the panel, its edges only in the caption; the
+            # appendix carries the system size beside each row instead.
             if with_size:
                 title = f"$N = {n}$, {title}"
-            row.append(Panel(title, groups.get(name)))
+            row.append(Panel(title, groups.get(name), None if with_size else name))
         rows.append(row)
     return rows
 
 
+def by_matched_overlap(data: pd.DataFrame, num_sites: int, edge_rows: list,
+                       with_size: bool = False) -> list:
+    """
+    One panel per bin of OVERLAP_EDGES, all holding the same Hamiltonians.
+
+    The quantile bins of the overlap compare different Hamiltonians: a large
+    overlap is only possible where the ground state has a dominant component,
+    and those Hamiltonians are harder for every protocol, the ceiling included.
+    Here every Hamiltonian contributes exactly one initial state to each bin --
+    and is left out if it has no initial state in one of them -- so only the
+    initial state changes from panel to panel and the ceiling is the same in all.
+    """
+    block = data[data["Number_of_Sites"] == num_sites]
+    runs = runs_of(block)[study.RUN_KEY + ["Overlap"]].copy()
+    runs["Bin"] = study.apply_bins(runs["Overlap"], OVERLAP_EDGES).astype(str)
+    names = study.bin_names(OVERLAP_EDGES.size - 1)
+    filled = runs.groupby(study.CELL_KEY)["Bin"].transform("nunique") == len(names)
+    chosen = runs[filled].groupby(study.CELL_KEY + ["Bin"]).sample(1, random_state=MATCHED_SEED)
+    cells = len(chosen.drop_duplicates(study.CELL_KEY))
+
+    row = []
+    for index, name in enumerate(names):
+        keys = chosen.loc[chosen["Bin"] == name, study.RUN_KEY]
+        group = block.merge(keys, on=study.RUN_KEY)
+        edge_rows.append({"Facet": "overlap (matched)", "N": num_sites, "Bin": name,
+                          "Lower": OVERLAP_EDGES[index], "Upper": OVERLAP_EDGES[index + 1],
+                          "Runs": len(keys)})
+        title = f"{bin_title(name, OVERLAP_EDGES, OVERLAP_SYMBOL)}\n({cells} Hamiltonians)"
+        if with_size:
+            title = f"$N = {num_sites}$, {title}"
+        row.append(Panel(title, group if len(keys) else None, None if with_size else name))
+    return [row]
+
+
 def by_dimension(data: pd.DataFrame) -> list:
     block = data[data["Number_of_Sites"] == MAIN_N]
-    return [[Panel(f"{d}D lattice, $N = {MAIN_N}$", rows)
+    return [[Panel(f"{d}D lattice, $N = {MAIN_N}$", rows, f"{d}D")
              for d, rows in block.groupby("Dimensions")]]
 
 
@@ -412,19 +490,25 @@ def statistic_figure(data: pd.DataFrame, recorder: Recorder) -> plt.Figure:
     the paper uses the median.
     """
     group = data[data["Number_of_Sites"] == MAIN_N]
+    # statistic, floor, caption, label on the panel
     variants = (
-        ("median", INFIDELITY_FLOOR, "median, interquartile range"),
-        ("mean", INFIDELITY_FLOOR, rf"mean $\pm$ SEM, floor $10^{{{np.log10(INFIDELITY_FLOOR):.0f}}}$"),
-        ("mean", ALTERNATIVE_FLOOR, rf"mean $\pm$ SEM, floor $10^{{{np.log10(ALTERNATIVE_FLOOR):.0f}}}$"),
+        ("median", INFIDELITY_FLOOR,
+         f"median, {BAND_QUANTILES[0]:.0%}-{BAND_QUANTILES[1]:.0%} range", "Median"),
+        ("mean", INFIDELITY_FLOOR,
+         rf"mean $\pm$ SEM, floor $10^{{{np.log10(INFIDELITY_FLOOR):.0f}}}$",
+         rf"Mean, floor $10^{{{np.log10(INFIDELITY_FLOOR):.0f}}}$"),
+        ("mean", ALTERNATIVE_FLOOR,
+         rf"mean $\pm$ SEM, floor $10^{{{np.log10(ALTERNATIVE_FLOOR):.0f}}}$",
+         rf"Mean, floor $10^{{{np.log10(ALTERNATIVE_FLOOR):.0f}}}$"),
     )
     fig, axes = plt.subplots(1, len(variants), layout="constrained", sharey=True,
                              figsize=(TEXT_WIDTH, INFIDELITY_HEIGHT + 0.75))
-    for ax, letter, (statistic, floor, title) in zip(axes, string.ascii_lowercase, variants):
+    for ax, letter, (statistic, floor, title, label) in zip(axes, string.ascii_lowercase, variants):
         stats = summarize(group, floor)
         draw_infidelity(ax, stats, statistic)
         ax.set_xlim(*budget_limits(group))
         ax.set_title(f"({letter})", loc="left", fontweight="bold")
-        ax.set_title(title)
+        ax.set_title(label)
         ax.set_xlabel(r"Bitstrings $K/2^N$")
         recorder.add("figA4_choice_of_statistic", letter, title, stats, Floor=floor)
     axes[0].set_ylabel(r"Infidelity $1-F$")
@@ -440,29 +524,56 @@ def make_figures(data_file: str, output: Path, fmt: str) -> None:
     recorder, edge_rows = Recorder(), []
     other_sizes = sorted(n for n in data["Number_of_Sites"].unique() if n != MAIN_N)
 
+    # name, panels, keyword arguments of paired_figure
+    size_labels = [f"$N = {n}$" for n in other_sizes]
     figures = [
-        ("fig1_system_size", lambda: by_size(data)),
+        ("fig1_system_size", lambda: by_size(data), {}),
         ("fig2_ground_state_density",
          lambda: by_bin(data, "Ground_State_Density", GSDENS_SYMBOL, [MAIN_N],
-                        edge_rows, "gsdens", with_size=False)),
+                        edge_rows, "gsdens", with_size=False), {}),
         ("fig3_initial_overlap",
-         lambda: by_bin(data, "Overlap", OVERLAP_SYMBOL, [MAIN_N],
-                        edge_rows, "overlap", with_size=False)),
-        ("figA1_lattice_dimension", lambda: by_dimension(data)),
+         lambda: by_matched_overlap(data, MAIN_N, edge_rows), {}),
+        ("figA1_lattice_dimension", lambda: by_dimension(data), {}),
         ("figA2_ground_state_density_other_N",
          lambda: by_bin(data, "Ground_State_Density", GSDENS_SYMBOL, other_sizes,
-                        edge_rows, "gsdens", with_size=True)),
+                        edge_rows, "gsdens", with_size=True), dict(row_labels=size_labels)),
         ("figA3_initial_overlap_other_N",
-         lambda: by_bin(data, "Overlap", OVERLAP_SYMBOL, other_sizes,
-                        edge_rows, "overlap", with_size=True)),
+         lambda: [row for n in other_sizes
+                  for row in by_matched_overlap(data, n, edge_rows, with_size=True)],
+         dict(row_labels=size_labels)),
     ]
-    for name, rows in figures:
-        save(paired_figure(name, rows(), recorder), output / f"{name}.{fmt}")
+    for name, rows, options in figures:
+        save(paired_figure(name, rows(), recorder, **options), output / f"{name}.{fmt}")
     save(statistic_figure(data, recorder), output / f"figA4_choice_of_statistic.{fmt}")
 
     recorder.save(output / "figure_data.csv")
+    write_panel_labels(recorder, edge_rows, output / "panel_labels.txt")
     pd.DataFrame(edge_rows).to_csv(output / "bin_edges.csv", index=False)
     print(f"Wrote {output / 'figure_data.csv'} and {output / 'bin_edges.csv'}")
+
+
+def write_panel_labels(recorder: Recorder, edge_rows: list, path: Path) -> None:
+    """
+    What every panel holds, for the captions: the panels themselves carry only
+    their letter (fig1 aside), so the bins, their edges and the number of runs
+    behind each panel are listed here instead.
+    """
+    frame = pd.concat(recorder.frames, ignore_index=True)
+    lines = []
+    for figure, panels in frame.groupby("Figure", sort=False):
+        lines.append(figure)
+        for (panel, title), stats in panels.groupby(["Panel", "Title"], sort=False):
+            lines.append(f"  ({panel}) {title}  [{int(stats['runs'].max())} runs]")
+        lines.append("")
+    lines.append(f"Converged: 1 - F < {CONVERGED:g}. Band: quantiles "
+                 f"{BAND_QUANTILES[0]:g} to {BAND_QUANTILES[1]:g} of log10(1 - F).")
+    lines.append("")
+    lines.append("Bin edges (Facet, N, Bin, Lower, Upper, Runs):")
+    for row in edge_rows:
+        lines.append(f"  {row['Facet']}, N = {row['N']}, {row['Bin']}: "
+                     f"{row['Lower']:.6g} to {row['Upper']:.6g}, {row['Runs']} runs")
+    path.write_text("\n".join(lines) + "\n")
+    print(f"Wrote {path}")
 
 
 def save(fig: plt.Figure, path: Path) -> None:
