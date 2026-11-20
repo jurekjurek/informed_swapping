@@ -1,0 +1,12 @@
+name: bark-counterexample
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy>=1.23
+  - scipy>=1.10
+  - matplotlib>=3.6
+  - pandas
+  - pip
+  - pip:
+      - qiskit>=1.0
